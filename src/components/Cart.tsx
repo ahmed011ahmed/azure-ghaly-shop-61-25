@@ -26,6 +26,13 @@ const Cart = () => {
     window.open(whatsappUrl, '_blank');
   };
 
+  const handleDiscordOrder = () => {
+    if (state.items.length === 0) return;
+    
+    const discordUrl = 'https://discord.gg/HbGJt7Wcxg';
+    window.open(discordUrl, '_blank');
+  };
+
   if (!state.isOpen) return null;
 
   return (
@@ -123,6 +130,13 @@ const Cart = () => {
                 >
                   <MessageCircle className="w-5 h-5" />
                   <span>اطلب عبر واتساب</span>
+                </button>
+                <button 
+                  onClick={handleDiscordOrder}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2"
+                >
+                  <span className="text-lg">💬</span>
+                  <span>اطلب عبر ديسكورد</span>
                 </button>
                 <button
                   onClick={clearCart}
