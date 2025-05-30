@@ -26,16 +26,14 @@ const Header = () => {
           </nav>
           
           <div className="flex items-center space-x-3">
-            <button onClick={toggleCart} className="relative bg-gaming-gradient text-white p-2 rounded-lg hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 my-[13px] px-[12px] mx-[15px] py-[8px]">
+            <button onClick={toggleCart} className="relative bg-gaming-gradient text-white p-2 rounded-lg hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 py-[8px] mx-[8px] my-[8px] px-[8px]">
               <ShoppingCart className="w-6 h-6" />
               {getTotalItems() > 0 && <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                   {getTotalItems()}
                 </span>}
             </button>
             
-            <button className="bg-gaming-gradient text-white p-2 rounded-lg hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300">
-              <Gamepad className="w-6 h-6" />
-            </button>
+            
           </div>
         </div>
       </div>
