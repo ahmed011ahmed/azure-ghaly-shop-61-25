@@ -1,10 +1,30 @@
 
 import React from 'react';
-import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, MessageCircle } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 
 const Cart = () => {
   const { state, removeItem, updateQuantity, clearCart, closeCart, getTotalPrice } = useCart();
+
+  const handleWhatsAppOrder = () => {
+    if (state.items.length === 0) return;
+    
+    let message = "مرحباً! أريد طلب المنتجات التالية:\n\n";
+    
+    state.items.forEach((item, index) => {
+      message += `${index + 1}. ${item.name}\n`;
+      message += `   الكمية: ${item.quantity}\n`;
+      message += `   السعر: ${item.price}\n\n`;
+    });
+    
+    message += `إجمالي الطلب: $${getTotalPrice().toFixed(2)}\n\n`;
+    message += "شكراً لكم!";
+    
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/+201010673596?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, '_blank');
+  };
 
   if (!state.isOpen) return null;
 
@@ -97,8 +117,12 @@ const Cart = () => {
               </div>
               
               <div className="space-y-3">
-                <button className="w-full btn-gaming">
-                  إتمام الشراء
+                <button 
+                  onClick={handleWhatsAppOrder}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  <span>اطلب عبر واتساب</span>
                 </button>
                 <button
                   onClick={clearCart}
