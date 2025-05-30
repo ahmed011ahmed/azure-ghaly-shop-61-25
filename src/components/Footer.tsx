@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
             <h3 className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent">
-              GHALY GAMING
+              GHALY HAX
             </h3>
             <p className="text-purple-200 leading-relaxed">
               متجرك المتخصص في أدوات الجيمنج المتقدمة. نوفر أقوى الحلول للجيمرز المحترفين مع ضمان الأمان والجودة.
@@ -82,7 +82,7 @@ const Footer = () => {
         
         <div className="border-t border-purple-800/30 mt-12 pt-8 text-center">
           <p className="text-purple-300">
-            🎮 جميع الحقوق محفوظة © 2024 GHALY GAMING. صُمم للجيمرز المحترفين 🏆
+            🎮 جميع الحقوق محفوظة © 2024 GHALY HAX. صُمم للجيمرز المحترفين 🏆
           </p>
         </div>
       </div>

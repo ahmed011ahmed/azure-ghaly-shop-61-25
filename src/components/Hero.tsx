@@ -1,4 +1,3 @@
-
 import { ArrowDown, Gamepad2 } from 'lucide-react';
 
 const Hero = () => {
@@ -29,7 +28,7 @@ const Hero = () => {
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
             مرحباً بك في
             <span className="block bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              GHALY GAMING
+              GHALY HAX
             </span>
           </h1>
           

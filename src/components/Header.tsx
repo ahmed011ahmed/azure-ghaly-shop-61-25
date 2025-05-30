@@ -11,7 +11,7 @@ const Header = () => {
               <Joystick className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent">
-              GHALY GAMING
+              GHALY HAX
             </h1>
           </div>
           
