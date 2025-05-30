@@ -47,7 +47,7 @@ const Hero = () => {
         </div>
         
         <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <ArrowDown className="w-8 h-8 text-purple-300" />
+          
         </div>
       </div>
       
