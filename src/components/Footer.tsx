@@ -1,6 +1,6 @@
 
-import { Mail, Phone, MapPin, Gamepad2, Joystick, GamepadIcon } from 'lucide-react';
-import { Whatsapp, Discord } from 'lucide-react';
+
+import { Mail, Phone, MapPin, Gamepad2, Joystick, GamepadIcon, MessageCircle } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -61,21 +61,21 @@ const Footer = () => {
                 className="bg-green-600 p-3 rounded-lg hover:bg-green-700 transition-colors hover:shadow-lg hover:shadow-green-500/25"
                 aria-label="WhatsApp"
               >
-                <Whatsapp className="w-5 h-5 text-white" />
+                <MessageCircle className="w-5 h-5 text-white" />
               </a>
               <a 
                 href="#" 
                 className="bg-black p-3 rounded-lg hover:bg-gray-800 transition-colors hover:shadow-lg hover:shadow-gray-500/25"
                 aria-label="TikTok"
               >
-                <span className="text-lg">🎵</span>
+                <span className="text-lg text-white">🎵</span>
               </a>
               <a 
                 href="#" 
                 className="bg-indigo-600 p-3 rounded-lg hover:bg-indigo-700 transition-colors hover:shadow-lg hover:shadow-indigo-500/25"
                 aria-label="Discord"
               >
-                <Discord className="w-5 h-5 text-white" />
+                <span className="text-lg text-white">💬</span>
               </a>
             </div>
           </div>
@@ -92,3 +92,4 @@ const Footer = () => {
 };
 
 export default Footer;
+
