@@ -1,5 +1,6 @@
 
 import { ShoppingCart, Heart } from 'lucide-react';
+import { useCart } from '../contexts/CartContext';
 
 interface ProductCardProps {
   id: number;
@@ -10,10 +11,12 @@ interface ProductCardProps {
   rating: number;
 }
 
-const ProductCard = ({ name, price, image, description, rating }: ProductCardProps) => {
+const ProductCard = ({ id, name, price, image, description, rating }: ProductCardProps) => {
+  const { addItem } = useCart();
+
   const handleAddToCart = () => {
+    addItem({ id, name, price, image });
     console.log(`Adding ${name} to cart - Price: ${price}`);
-    // يمكن إضافة المنطق الخاص بالسلة هنا
   };
 
   const handleAddToFavorites = () => {
