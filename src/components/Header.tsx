@@ -21,12 +21,8 @@ const Header = () => {
             <a href="#products" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
               الأدوات
             </a>
-            <a href="#about" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
-              من نحن
-            </a>
-            <a href="#contact" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
-              تواصل معنا
-            </a>
+            
+            
           </nav>
           
           <div className="flex items-center space-x-3">
