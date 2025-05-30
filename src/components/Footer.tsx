@@ -47,20 +47,11 @@ const Footer = () => {
           </div>
           
           <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-purple-300 flex items-center gap-2">
-              <GamepadIcon className="w-5 h-5" />
-              انضم للمجتمع
-            </h4>
+            
             <div className="flex space-x-6">
-              <a href="#" aria-label="WhatsApp" className="bg-green-600 p-3 rounded-lg hover:bg-green-700 transition-colors hover:shadow-lg hover:shadow-green-500/25 mx-[10px] px-[19px]">
-                <MessageCircle className="w-5 h-5 text-white" />
-              </a>
-              <a href="https://www.tiktok.com/@ghaly.tk" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="bg-black p-3 rounded-lg hover:bg-gray-800 transition-colors hover:shadow-lg hover:shadow-gray-500/25 px-[21px] mx-[10px] py-[12px]">
-                <span className="text-lg text-white font-normal">🎵</span>
-              </a>
-              <a href="#" aria-label="Discord" className="bg-indigo-600 p-3 rounded-lg hover:bg-indigo-700 transition-colors hover:shadow-lg hover:shadow-indigo-500/25 mx-[10px] px-[20px]">
-                <span className="text-lg text-white">💬</span>
-              </a>
+              
+              
+              
             </div>
           </div>
         </div>
