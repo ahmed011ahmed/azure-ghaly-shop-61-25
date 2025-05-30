@@ -64,7 +64,9 @@ const Footer = () => {
                 <MessageCircle className="w-5 h-5 text-white" />
               </a>
               <a 
-                href="#" 
+                href="https://www.tiktok.com/@ghaly.tk" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-black p-3 rounded-lg hover:bg-gray-800 transition-colors hover:shadow-lg hover:shadow-gray-500/25"
                 aria-label="TikTok"
               >
