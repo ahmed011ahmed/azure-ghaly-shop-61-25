@@ -1,11 +1,11 @@
 import { Gamepad, ShoppingCart } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
-
 const Header = () => {
-  const { toggleCart, getTotalItems } = useCart();
-
-  return (
-    <header className="bg-gray-900/95 backdrop-blur-md border-b border-purple-800/30 sticky top-0 z-50">
+  const {
+    toggleCart,
+    getTotalItems
+  } = useCart();
+  return <header className="bg-gray-900/95 backdrop-blur-md border-b border-purple-800/30 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -30,16 +30,11 @@ const Header = () => {
           </nav>
           
           <div className="flex items-center space-x-3">
-            <button 
-              onClick={toggleCart}
-              className="relative bg-gaming-gradient text-white p-2 rounded-lg hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
-            >
+            <button onClick={toggleCart} className="relative bg-gaming-gradient text-white p-2 rounded-lg hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 my-[13px] px-[12px] mx-[15px] py-[8px]">
               <ShoppingCart className="w-6 h-6" />
-              {getTotalItems() > 0 && (
-                <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              {getTotalItems() > 0 && <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                   {getTotalItems()}
-                </span>
-              )}
+                </span>}
             </button>
             
             <button className="bg-gaming-gradient text-white p-2 rounded-lg hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300">
@@ -48,8 +43,6 @@ const Header = () => {
           </div>
         </div>
       </div>
-    </header>
-  );
+    </header>;
 };
-
 export default Header;
