@@ -15,7 +15,7 @@ const Header = () => {
             </h1>
           </div>
           
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-12">
             <a href="#home" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
               الرئيسية
             </a>

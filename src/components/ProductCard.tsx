@@ -11,6 +11,16 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ name, price, image, description, rating }: ProductCardProps) => {
+  const handleAddToCart = () => {
+    console.log(`Adding ${name} to cart - Price: ${price}`);
+    // يمكن إضافة المنطق الخاص بالسلة هنا
+  };
+
+  const handleAddToFavorites = () => {
+    console.log(`Adding ${name} to favorites`);
+    // يمكن إضافة المنطق الخاص بالمفضلة هنا
+  };
+
   return (
     <div className="gaming-card overflow-hidden group">
       <div className="relative overflow-hidden">
@@ -20,7 +30,10 @@ const ProductCard = ({ name, price, image, description, rating }: ProductCardPro
           className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
         />
         <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="bg-gray-900/90 backdrop-blur-sm p-2 rounded-full hover:bg-pink-500/20 transition-colors">
+          <button 
+            onClick={handleAddToFavorites}
+            className="bg-gray-900/90 backdrop-blur-sm p-2 rounded-full hover:bg-pink-500/20 transition-colors"
+          >
             <Heart className="w-5 h-5 text-pink-400 hover:text-pink-300" />
           </button>
         </div>
@@ -46,7 +59,10 @@ const ProductCard = ({ name, price, image, description, rating }: ProductCardPro
         
         <div className="flex items-center justify-between">
           <span className="text-2xl font-bold text-pink-400">{price}</span>
-          <button className="btn-gaming flex items-center space-x-2">
+          <button 
+            onClick={handleAddToCart}
+            className="btn-gaming flex items-center space-x-2 hover:scale-105 active:scale-95"
+          >
             <ShoppingCart className="w-5 h-5" />
             <span>احصل عليه</span>
           </button>
