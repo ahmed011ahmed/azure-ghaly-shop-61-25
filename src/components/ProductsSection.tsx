@@ -1,4 +1,3 @@
-
 import ProductCard from './ProductCard';
 
 const ProductsSection = () => {
@@ -13,26 +12,26 @@ const ProductsSection = () => {
     },
     {
       id: 2,
-      name: "المنتج الأنيق",
+      name: "RNG",
       price: "450 ج.م",
-      description: "تصميم عصري وأنيق مع أداء متفوق وضمان شامل لراحتك",
-      image: "/placeholder.svg",
+      description: "منتج امان 100%",
+      image: "https://i.imgur.com/SJJK1ZQ.jpeg",
       rating: 4
     },
     {
       id: 3,
-      name: "المنتج الذكي",
+      name: "Bypass GHALY+ HAK GHALY",
       price: "650 ج.م",
-      description: "تقنية متطورة وحلول ذكية تجعل حياتك أسهل وأكثر راحة",
-      image: "/placeholder.svg",
+      description: "طريقك الى الكونكر",
+      image: "https://i.imgur.com/TzAjRA0.jpeg",
       rating: 5
     },
     {
       id: 4,
-      name: "المنتج العملي",
+      name: "Bypass GHALY",
       price: "380 ج.م",
-      description: "عملي ومتين، مصمم خصيصاً للاستخدام اليومي المكثف",
-      image: "/placeholder.svg",
+      description: "بيباس غالي فقط",
+      image: "https://i.imgur.com/viiCVaD.jpeg",
       rating: 4
     }
   ];
