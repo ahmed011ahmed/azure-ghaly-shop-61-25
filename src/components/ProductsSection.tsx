@@ -5,50 +5,50 @@ const ProductsSection = () => {
   const products = [
     {
       id: 1,
-      name: "Bypass GHALY + HAK RNG",
+      name: "🎯 Bypass GHALY + HAK RNG",
       price: "$60",
-      description: "منتج متميز بجودة عالية ومواصفات ممتازة يلبي جميع احتياجاتك",
+      description: "أداة متقدمة للبايباس والهاكينج - تجربة جيمنج لا تُضاهى مع حماية 100%",
       image: "https://i.imgur.com/ogU7D3c.jpeg",
       rating: 5
     },
     {
       id: 2,
-      name: "RNG",
+      name: "🔥 RNG Tool",
       price: "$35",
-      description: "منتج امان 100%",
+      description: "أداة RNG متطورة - امان مضمون 100% مع أداء فائق",
       image: "https://i.imgur.com/SJJK1ZQ.jpeg",
       rating: 4
     },
     {
       id: 3,
-      name: "Bypass GHALY+ HAK GHALY",
+      name: "⚡ Bypass GHALY+ HAK GHALY",
       price: "$50",
-      description: "طريقك الى الكونكر",
+      description: "طريقك المضمون للكونكر - أداة شاملة للجيمرز المحترفين",
       image: "https://i.imgur.com/TzAjRA0.jpeg",
       rating: 5
     },
     {
       id: 4,
-      name: "Bypass GHALY",
+      name: "🛡️ Bypass GHALY",
       price: "$40",
-      description: "بيباس غالي فقط",
+      description: "بايباس غالي المتخصص - حل مثالي للعبة آمنة ومتقدمة",
       image: "https://i.imgur.com/viiCVaD.jpeg",
       rating: 4
     }
   ];
 
   return (
-    <section id="products" className="py-20 bg-gradient-to-b from-blue-50 to-white">
+    <section id="products" className="py-20 bg-gradient-to-b from-gray-900 to-gray-800">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
-            منتجاتنا <span className="bg-blue-gradient bg-clip-text text-transparent">المتميزة</span>
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            أدوات <span className="bg-gaming-gradient bg-clip-text text-transparent">الجيمنج</span> المتقدمة
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-4">
-            مجموعة مختارة بعناية من أفضل المنتجات لتلبية جميع احتياجاتك
+          <p className="text-xl text-purple-200 max-w-2xl mx-auto mb-4">
+            مجموعة حصرية من أقوى أدوات الهاكينج والبايباس للجيمرز المحترفين
           </p>
-          <p className="text-lg text-blue-600 font-semibold">
-            * جميع الأسعار للاشتراك الشهري
+          <p className="text-lg text-pink-400 font-semibold">
+            ⚡ جميع الأسعار للاشتراك الشهري - ضمان الجودة والأمان
           </p>
         </div>
         

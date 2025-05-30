@@ -1,79 +1,88 @@
 
-import { Mail, Phone, MapPin, Facebook, Instagram, Youtube } from 'lucide-react';
+import { Mail, Phone, MapPin, Gamepad2, Joystick, GamepadIcon } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-slate-900 text-white py-16">
+    <footer className="bg-gray-900 text-white py-16 border-t border-purple-800/30">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <h3 className="text-2xl font-bold bg-blue-gradient bg-clip-text text-transparent">
-              GHALY
+            <h3 className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent">
+              GHALY GAMING
             </h3>
-            <p className="text-gray-300 leading-relaxed">
-              متجرك المفضل للمنتجات عالية الجودة. نقدم لك أفضل المنتجات بأسعار تنافسية وخدمة عملاء متميزة.
+            <p className="text-purple-200 leading-relaxed">
+              متجرك المتخصص في أدوات الجيمنج المتقدمة. نوفر أقوى الحلول للجيمرز المحترفين مع ضمان الأمان والجودة.
             </p>
           </div>
           
           <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-blue-300">روابط سريعة</h4>
+            <h4 className="text-lg font-semibold text-purple-300 flex items-center gap-2">
+              <Gamepad2 className="w-5 h-5" />
+              روابط سريعة
+            </h4>
             <ul className="space-y-2">
-              <li><a href="#home" className="text-gray-300 hover:text-blue-400 transition-colors">الرئيسية</a></li>
-              <li><a href="#products" className="text-gray-300 hover:text-blue-400 transition-colors">المنتجات</a></li>
-              <li><a href="#about" className="text-gray-300 hover:text-blue-400 transition-colors">من نحن</a></li>
-              <li><a href="#contact" className="text-gray-300 hover:text-blue-400 transition-colors">تواصل معنا</a></li>
+              <li><a href="#home" className="text-purple-200 hover:text-pink-400 transition-colors">🏠 الرئيسية</a></li>
+              <li><a href="#products" className="text-purple-200 hover:text-pink-400 transition-colors">🎮 الأدوات</a></li>
+              <li><a href="#about" className="text-purple-200 hover:text-pink-400 transition-colors">👥 من نحن</a></li>
+              <li><a href="#contact" className="text-purple-200 hover:text-pink-400 transition-colors">📞 تواصل معنا</a></li>
             </ul>
           </div>
           
           <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-blue-300">تواصل معنا</h4>
+            <h4 className="text-lg font-semibold text-purple-300 flex items-center gap-2">
+              <Joystick className="w-5 h-5" />
+              تواصل معنا
+            </h4>
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5 text-blue-400" />
-                <span className="text-gray-300">+20 123 456 7890</span>
+                <Phone className="w-5 h-5 text-pink-400" />
+                <span className="text-purple-200">+20 123 456 7890</span>
               </div>
               <div className="flex items-center space-x-3">
-                <Mail className="w-5 h-5 text-blue-400" />
-                <span className="text-gray-300">info@ghaly.com</span>
+                <Mail className="w-5 h-5 text-pink-400" />
+                <span className="text-purple-200">gaming@ghaly.com</span>
               </div>
               <div className="flex items-center space-x-3">
-                <MapPin className="w-5 h-5 text-blue-400" />
-                <span className="text-gray-300">القاهرة، مصر</span>
+                <MapPin className="w-5 h-5 text-pink-400" />
+                <span className="text-purple-200">القاهرة، مصر</span>
               </div>
             </div>
           </div>
           
           <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-blue-300">تابعنا</h4>
+            <h4 className="text-lg font-semibold text-purple-300 flex items-center gap-2">
+              <GamepadIcon className="w-5 h-5" />
+              انضم للمجتمع
+            </h4>
             <div className="flex space-x-4">
               <a 
                 href="#" 
-                className="bg-blue-600 p-3 rounded-lg hover:bg-blue-700 transition-colors"
-                aria-label="Facebook"
+                className="bg-purple-600 p-3 rounded-lg hover:bg-purple-700 transition-colors hover:shadow-lg hover:shadow-purple-500/25"
+                aria-label="Discord"
               >
-                <Facebook className="w-5 h-5" />
+                <span className="text-lg">🎮</span>
               </a>
               <a 
                 href="#" 
-                className="bg-blue-600 p-3 rounded-lg hover:bg-blue-700 transition-colors"
-                aria-label="Instagram"
+                className="bg-pink-600 p-3 rounded-lg hover:bg-pink-700 transition-colors hover:shadow-lg hover:shadow-pink-500/25"
+                aria-label="Twitch"
               >
-                <Instagram className="w-5 h-5" />
+                <span className="text-lg">📺</span>
               </a>
               <a 
                 href="#" 
-                className="bg-blue-600 p-3 rounded-lg hover:bg-blue-700 transition-colors"
-                aria-label="YouTube"
+                className="bg-purple-600 p-3 rounded-lg hover:bg-purple-700 transition-colors hover:shadow-lg hover:shadow-purple-500/25"
+                aria-label="YouTube Gaming"
               >
-                <Youtube className="w-5 h-5" />
+                <span className="text-lg">🎬</span>
               </a>
             </div>
           </div>
         </div>
         
-        <div className="border-t border-gray-700 mt-12 pt-8 text-center">
-          <p className="text-gray-400">
-            جميع الحقوق محفوظة © 2024 GHALY. صُمم بـ ❤️ في مصر
+        <div className="border-t border-purple-800/30 mt-12 pt-8 text-center">
+          <p className="text-purple-300">
+            🎮 جميع الحقوق محفوظة © 2024 GHALY GAMING. صُمم للجيمرز المحترفين 🏆
           </p>
         </div>
       </div>
