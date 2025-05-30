@@ -1,5 +1,6 @@
 
 
+
 import { Mail, Phone, MapPin, Gamepad2, Joystick, GamepadIcon, MessageCircle } from 'lucide-react';
 
 const Footer = () => {
@@ -55,7 +56,7 @@ const Footer = () => {
               <GamepadIcon className="w-5 h-5" />
               انضم للمجتمع
             </h4>
-            <div className="flex space-x-4">
+            <div className="flex space-x-6">
               <a 
                 href="#" 
                 className="bg-green-600 p-3 rounded-lg hover:bg-green-700 transition-colors hover:shadow-lg hover:shadow-green-500/25"
@@ -94,4 +95,5 @@ const Footer = () => {
 };
 
 export default Footer;
+
 
