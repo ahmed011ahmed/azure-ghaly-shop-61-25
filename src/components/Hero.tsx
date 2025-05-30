@@ -2,6 +2,20 @@
 import { ArrowDown, Sparkles } from 'lucide-react';
 
 const Hero = () => {
+  const scrollToProducts = () => {
+    const productsSection = document.getElementById('products');
+    if (productsSection) {
+      productsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const scrollToFooter = () => {
+    const footer = document.querySelector('footer');
+    if (footer) {
+      footer.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <section id="home" className="hero-section min-h-screen flex items-center justify-center relative">
       <div className="container mx-auto px-4 text-center relative z-10">
@@ -24,10 +38,16 @@ const Hero = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <button className="btn-primary text-lg px-8 py-4">
+            <button 
+              onClick={scrollToProducts}
+              className="btn-primary text-lg px-8 py-4"
+            >
               تسوق الآن
             </button>
-            <button className="glass-effect text-white font-semibold py-4 px-8 rounded-xl hover:bg-white/20 transition-all duration-300">
+            <button 
+              onClick={scrollToFooter}
+              className="glass-effect text-white font-semibold py-4 px-8 rounded-xl hover:bg-white/20 transition-all duration-300"
+            >
               تعرف علينا
             </button>
           </div>
