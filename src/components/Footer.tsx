@@ -1,11 +1,6 @@
-
-
-
 import { Mail, Phone, MapPin, Gamepad2, Joystick, GamepadIcon, MessageCircle } from 'lucide-react';
-
 const Footer = () => {
-  return (
-    <footer className="bg-gray-900 text-white py-16 border-t border-purple-800/30">
+  return <footer className="bg-gray-900 text-white py-16 border-t border-purple-800/30">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
@@ -57,27 +52,13 @@ const Footer = () => {
               انضم للمجتمع
             </h4>
             <div className="flex space-x-6">
-              <a 
-                href="#" 
-                className="bg-green-600 p-3 rounded-lg hover:bg-green-700 transition-colors hover:shadow-lg hover:shadow-green-500/25"
-                aria-label="WhatsApp"
-              >
+              <a href="#" aria-label="WhatsApp" className="bg-green-600 p-3 rounded-lg hover:bg-green-700 transition-colors hover:shadow-lg hover:shadow-green-500/25 mx-[10px] px-[19px]">
                 <MessageCircle className="w-5 h-5 text-white" />
               </a>
-              <a 
-                href="https://www.tiktok.com/@ghaly.tk" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-black p-3 rounded-lg hover:bg-gray-800 transition-colors hover:shadow-lg hover:shadow-gray-500/25"
-                aria-label="TikTok"
-              >
-                <span className="text-lg text-white">🎵</span>
+              <a href="https://www.tiktok.com/@ghaly.tk" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="bg-black p-3 rounded-lg hover:bg-gray-800 transition-colors hover:shadow-lg hover:shadow-gray-500/25 px-[21px] mx-[10px] py-[12px]">
+                <span className="text-lg text-white font-normal">🎵</span>
               </a>
-              <a 
-                href="#" 
-                className="bg-indigo-600 p-3 rounded-lg hover:bg-indigo-700 transition-colors hover:shadow-lg hover:shadow-indigo-500/25"
-                aria-label="Discord"
-              >
+              <a href="#" aria-label="Discord" className="bg-indigo-600 p-3 rounded-lg hover:bg-indigo-700 transition-colors hover:shadow-lg hover:shadow-indigo-500/25 mx-[10px] px-[20px]">
                 <span className="text-lg text-white">💬</span>
               </a>
             </div>
@@ -90,10 +71,6 @@ const Footer = () => {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
-
-
