@@ -1,3 +1,4 @@
+
 import ProductCard from './ProductCard';
 
 const ProductsSection = () => {
@@ -5,7 +6,7 @@ const ProductsSection = () => {
     {
       id: 1,
       name: "Bypass GHALY + HAK RNG",
-      price: "299 ج.م",
+      price: "$60",
       description: "منتج متميز بجودة عالية ومواصفات ممتازة يلبي جميع احتياجاتك",
       image: "https://i.imgur.com/ogU7D3c.jpeg",
       rating: 5
@@ -13,7 +14,7 @@ const ProductsSection = () => {
     {
       id: 2,
       name: "RNG",
-      price: "450 ج.م",
+      price: "$35",
       description: "منتج امان 100%",
       image: "https://i.imgur.com/SJJK1ZQ.jpeg",
       rating: 4
@@ -21,7 +22,7 @@ const ProductsSection = () => {
     {
       id: 3,
       name: "Bypass GHALY+ HAK GHALY",
-      price: "650 ج.م",
+      price: "$50",
       description: "طريقك الى الكونكر",
       image: "https://i.imgur.com/TzAjRA0.jpeg",
       rating: 5
@@ -29,7 +30,7 @@ const ProductsSection = () => {
     {
       id: 4,
       name: "Bypass GHALY",
-      price: "380 ج.م",
+      price: "$40",
       description: "بيباس غالي فقط",
       image: "https://i.imgur.com/viiCVaD.jpeg",
       rating: 4
@@ -43,8 +44,11 @@ const ProductsSection = () => {
           <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
             منتجاتنا <span className="bg-blue-gradient bg-clip-text text-transparent">المتميزة</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-4">
             مجموعة مختارة بعناية من أفضل المنتجات لتلبية جميع احتياجاتك
+          </p>
+          <p className="text-lg text-blue-600 font-semibold">
+            * جميع الأسعار للاشتراك الشهري
           </p>
         </div>
         
