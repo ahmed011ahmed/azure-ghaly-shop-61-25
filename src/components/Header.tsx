@@ -1,22 +1,17 @@
-
 import { Gamepad, Joystick } from 'lucide-react';
-
 const Header = () => {
-  return (
-    <header className="bg-gray-900/95 backdrop-blur-md border-b border-purple-800/30 sticky top-0 z-50">
+  return <header className="bg-gray-900/95 backdrop-blur-md border-b border-purple-800/30 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gaming-gradient rounded-xl flex items-center justify-center">
-              <Joystick className="w-6 h-6 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent">
+            
+            <h1 className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent px-[12px]">
               GHALY HAX
             </h1>
           </div>
           
           <nav className="hidden md:flex items-center space-x-12">
-            <a href="#home" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
+            <a href="#home" className="text-gray-300 hover:text-purple-400 font-medium transition-colors px-[24px]">
               الرئيسية
             </a>
             <a href="#products" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
@@ -35,8 +30,6 @@ const Header = () => {
           </button>
         </div>
       </div>
-    </header>
-  );
+    </header>;
 };
-
 export default Header;
