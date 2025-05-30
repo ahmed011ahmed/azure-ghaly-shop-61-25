@@ -1,5 +1,6 @@
 
 import { Mail, Phone, MapPin, Gamepad2, Joystick, GamepadIcon } from 'lucide-react';
+import { Whatsapp, Discord } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -57,24 +58,24 @@ const Footer = () => {
             <div className="flex space-x-4">
               <a 
                 href="#" 
-                className="bg-purple-600 p-3 rounded-lg hover:bg-purple-700 transition-colors hover:shadow-lg hover:shadow-purple-500/25"
+                className="bg-green-600 p-3 rounded-lg hover:bg-green-700 transition-colors hover:shadow-lg hover:shadow-green-500/25"
+                aria-label="WhatsApp"
+              >
+                <Whatsapp className="w-5 h-5 text-white" />
+              </a>
+              <a 
+                href="#" 
+                className="bg-black p-3 rounded-lg hover:bg-gray-800 transition-colors hover:shadow-lg hover:shadow-gray-500/25"
+                aria-label="TikTok"
+              >
+                <span className="text-lg">🎵</span>
+              </a>
+              <a 
+                href="#" 
+                className="bg-indigo-600 p-3 rounded-lg hover:bg-indigo-700 transition-colors hover:shadow-lg hover:shadow-indigo-500/25"
                 aria-label="Discord"
               >
-                <span className="text-lg">🎮</span>
-              </a>
-              <a 
-                href="#" 
-                className="bg-pink-600 p-3 rounded-lg hover:bg-pink-700 transition-colors hover:shadow-lg hover:shadow-pink-500/25"
-                aria-label="Twitch"
-              >
-                <span className="text-lg">📺</span>
-              </a>
-              <a 
-                href="#" 
-                className="bg-purple-600 p-3 rounded-lg hover:bg-purple-700 transition-colors hover:shadow-lg hover:shadow-purple-500/25"
-                aria-label="YouTube Gaming"
-              >
-                <span className="text-lg">🎬</span>
+                <Discord className="w-5 h-5 text-white" />
               </a>
             </div>
           </div>
