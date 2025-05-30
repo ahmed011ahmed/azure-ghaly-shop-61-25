@@ -5,10 +5,10 @@ const ProductsSection = () => {
   const products = [
     {
       id: 1,
-      name: "منتج الجودة العالية",
+      name: "Bypass GHALY + HAK RNG",
       price: "299 ج.م",
       description: "منتج متميز بجودة عالية ومواصفات ممتازة يلبي جميع احتياجاتك",
-      image: "/placeholder.svg",
+      image: "https://i.imgur.com/ogU7D3c.jpeg",
       rating: 5
     },
     {
@@ -32,22 +32,6 @@ const ProductsSection = () => {
       name: "المنتج العملي",
       price: "380 ج.م",
       description: "عملي ومتين، مصمم خصيصاً للاستخدام اليومي المكثف",
-      image: "/placeholder.svg",
-      rating: 4
-    },
-    {
-      id: 5,
-      name: "المنتج الفاخر",
-      price: "850 ج.م",
-      description: "لمسة من الفخامة والأناقة مع أعلى معايير الجودة والتصنيع",
-      image: "/placeholder.svg",
-      rating: 5
-    },
-    {
-      id: 6,
-      name: "المنتج المتكامل",
-      price: "520 ج.م",
-      description: "حل متكامل يجمع بين الوظائف المتعددة والسعر المناسب",
       image: "/placeholder.svg",
       rating: 4
     }
