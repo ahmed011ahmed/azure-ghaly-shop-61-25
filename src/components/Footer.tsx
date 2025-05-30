@@ -20,8 +20,8 @@ const Footer = () => {
             <ul className="space-y-2">
               <li><a href="#home" className="text-purple-200 hover:text-pink-400 transition-colors">🏠 الرئيسية</a></li>
               <li><a href="#products" className="text-purple-200 hover:text-pink-400 transition-colors">🎮 الأدوات</a></li>
-              <li><a href="#about" className="text-purple-200 hover:text-pink-400 transition-colors">👥 من نحن</a></li>
-              <li><a href="#contact" className="text-purple-200 hover:text-pink-400 transition-colors">📞 تواصل معنا</a></li>
+              
+              
             </ul>
           </div>
           
@@ -33,11 +33,11 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <Phone className="w-5 h-5 text-pink-400" />
-                <span className="text-purple-200">+20 123 456 7890</span>
+                <span className="text-purple-200">01010673596</span>
               </div>
               <div className="flex items-center space-x-3">
-                <Mail className="w-5 h-5 text-pink-400" />
-                <span className="text-purple-200">gaming@ghaly.com</span>
+                
+                
               </div>
               <div className="flex items-center space-x-3">
                 <MapPin className="w-5 h-5 text-pink-400" />
