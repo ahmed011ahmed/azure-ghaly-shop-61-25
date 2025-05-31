@@ -90,7 +90,6 @@ export const useDownloads = () => {
       }
 
       console.log('Download added successfully:', data);
-      setDownloads(prev => [data as DownloadLink, ...prev]);
       
       toast({
         title: "نجح",
@@ -136,10 +135,6 @@ export const useDownloads = () => {
         return;
       }
 
-      setDownloads(prev => prev.map(download => 
-        download.id === id ? data : download
-      ));
-      
       toast({
         title: "نجح",
         description: "تم تحديث رابط التحميل بنجاح"
@@ -174,8 +169,6 @@ export const useDownloads = () => {
         return;
       }
 
-      setDownloads(prev => prev.filter(download => download.id !== id));
-      
       toast({
         title: "نجح",
         description: "تم حذف رابط التحميل بنجاح"
@@ -192,6 +185,36 @@ export const useDownloads = () => {
 
   useEffect(() => {
     fetchDownloads();
+
+    // إعداد التحديثات الفورية لروابط التحميل
+    const channel = supabase
+      .channel('downloads_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'download_links'
+        },
+        (payload) => {
+          console.log('Real-time download update:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            setDownloads(prev => [payload.new as DownloadLink, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setDownloads(prev => prev.map(download => 
+              download.id === payload.new.id ? payload.new as DownloadLink : download
+            ));
+          } else if (payload.eventType === 'DELETE') {
+            setDownloads(prev => prev.filter(download => download.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return {

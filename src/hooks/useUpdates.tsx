@@ -84,7 +84,6 @@ export const useUpdates = () => {
       }
 
       console.log('Update added successfully:', data);
-      setUpdates(prev => [data as Update, ...prev]);
       
       toast({
         title: "نجح",
@@ -128,10 +127,6 @@ export const useUpdates = () => {
         return;
       }
 
-      setUpdates(prev => prev.map(update => 
-        update.id === id ? data : update
-      ));
-      
       toast({
         title: "نجح",
         description: "تم تحديث الإصدار بنجاح"
@@ -166,8 +161,6 @@ export const useUpdates = () => {
         return;
       }
 
-      setUpdates(prev => prev.filter(update => update.id !== id));
-      
       toast({
         title: "نجح",
         description: "تم حذف التحديث بنجاح"
@@ -184,6 +177,36 @@ export const useUpdates = () => {
 
   useEffect(() => {
     fetchUpdates();
+
+    // إعداد التحديثات الفورية للتحديثات
+    const channel = supabase
+      .channel('updates_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'updates'
+        },
+        (payload) => {
+          console.log('Real-time update:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            setUpdates(prev => [payload.new as Update, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setUpdates(prev => prev.map(update => 
+              update.id === payload.new.id ? payload.new as Update : update
+            ));
+          } else if (payload.eventType === 'DELETE') {
+            setUpdates(prev => prev.filter(update => update.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return {

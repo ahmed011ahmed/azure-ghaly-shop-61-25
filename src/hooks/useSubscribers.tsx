@@ -101,17 +101,6 @@ export const useSubscribers = () => {
         throw error;
       }
 
-      const addedSubscriber: Subscriber = {
-        id: data.id,
-        email: newSubscriber.email,
-        nickname: newSubscriber.nickname,
-        subscription_status: 'active',
-        subscription_date: data.created_at,
-        last_login: data.updated_at
-      };
-
-      setSubscribers(prev => [addedSubscriber, ...prev]);
-      
       toast({
         title: "تم بنجاح",
         description: `تم إضافة المشترك ${newSubscriber.nickname} بنجاح`
@@ -178,8 +167,6 @@ export const useSubscribers = () => {
         throw error;
       }
 
-      setSubscribers(prev => prev.filter(sub => sub.id !== id));
-      
       toast({
         title: "تم الحذف بنجاح",
         description: "تم حذف المشترك بنجاح"
@@ -197,6 +184,50 @@ export const useSubscribers = () => {
 
   useEffect(() => {
     fetchSubscribers();
+
+    // إعداد التحديثات الفورية للمشتركين
+    const channel = supabase
+      .channel('profiles_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles'
+        },
+        (payload) => {
+          console.log('Real-time subscriber update:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            const newSubscriber: Subscriber = {
+              id: payload.new.id,
+              email: payload.new.id,
+              nickname: payload.new.nickname,
+              subscription_status: 'active',
+              subscription_date: payload.new.created_at,
+              last_login: payload.new.updated_at
+            };
+            setSubscribers(prev => [newSubscriber, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setSubscribers(prev => prev.map(sub => 
+              sub.id === payload.new.id 
+                ? { 
+                    ...sub, 
+                    nickname: payload.new.nickname,
+                    last_login: payload.new.updated_at
+                  }
+                : sub
+            ));
+          } else if (payload.eventType === 'DELETE') {
+            setSubscribers(prev => prev.filter(sub => sub.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return {
