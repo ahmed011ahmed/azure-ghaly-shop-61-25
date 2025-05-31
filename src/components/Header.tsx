@@ -1,17 +1,21 @@
-import { Gamepad, ShoppingCart } from 'lucide-react';
+
+import { Gamepad, ShoppingCart, Settings } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
+import { Link } from 'react-router-dom';
+
 const Header = () => {
   const {
     toggleCart,
     getTotalItems
   } = useCart();
+  
   return <header className="bg-gray-900/95 backdrop-blur-md border-b border-purple-800/30 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <h1 className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent px-[12px]">
+            <Link to="/" className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent px-[12px] hover:opacity-80 transition-opacity">
               GHALY HAX
-            </h1>
+            </Link>
           </div>
           
           <nav className="hidden md:flex items-center space-x-12">
@@ -21,8 +25,13 @@ const Header = () => {
             <a href="#products" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
               الأدوات
             </a>
-            
-            
+            <Link 
+              to="/admin" 
+              className="text-gray-300 hover:text-purple-400 font-medium transition-colors flex items-center space-x-2"
+            >
+              <Settings className="w-4 h-4" />
+              <span>لوحة التحكم</span>
+            </Link>
           </nav>
           
           <div className="flex items-center space-x-3">
@@ -32,11 +41,10 @@ const Header = () => {
                   {getTotalItems()}
                 </span>}
             </button>
-            
-            
           </div>
         </div>
       </div>
     </header>;
 };
+
 export default Header;

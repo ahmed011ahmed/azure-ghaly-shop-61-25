@@ -1,0 +1,163 @@
+
+import React, { useState } from 'react';
+import { ArrowLeft, Plus, Edit, Trash2, Eye, Package, Users, DollarSign, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import ProductManagement from '../components/admin/ProductManagement';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+
+const AdminDashboard = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // بيانات إحصائية وهمية
+  const stats = [
+    {
+      title: 'إجمالي المنتجات',
+      value: '4',
+      icon: Package,
+      color: 'text-blue-500'
+    },
+    {
+      title: 'إجمالي المبيعات',
+      value: '$185',
+      icon: DollarSign,
+      color: 'text-green-500'
+    },
+    {
+      title: 'العملاء',
+      value: '127',
+      icon: Users,
+      color: 'text-purple-500'
+    },
+    {
+      title: 'معدل النمو',
+      value: '+12%',
+      icon: TrendingUp,
+      color: 'text-pink-500'
+    }
+  ];
+
+  const tabs = [
+    { id: 'overview', label: 'نظرة عامة', icon: Eye },
+    { id: 'products', label: 'إدارة المنتجات', icon: Package }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900">
+      {/* Header */}
+      <header className="bg-gray-900/95 backdrop-blur-md border-b border-purple-800/30 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Link 
+                to="/" 
+                className="text-gray-300 hover:text-purple-400 transition-colors"
+              >
+                <ArrowLeft className="w-6 h-6" />
+              </Link>
+              <h1 className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent">
+                لوحة تحكم الإدارة
+              </h1>
+            </div>
+            
+            <div className="flex items-center space-x-3">
+              <Button 
+                onClick={() => setActiveTab('products')}
+                className="bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                إضافة منتج جديد
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Navigation Tabs */}
+        <div className="flex space-x-1 mb-8 bg-gray-800/50 backdrop-blur-sm rounded-lg p-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center space-x-2 px-6 py-3 rounded-md font-medium transition-all duration-200 ${
+                activeTab === tab.id
+                  ? 'bg-gaming-gradient text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+              }`}
+            >
+              <tab.icon className="w-5 h-5" />
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        {activeTab === 'overview' && (
+          <div className="space-y-8">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {stats.map((stat, index) => (
+                <Card key={index} className="gaming-card">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-gray-300">
+                      {stat.title}
+                    </CardTitle>
+                    <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-white">{stat.value}</div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Quick Actions */}
+            <Card className="gaming-card">
+              <CardHeader>
+                <CardTitle className="text-xl text-white">إجراءات سريعة</CardTitle>
+                <CardDescription className="text-gray-300">
+                  الإجراءات الأكثر استخداماً في لوحة التحكم
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button 
+                    onClick={() => setActiveTab('products')}
+                    className="bg-purple-600 hover:bg-purple-700 text-white p-6 h-auto flex-col space-y-2"
+                  >
+                    <Package className="w-8 h-8" />
+                    <span className="font-semibold">إدارة المنتجات</span>
+                    <span className="text-sm opacity-80">إضافة وتعديل المنتجات</span>
+                  </Button>
+                  
+                  <Button 
+                    variant="outline"
+                    className="border-pink-500 text-pink-400 hover:bg-pink-500/10 p-6 h-auto flex-col space-y-2"
+                  >
+                    <Users className="w-8 h-8" />
+                    <span className="font-semibold">إدارة العملاء</span>
+                    <span className="text-sm opacity-80">عرض وإدارة العملاء</span>
+                  </Button>
+                  
+                  <Button 
+                    variant="outline"
+                    className="border-blue-500 text-blue-400 hover:bg-blue-500/10 p-6 h-auto flex-col space-y-2"
+                  >
+                    <TrendingUp className="w-8 h-8" />
+                    <span className="font-semibold">التقارير</span>
+                    <span className="text-sm opacity-80">مشاهدة الإحصائيات</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === 'products' && <ProductManagement />}
+      </div>
+    </div>
+  );
+};
+
+export default AdminDashboard;
