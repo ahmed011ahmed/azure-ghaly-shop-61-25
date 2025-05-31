@@ -1,5 +1,6 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageSquare, Trash2, User, Loader2 } from 'lucide-react';
+import { Send, MessageSquare, Trash2, User, Loader2, Image, Link } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
@@ -11,6 +12,7 @@ const AdminChat = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<string>('');
   const [userName, setUserName] = useState('');
   const [isUserMode, setIsUserMode] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -43,12 +45,89 @@ const AdminChat = () => {
     }
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const imageData = event.target?.result as string;
+        const messageText = `[صورة]: ${imageData}`;
+        
+        if (!isUserMode) {
+          // رسالة من الإدارة
+          addMessage(messageText, 'admin', undefined, selectedCustomer || undefined);
+        } else {
+          if (!userName.trim()) {
+            alert('يرجى إدخال اسم المستخدم أولاً');
+            return;
+          }
+          // رسالة كمستخدم
+          addMessage(messageText, 'user', userName);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('ar-SA', { 
       hour: '2-digit', 
       minute: '2-digit',
       hour12: true 
     });
+  };
+
+  const isImageMessage = (text: string) => {
+    return text.startsWith('[صورة]: ');
+  };
+
+  const isLinkMessage = (text: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return urlRegex.test(text);
+  };
+
+  const renderMessageContent = (text: string) => {
+    if (isImageMessage(text)) {
+      const imageData = text.replace('[صورة]: ', '');
+      return (
+        <div className="mt-2">
+          <img 
+            src={imageData} 
+            alt="صورة مرسلة" 
+            className="max-w-xs max-h-48 rounded-lg object-cover cursor-pointer"
+            onClick={() => window.open(imageData, '_blank')}
+          />
+        </div>
+      );
+    }
+
+    if (isLinkMessage(text)) {
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const parts = text.split(urlRegex);
+      
+      return (
+        <div>
+          {parts.map((part, index) => {
+            if (urlRegex.test(part)) {
+              return (
+                <a
+                  key={index}
+                  href={part}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-300 hover:text-blue-400 underline break-all"
+                >
+                  {part}
+                </a>
+              );
+            }
+            return part;
+          })}
+        </div>
+      );
+    }
+
+    return <span className="break-words">{text}</span>;
   };
 
   // الحصول على قائمة العملاء الفريدة
@@ -195,9 +274,9 @@ const AdminChat = () => {
                       </span>
                     )}
                   </div>
-                  <p className="text-white text-sm leading-relaxed">
-                    {message.text}
-                  </p>
+                  <div className="text-white text-sm leading-relaxed">
+                    {renderMessageContent(message.text)}
+                  </div>
                 </div>
               </div>
             ))
@@ -221,10 +300,28 @@ const AdminChat = () => {
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder={`اكتب رسالة ${isUserMode ? 'كمستخدم' : selectedCustomer ? `لـ ${selectedCustomer}` : 'عامة'}...`}
+              placeholder={`اكتب رسالة أو رابط ${isUserMode ? 'كمستخدم' : selectedCustomer ? `لـ ${selectedCustomer}` : 'عامة'}...`}
               className="flex-1 bg-gray-800/50 border-gray-600 text-white"
               disabled={loading}
             />
+            
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+            
+            <Button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="bg-green-600 hover:bg-green-700"
+              disabled={loading || (isUserMode && !userName.trim())}
+            >
+              <Image className="w-4 h-4" />
+            </Button>
+            
             <Button
               type="submit"
               className={`${
@@ -237,6 +334,9 @@ const AdminChat = () => {
               <Send className="w-4 h-4" />
             </Button>
           </form>
+          <p className="text-xs text-gray-400 mt-2">
+            يمكنك إرسال النصوص والصور والروابط
+          </p>
         </div>
       </CardContent>
     </Card>
