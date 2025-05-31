@@ -21,6 +21,8 @@ serve(async (req) => {
 
     const { email, code } = await req.json();
 
+    console.log('Verifying code for email:', email);
+
     // Check verification code
     const { data: verificationData, error: verifyError } = await supabaseClient
       .from('verification_codes')
@@ -32,6 +34,7 @@ serve(async (req) => {
       .single();
 
     if (verifyError || !verificationData) {
+      console.error('Verification failed:', verifyError);
       return new Response(
         JSON.stringify({ error: 'كود التأكيد غير صحيح أو منتهي الصلاحية' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -39,29 +42,39 @@ serve(async (req) => {
     }
 
     // Mark code as used
-    await supabaseClient
+    const { error: updateError } = await supabaseClient
       .from('verification_codes')
       .update({ is_used: true })
       .eq('id', verificationData.id);
 
-    // Update user email verification status
-    const { error: updateError } = await supabaseClient.auth.admin.updateUserById(
-      verificationData.user_id,
-      { email_confirm: true }
-    );
-
     if (updateError) {
+      console.error('Error marking code as used:', updateError);
       throw updateError;
     }
 
+    // Update user email verification status if user_id exists
+    if (verificationData.user_id) {
+      const { error: authUpdateError } = await supabaseClient.auth.admin.updateUserById(
+        verificationData.user_id,
+        { email_confirm: true }
+      );
+
+      if (authUpdateError) {
+        console.error('Error confirming user email:', authUpdateError);
+        throw authUpdateError;
+      }
+    }
+
+    console.log('Email verification successful for:', email);
+
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ success: true, message: 'تم تأكيد البريد الإلكتروني بنجاح' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in verify-email-code:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message || 'حدث خطأ في تأكيد كود التحقق' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

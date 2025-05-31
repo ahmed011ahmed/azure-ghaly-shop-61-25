@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
@@ -47,11 +48,14 @@ const Auth = () => {
     }
 
     try {
+      console.log('Starting signup process for:', email);
+      
       // Create user without email confirmation
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: undefined, // Disable automatic email confirmation
           data: {
             nickname: nickname,
           }
@@ -59,6 +63,7 @@ const Auth = () => {
       });
 
       if (error) {
+        console.error('Signup error:', error);
         if (error.message.includes('User already registered')) {
           toast({
             title: 'خطأ',
@@ -76,17 +81,22 @@ const Auth = () => {
         return;
       }
 
+      console.log('User created successfully:', data.user?.id);
+
       // Generate verification code
       const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      console.log('Generated verification code:', verificationCode);
 
       // Send verification code
-      const { error: codeError } = await supabase.functions.invoke('send-verification-code', {
+      const { data: codeResponse, error: codeError } = await supabase.functions.invoke('send-verification-code', {
         body: { 
           email, 
           code: verificationCode,
           user_id: data.user?.id
         }
       });
+
+      console.log('Send verification response:', { codeResponse, codeError });
 
       if (codeError) {
         console.error('Error sending verification code:', codeError);
@@ -105,9 +115,10 @@ const Auth = () => {
       setPendingEmail(email);
       setShowVerification(true);
     } catch (error: any) {
+      console.error('Unexpected signup error:', error);
       toast({
         title: 'خطأ في التسجيل',
-        description: error.message,
+        description: error.message || 'حدث خطأ غير متوقع',
         variant: 'destructive',
       });
     } finally {
@@ -119,33 +130,46 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    setIsLoading(false);
-
-    if (error) {
-      if (error.message.includes('Invalid login credentials')) {
-        toast({
-          title: 'خطأ في تسجيل الدخول',
-          description: 'الإيميل أو كلمة المرور غير صحيحة',
-          variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: 'خطأ في تسجيل الدخول',
-          description: error.message,
-          variant: 'destructive',
-        });
-      }
-    } else {
-      toast({
-        title: 'مرحباً بك!',
-        description: 'تم تسجيل الدخول بنجاح',
+    try {
+      console.log('Starting signin process for:', email);
+      
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-      navigate('/');
+
+      if (error) {
+        console.error('Signin error:', error);
+        if (error.message.includes('Invalid login credentials')) {
+          toast({
+            title: 'خطأ في تسجيل الدخول',
+            description: 'الإيميل أو كلمة المرور غير صحيحة',
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'خطأ في تسجيل الدخول',
+            description: error.message,
+            variant: 'destructive',
+          });
+        }
+      } else {
+        console.log('Signin successful');
+        toast({
+          title: 'مرحباً بك!',
+          description: 'تم تسجيل الدخول بنجاح',
+        });
+        navigate('/');
+      }
+    } catch (error: any) {
+      console.error('Unexpected signin error:', error);
+      toast({
+        title: 'خطأ في تسجيل الدخول',
+        description: error.message || 'حدث خطأ غير متوقع',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 

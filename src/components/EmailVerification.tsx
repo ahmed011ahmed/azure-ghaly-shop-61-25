@@ -21,14 +21,30 @@ const EmailVerification = ({ email, onVerificationSuccess, onBack }: EmailVerifi
 
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (verificationCode.length !== 6) {
+      toast({
+        title: 'خطأ',
+        description: 'يرجى إدخال كود مكون من 6 أرقام',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
+      console.log('Verifying code:', verificationCode, 'for email:', email);
+      
       const { data, error } = await supabase.functions.invoke('verify-email-code', {
         body: { email, code: verificationCode }
       });
 
-      if (error) throw error;
+      console.log('Verification response:', { data, error });
+
+      if (error) {
+        console.error('Verification error:', error);
+        throw error;
+      }
 
       if (data.success) {
         toast({
@@ -36,11 +52,14 @@ const EmailVerification = ({ email, onVerificationSuccess, onBack }: EmailVerifi
           description: 'تم تأكيد بريدك الإلكتروني، يمكنك الآن تسجيل الدخول',
         });
         onVerificationSuccess();
+      } else {
+        throw new Error(data.error || 'فشل في التحقق من الكود');
       }
     } catch (error: any) {
+      console.error('Error during verification:', error);
       toast({
         title: 'خطأ في التأكيد',
-        description: error.message || 'كود التأكيد غير صحيح',
+        description: error.message || 'كود التأكيد غير صحيح أو منتهي الصلاحية',
         variant: 'destructive',
       });
     } finally {
@@ -55,20 +74,31 @@ const EmailVerification = ({ email, onVerificationSuccess, onBack }: EmailVerifi
       // Generate new verification code
       const newCode = Math.floor(100000 + Math.random() * 900000).toString();
       
-      const { error } = await supabase.functions.invoke('send-verification-code', {
+      console.log('Resending verification code for email:', email);
+      
+      const { data, error } = await supabase.functions.invoke('send-verification-code', {
         body: { email, code: newCode }
       });
 
-      if (error) throw error;
+      console.log('Resend response:', { data, error });
+
+      if (error) {
+        console.error('Resend error:', error);
+        throw error;
+      }
 
       toast({
         title: 'تم إرسال الكود',
         description: 'تم إرسال كود تأكيد جديد إلى بريدك الإلكتروني',
       });
+      
+      // Clear the input field
+      setVerificationCode('');
     } catch (error: any) {
+      console.error('Error during resend:', error);
       toast({
         title: 'خطأ في الإرسال',
-        description: error.message,
+        description: error.message || 'فشل في إرسال كود التحقق',
         variant: 'destructive',
       });
     } finally {
@@ -98,7 +128,11 @@ const EmailVerification = ({ email, onVerificationSuccess, onBack }: EmailVerifi
               type="text"
               placeholder="000000"
               value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value)}
+              onChange={(e) => {
+                // Only allow numbers and limit to 6 digits
+                const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                setVerificationCode(value);
+              }}
               className="bg-gray-800/50 border-gray-600 text-white text-center text-2xl tracking-widest"
               maxLength={6}
               required
