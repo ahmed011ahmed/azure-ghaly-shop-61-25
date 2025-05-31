@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -60,13 +61,13 @@ export const useSubscribers = (targetLevel?: number) => {
       });
       
       // بيانات تجريبية في حالة الفشل
-      const mockData = [
+      const mockData: Subscriber[] = [
         {
           id: '1',
           email: 'subscriber1@example.com',
           nickname: 'مشترك 1',
-          subscription_status: 'active' as const,
-          subscription_level: targetLevel || 1,
+          subscription_status: 'active',
+          subscription_level: (targetLevel as 1 | 2 | 3 | 4 | 5) || 1,
           subscription_date: new Date().toISOString(),
           last_login: new Date().toISOString()
         },
@@ -74,8 +75,8 @@ export const useSubscribers = (targetLevel?: number) => {
           id: '2',
           email: 'subscriber2@example.com',
           nickname: 'مشترك 2',
-          subscription_status: 'inactive' as const,
-          subscription_level: targetLevel || 1,
+          subscription_status: 'inactive',
+          subscription_level: (targetLevel as 1 | 2 | 3 | 4 | 5) || 1,
           subscription_date: new Date(Date.now() - 86400000).toISOString(),
           last_login: new Date(Date.now() - 86400000).toISOString()
         }
