@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, MessageSquare, Trash2, User, Loader2 } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -106,7 +105,6 @@ const AdminChat = () => {
           </div>
         )}
 
-        {/* اختيار العميل للرد عليه */}
         {!isUserMode && (
           <div className="mt-3 space-y-2">
             <div className="flex items-center space-x-2">
