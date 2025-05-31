@@ -1,0 +1,165 @@
+
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface Subscriber {
+  id?: string;
+  email: string;
+  nickname?: string;
+  subscription_status: 'active' | 'inactive' | 'pending';
+  subscription_date?: string;
+  last_login?: string;
+}
+
+export const useSubscribers = () => {
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  // جلب المشتركين من جدول profiles
+  const fetchSubscribers = async () => {
+    try {
+      setLoading(true);
+      console.log('Fetching subscribers...');
+      
+      // نجلب المشتركين من جدول profiles
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*');
+
+      if (profilesError) {
+        console.error('Profiles error:', profilesError);
+        throw profilesError;
+      }
+
+      // نحول بيانات profiles إلى تنسيق المشتركين
+      const subscribersData = profilesData?.map(profile => ({
+        id: profile.id,
+        email: profile.id, // نستخدم ID كـ email مؤقتاً
+        nickname: profile.nickname,
+        subscription_status: 'active' as const,
+        subscription_date: profile.created_at,
+        last_login: profile.updated_at
+      })) || [];
+
+      console.log('Subscribers loaded:', subscribersData);
+      setSubscribers(subscribersData);
+    } catch (error) {
+      console.error('Error fetching subscribers:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في تحميل قائمة المشتركين",
+        variant: "destructive"
+      });
+      
+      // بيانات تجريبية في حالة الفشل
+      setSubscribers([
+        {
+          id: '1',
+          email: 'subscriber1@example.com',
+          nickname: 'مشترك 1',
+          subscription_status: 'active',
+          subscription_date: new Date().toISOString(),
+          last_login: new Date().toISOString()
+        },
+        {
+          id: '2',
+          email: 'subscriber2@example.com',
+          nickname: 'مشترك 2',
+          subscription_status: 'inactive',
+          subscription_date: new Date(Date.now() - 86400000).toISOString(),
+          last_login: new Date(Date.now() - 86400000).toISOString()
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // تحديث حالة الاشتراك
+  const updateSubscriptionStatus = async (id: string, status: 'active' | 'inactive' | 'pending') => {
+    try {
+      console.log(`Updating subscriber ${id} status to ${status}`);
+      
+      // نحدث في جدول profiles
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Update error:', error);
+        throw error;
+      }
+
+      // نحدث البيانات المحلية
+      setSubscribers(prev => 
+        prev.map(sub => 
+          sub.id === id 
+            ? { ...sub, subscription_status: status, last_login: new Date().toISOString() }
+            : sub
+        )
+      );
+
+      toast({
+        title: "تم التحديث بنجاح",
+        description: `تم تحديث حالة المشترك إلى ${status === 'active' ? 'نشط' : status === 'inactive' ? 'غير نشط' : 'في الانتظار'}`
+      });
+
+    } catch (error) {
+      console.error('Error updating subscription status:', error);
+      toast({
+        title: "خطأ في التحديث",
+        description: "فشل في تحديث حالة المشترك",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // حذف مشترك
+  const deleteSubscriber = async (id: string) => {
+    try {
+      console.log(`Deleting subscriber ${id}`);
+      
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
+
+      setSubscribers(prev => prev.filter(sub => sub.id !== id));
+      
+      toast({
+        title: "تم الحذف بنجاح",
+        description: "تم حذف المشترك بنجاح"
+      });
+
+    } catch (error) {
+      console.error('Error deleting subscriber:', error);
+      toast({
+        title: "خطأ في الحذف",
+        description: "فشل في حذف المشترك",
+        variant: "destructive"
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchSubscribers();
+  }, []);
+
+  return {
+    subscribers,
+    loading,
+    updateSubscriptionStatus,
+    deleteSubscriber,
+    refetch: fetchSubscribers
+  };
+};

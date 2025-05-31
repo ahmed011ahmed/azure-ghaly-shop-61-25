@@ -7,6 +7,7 @@ import AdminLogin from '../components/admin/AdminLogin';
 import AdminChat from '../components/admin/AdminChat';
 import UpdatesManagement from '../components/admin/UpdatesManagement';
 import DownloadsManagement from '../components/admin/DownloadsManagement';
+import SubscribersManagement from '../components/admin/SubscribersManagement';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 
@@ -78,6 +79,11 @@ const AdminDashboard = () => {
       id: 'products',
       label: 'إدارة المنتجات',
       icon: Package
+    },
+    {
+      id: 'subscribers',
+      label: 'إدارة المشتركين',
+      icon: Users
     },
     {
       id: 'downloads',
@@ -192,6 +198,15 @@ const AdminDashboard = () => {
                   </Button>
                   
                   <Button
+                    onClick={() => setActiveTab('subscribers')}
+                    className="bg-green-600 hover:bg-green-700 text-white p-6 h-auto flex-col space-y-2"
+                  >
+                    <Users className="w-8 h-8" />
+                    <span className="font-semibold">إدارة المشتركين</span>
+                    <span className="text-sm opacity-80">إدارة العضويات</span>
+                  </Button>
+                  
+                  <Button
                     onClick={() => setActiveTab('chat')}
                     className="bg-blue-600 hover:bg-blue-700 text-white p-6 h-auto flex-col space-y-2"
                   >
@@ -201,21 +216,12 @@ const AdminDashboard = () => {
                   </Button>
                   
                   <Button
-                    variant="outline"
-                    className="border-pink-500 hover:bg-pink-500/10 p-6 h-auto flex-col space-y-2 text-slate-50"
+                    onClick={() => setActiveTab('updates')}
+                    className="bg-orange-600 hover:bg-orange-700 text-white p-6 h-auto flex-col space-y-2"
                   >
-                    <Users className="w-8 h-8" />
-                    <span className="font-semibold text-slate-50">إدارة العملاء</span>
-                    <span className="text-sm opacity-80 text-slate-50">عرض وإدارة العملاء</span>
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    className="border-blue-500 hover:bg-blue-500/10 p-6 h-auto flex-col space-y-2 text-slate-50"
-                  >
-                    <TrendingUp className="w-8 h-8" />
-                    <span className="font-semibold">التقارير</span>
-                    <span className="text-sm opacity-80">مشاهدة الإحصائيات</span>
+                    <Calendar className="w-8 h-8" />
+                    <span className="font-semibold">التحديثات</span>
+                    <span className="text-sm opacity-80">إدارة الإصدارات</span>
                   </Button>
                 </div>
               </CardContent>
@@ -224,6 +230,8 @@ const AdminDashboard = () => {
         )}
 
         {activeTab === 'products' && <ProductManagement />}
+        
+        {activeTab === 'subscribers' && <SubscribersManagement />}
         
         {activeTab === 'downloads' && <DownloadsManagement />}
         
