@@ -31,7 +31,7 @@ export const useDownloads = () => {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        const downloadsData = data[0].setting_value as DownloadLink[];
+        const downloadsData = data[0].setting_value as unknown as DownloadLink[];
         setDownloads(downloadsData || []);
       } else {
         // البيانات الافتراضية
@@ -84,7 +84,7 @@ export const useDownloads = () => {
         .from('global_settings')
         .upsert({
           setting_key: 'downloads',
-          setting_value: updatedList,
+          setting_value: updatedList as any,
           updated_at: new Date().toISOString()
         });
 
@@ -116,7 +116,7 @@ export const useDownloads = () => {
         .from('global_settings')
         .upsert({
           setting_key: 'downloads',
-          setting_value: updatedList,
+          setting_value: updatedList as any,
           updated_at: new Date().toISOString()
         });
 
@@ -146,7 +146,7 @@ export const useDownloads = () => {
         .from('global_settings')
         .upsert({
           setting_key: 'downloads',
-          setting_value: updatedList,
+          setting_value: updatedList as any,
           updated_at: new Date().toISOString()
         });
 

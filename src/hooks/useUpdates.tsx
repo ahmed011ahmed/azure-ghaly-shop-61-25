@@ -30,7 +30,7 @@ export const useUpdates = () => {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        const updatesData = data[0].setting_value as Update[];
+        const updatesData = data[0].setting_value as unknown as Update[];
         setUpdates(updatesData || []);
       } else {
         // إذا لم توجد بيانات، نضع البيانات الافتراضية
@@ -79,7 +79,7 @@ export const useUpdates = () => {
         .from('global_settings')
         .upsert({
           setting_key: 'updates',
-          setting_value: updatedList,
+          setting_value: updatedList as any,
           updated_at: new Date().toISOString()
         });
 
@@ -111,7 +111,7 @@ export const useUpdates = () => {
         .from('global_settings')
         .upsert({
           setting_key: 'updates',
-          setting_value: updatedList,
+          setting_value: updatedList as any,
           updated_at: new Date().toISOString()
         });
 
@@ -141,7 +141,7 @@ export const useUpdates = () => {
         .from('global_settings')
         .upsert({
           setting_key: 'updates',
-          setting_value: updatedList,
+          setting_value: updatedList as any,
           updated_at: new Date().toISOString()
         });
 
