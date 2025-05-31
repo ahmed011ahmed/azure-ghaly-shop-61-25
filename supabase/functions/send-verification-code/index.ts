@@ -19,7 +19,9 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { email, code } = await req.json();
+    const { email, code, user_id } = await req.json();
+
+    console.log('Received request:', { email, code, user_id });
 
     // Store verification code in database
     const { error: insertError } = await supabaseClient
@@ -27,24 +29,27 @@ serve(async (req) => {
       .insert({
         email,
         code,
-        expires_at: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+        user_id: user_id || null,
+        expires_at: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+        is_used: false
       });
 
     if (insertError) {
+      console.error('Database insert error:', insertError);
       throw insertError;
     }
 
-    // Send email with code (you can integrate with Resend or other email service)
-    console.log(`Verification code for ${email}: ${code}`);
+    // For now, log the verification code (in production, send actual email)
+    console.log(`كود التحقق للإيميل ${email}: ${code}`);
 
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ success: true, message: 'تم إرسال كود التحقق بنجاح' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in send-verification-code:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message || 'حدث خطأ في إرسال كود التحقق' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
