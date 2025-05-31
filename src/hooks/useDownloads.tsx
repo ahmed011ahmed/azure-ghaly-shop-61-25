@@ -37,23 +37,28 @@ export const useDownloads = () => {
 
       if (data && data.setting_value) {
         // التأكد من أن البيانات في التنسيق الصحيح
-        const rawData = data.setting_value;
-        if (Array.isArray(rawData)) {
-          const downloadsData = rawData.map((item: any) => ({
-            id: item.id || Date.now(),
-            name: item.name || '',
-            description: item.description || '',
-            download_url: item.download_url || '',
-            version: item.version || '',
-            file_size: item.file_size || '',
-            created_at: item.created_at || new Date().toISOString()
-          } as DownloadLink));
-          
-          console.log('Downloads loaded from database:', downloadsData);
-          setDownloads(downloadsData);
-        } else {
-          setDownloads([]);
+        let downloadsData: DownloadLink[] = [];
+        
+        try {
+          const rawData = data.setting_value;
+          if (Array.isArray(rawData)) {
+            downloadsData = rawData.map((item: any, index: number) => ({
+              id: item.id || Date.now() + index,
+              name: item.name || '',
+              description: item.description || '',
+              download_url: item.download_url || '',
+              version: item.version || '',
+              file_size: item.file_size || '',
+              created_at: item.created_at || new Date().toISOString()
+            }));
+          }
+        } catch (parseError) {
+          console.error('Error parsing downloads data:', parseError);
+          downloadsData = [];
         }
+        
+        console.log('Downloads loaded from database:', downloadsData);
+        setDownloads(downloadsData);
       } else {
         // البيانات الافتراضية
         console.log('No downloads found, using default data');
@@ -99,7 +104,7 @@ export const useDownloads = () => {
     try {
       console.log('Saving downloads:', updatedList);
       
-      // تحويل البيانات إلى تنسيق JSON متوافق
+      // تحويل البيانات إلى تنسيق JSON بسيط
       const jsonData = updatedList.map(item => ({
         id: item.id,
         name: item.name,
@@ -110,11 +115,13 @@ export const useDownloads = () => {
         created_at: item.created_at
       }));
 
+      console.log('Prepared JSON data:', jsonData);
+
       const { error } = await supabase
         .from('global_settings')
         .upsert({
           setting_key: 'downloads',
-          setting_value: jsonData as any,
+          setting_value: JSON.parse(JSON.stringify(jsonData)),
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'setting_key'
