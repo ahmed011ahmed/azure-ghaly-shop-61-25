@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '../integrations/supabase/client';
 
 export interface Product {
   id: number;
@@ -10,112 +11,131 @@ export interface Product {
   rating: number;
 }
 
-interface ProductsState {
-  products: Product[];
-}
-
 interface ProductsContextType {
   products: Product[];
-  addProduct: (product: Omit<Product, 'id'>) => void;
-  updateProduct: (id: number, product: Omit<Product, 'id'>) => void;
-  deleteProduct: (id: number) => void;
+  addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
+  updateProduct: (id: number, product: Omit<Product, 'id'>) => Promise<void>;
+  deleteProduct: (id: number) => Promise<void>;
+  loading: boolean;
 }
 
 const ProductsContext = createContext<ProductsContextType | undefined>(undefined);
 
-const initialProducts: Product[] = [
-  {
-    id: 1,
-    name: "🎯 Bypass GHALY + HAK RNG",
-    price: "$60",
-    description: "أداة متقدمة للبايباس والهاكينج - تجربة جيمنج لا تُضاهى مع حماية 100%",
-    image: "https://i.imgur.com/ogU7D3c.jpeg",
-    rating: 5
-  },
-  {
-    id: 2,
-    name: "🔥 RNG Tool",
-    price: "$35",
-    description: "أداة RNG متطورة - امان مضمون 100% مع أداء فائق",
-    image: "https://i.imgur.com/SJJK1ZQ.jpeg",
-    rating: 4
-  },
-  {
-    id: 3,
-    name: "⚡ Bypass GHALY+ HAK GHALY",
-    price: "$50",
-    description: "طريقك المضمون للكونكر - أداة شاملة للجيمرز المحترفين",
-    image: "https://i.imgur.com/TzAjRA0.jpeg",
-    rating: 5
-  },
-  {
-    id: 4,
-    name: "🛡️ Bypass GHALY",
-    price: "$40",
-    description: "بايباس غالي المتخصص - حل مثالي للعبة آمنة ومتقدمة",
-    image: "https://i.imgur.com/viiCVaD.jpeg",
-    rating: 4
-  }
-];
-
-const STORAGE_KEY = 'ghaly_products';
-
-const loadProductsFromStorage = (): Product[] => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      console.log('Loaded products from localStorage:', parsed);
-      return parsed;
-    }
-  } catch (error) {
-    console.error('Error loading products from localStorage:', error);
-  }
-  return initialProducts;
-};
-
-const saveProductsToStorage = (products: Product[]) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-    console.log('Saved products to localStorage:', products);
-  } catch (error) {
-    console.error('Error saving products to localStorage:', error);
-  }
-};
-
 export function ProductsProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Load products from localStorage on mount
+  // تحميل المنتجات من قاعدة البيانات
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error loading products:', error);
+        return;
+      }
+
+      setProducts(data || []);
+      console.log('Loaded products from database:', data);
+    } catch (error) {
+      console.error('Error loading products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadedProducts = loadProductsFromStorage();
-    setProducts(loadedProducts);
+    loadProducts();
+
+    // إعداد التحديثات الفورية للمنتجات
+    const channel = supabase
+      .channel('products_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'products'
+        },
+        (payload) => {
+          console.log('Real-time product update:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            setProducts(prev => [...prev, payload.new as Product]);
+          } else if (payload.eventType === 'UPDATE') {
+            setProducts(prev => prev.map(p => p.id === payload.new.id ? payload.new as Product : p));
+          } else if (payload.eventType === 'DELETE') {
+            setProducts(prev => prev.filter(p => p.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
-  // Save to localStorage whenever products change
-  useEffect(() => {
-    if (products.length > 0) {
-      saveProductsToStorage(products);
+  const addProduct = async (productData: Omit<Product, 'id'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .insert([productData])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error adding product:', error);
+        throw error;
+      }
+
+      console.log('Added new product:', data);
+    } catch (error) {
+      console.error('Error adding product:', error);
+      throw error;
     }
-  }, [products]);
-
-  const addProduct = (productData: Omit<Product, 'id'>) => {
-    const newProduct: Product = {
-      ...productData,
-      id: Math.max(...products.map(p => p.id), 0) + 1
-    };
-    setProducts(prev => [...prev, newProduct]);
-    console.log('Added new product:', newProduct);
   };
 
-  const updateProduct = (id: number, productData: Omit<Product, 'id'>) => {
-    setProducts(prev => prev.map(p => p.id === id ? { ...productData, id } : p));
-    console.log('Updated product:', productData);
+  const updateProduct = async (id: number, productData: Omit<Product, 'id'>) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update(productData)
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error updating product:', error);
+        throw error;
+      }
+
+      console.log('Updated product:', productData);
+    } catch (error) {
+      console.error('Error updating product:', error);
+      throw error;
+    }
   };
 
-  const deleteProduct = (id: number) => {
-    setProducts(prev => prev.filter(p => p.id !== id));
-    console.log(`Deleted product with id: ${id}`);
+  const deleteProduct = async (id: number) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting product:', error);
+        throw error;
+      }
+
+      console.log(`Deleted product with id: ${id}`);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      throw error;
+    }
   };
 
   return (
@@ -125,6 +145,7 @@ export function ProductsProvider({ children }: { children: ReactNode }) {
         addProduct,
         updateProduct,
         deleteProduct,
+        loading,
       }}
     >
       {children}
