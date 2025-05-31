@@ -7,7 +7,6 @@ import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface DownloadLink {
@@ -21,8 +20,27 @@ interface DownloadLink {
 }
 
 const DownloadsManagement = () => {
-  const [downloads, setDownloads] = useState<DownloadLink[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [downloads, setDownloads] = useState<DownloadLink[]>([
+    {
+      id: 1,
+      name: "GHALY BYPASS TOOL",
+      description: "أداة البايباس الحصرية من GHALY HAX",
+      download_url: "https://example.com/download1",
+      version: "v2.1.4",
+      file_size: "45 MB",
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 2,
+      name: "GHALY INJECTOR",
+      description: "أداة الحقن المتقدمة للألعاب",
+      download_url: "https://example.com/download2",
+      version: "v1.8.2",
+      file_size: "32 MB",
+      created_at: new Date().toISOString()
+    }
+  ]);
+  const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingDownload, setEditingDownload] = useState<DownloadLink | null>(null);
   const [formData, setFormData] = useState({
@@ -34,31 +52,6 @@ const DownloadsManagement = () => {
   });
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const { toast } = useToast();
-
-  useEffect(() => {
-    fetchDownloads();
-  }, []);
-
-  const fetchDownloads = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('download_links')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setDownloads(data || []);
-    } catch (error) {
-      console.error('Error fetching downloads:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في تحميل روابط التحميل",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,20 +66,22 @@ const DownloadsManagement = () => {
 
     try {
       if (editingDownload) {
-        const { error } = await supabase
-          .from('download_links')
-          .update(formData)
-          .eq('id', editingDownload.id);
-        if (error) throw error;
+        setDownloads(prev => prev.map(download => 
+          download.id === editingDownload.id 
+            ? { ...download, ...formData }
+            : download
+        ));
         toast({
           title: "نجح",
           description: "تم تحديث رابط التحميل بنجاح"
         });
       } else {
-        const { error } = await supabase
-          .from('download_links')
-          .insert([formData]);
-        if (error) throw error;
+        const newDownload = {
+          id: Date.now(),
+          ...formData,
+          created_at: new Date().toISOString()
+        };
+        setDownloads(prev => [newDownload, ...prev]);
         toast({
           title: "نجح",
           description: "تم إضافة رابط التحميل بنجاح"
@@ -96,7 +91,6 @@ const DownloadsManagement = () => {
       setFormData({ name: '', description: '', download_url: '', version: '', file_size: '' });
       setShowForm(false);
       setEditingDownload(null);
-      fetchDownloads();
     } catch (error) {
       console.error('Error saving download:', error);
       toast({
@@ -124,18 +118,12 @@ const DownloadsManagement = () => {
 
     try {
       setActionLoading(id);
-      const { error } = await supabase
-        .from('download_links')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+      setDownloads(prev => prev.filter(download => download.id !== id));
       
       toast({
         title: "نجح",
         description: "تم حذف رابط التحميل بنجاح"
       });
-      fetchDownloads();
     } catch (error) {
       console.error('Error deleting download:', error);
       toast({

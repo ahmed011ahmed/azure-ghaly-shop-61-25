@@ -7,7 +7,6 @@ import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface Update {
@@ -19,38 +18,21 @@ interface Update {
 }
 
 const UpdatesManagement = () => {
-  const [updates, setUpdates] = useState<Update[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [updates, setUpdates] = useState<Update[]>([
+    {
+      id: 1,
+      title: "تحديث البايباس الجديد",
+      description: "تحديث شامل لنظام البايباس مع تحسينات في الأداء والأمان",
+      version: "v2.1.4",
+      created_at: new Date().toISOString()
+    }
+  ]);
+  const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingUpdate, setEditingUpdate] = useState<Update | null>(null);
   const [formData, setFormData] = useState({ title: '', description: '', version: '' });
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const { toast } = useToast();
-
-  useEffect(() => {
-    fetchUpdates();
-  }, []);
-
-  const fetchUpdates = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('updates')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setUpdates(data || []);
-    } catch (error) {
-      console.error('Error fetching updates:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في تحميل التحديثات",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,20 +47,22 @@ const UpdatesManagement = () => {
 
     try {
       if (editingUpdate) {
-        const { error } = await supabase
-          .from('updates')
-          .update(formData)
-          .eq('id', editingUpdate.id);
-        if (error) throw error;
+        setUpdates(prev => prev.map(update => 
+          update.id === editingUpdate.id 
+            ? { ...update, ...formData }
+            : update
+        ));
         toast({
           title: "نجح",
           description: "تم تحديث الإصدار بنجاح"
         });
       } else {
-        const { error } = await supabase
-          .from('updates')
-          .insert([formData]);
-        if (error) throw error;
+        const newUpdate = {
+          id: Date.now(),
+          ...formData,
+          created_at: new Date().toISOString()
+        };
+        setUpdates(prev => [newUpdate, ...prev]);
         toast({
           title: "نجح",
           description: "تم إضافة التحديث بنجاح"
@@ -88,7 +72,6 @@ const UpdatesManagement = () => {
       setFormData({ title: '', description: '', version: '' });
       setShowForm(false);
       setEditingUpdate(null);
-      fetchUpdates();
     } catch (error) {
       console.error('Error saving update:', error);
       toast({
@@ -114,18 +97,12 @@ const UpdatesManagement = () => {
 
     try {
       setActionLoading(id);
-      const { error } = await supabase
-        .from('updates')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+      setUpdates(prev => prev.filter(update => update.id !== id));
       
       toast({
         title: "نجح",
         description: "تم حذف التحديث بنجاح"
       });
-      fetchUpdates();
     } catch (error) {
       console.error('Error deleting update:', error);
       toast({
