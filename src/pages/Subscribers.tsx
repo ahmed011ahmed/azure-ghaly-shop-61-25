@@ -6,69 +6,79 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Update {
   id: number;
   title: string;
   description: string;
   version: string;
-  date: string;
   created_at: string;
+}
+
+interface DownloadLink {
+  id: number;
+  name: string;
+  description: string;
+  download_url: string;
+  version: string;
+  file_size: string;
 }
 
 const Subscribers = () => {
   const { user, loading } = useAuth();
   const { toast } = useToast();
   const [updates, setUpdates] = useState<Update[]>([]);
+  const [downloadLinks, setDownloadLinks] = useState<DownloadLink[]>([]);
   const [loadingUpdates, setLoadingUpdates] = useState(true);
+  const [loadingDownloads, setLoadingDownloads] = useState(true);
 
-  // روابط التحميل
-  const downloadLinks = [
-    {
-      id: 1,
-      name: "GHALY BYPASS TOOL",
-      description: "أداة البايباس الأساسية - الإصدار الأحدث",
-      downloadUrl: "https://example.com/download1",
-      version: "v2.1.4",
-      size: "45 MB"
-    },
-    {
-      id: 2,
-      name: "RNG ADVANCED TOOL",
-      description: "أداة RNG المتقدمة - نسخة المشتركين الحصرية",
-      downloadUrl: "https://example.com/download2", 
-      version: "v1.8.3",
-      size: "32 MB"
-    }
-  ];
-
-  // بيانات التحديثات المحلية (يمكن ربطها بقاعدة البيانات لاحقاً)
-  const sampleUpdates: Update[] = [
-    {
-      id: 1,
-      title: "تحديث البايباس الجديد",
-      description: "تم إضافة دعم للألعاب الجديدة وإصلاح مشاكل الاتصال",
-      version: "v2.1.4",
-      date: "2024-01-15",
-      created_at: "2024-01-15T10:00:00Z"
-    },
-    {
-      id: 2,
-      title: "تحسينات في أداة RNG",
-      description: "تحسين سرعة المعالجة وإضافة خيارات جديدة للتخصيص",
-      version: "v1.8.3",
-      date: "2024-01-10",
-      created_at: "2024-01-10T14:30:00Z"
-    }
-  ];
-
-  // تحميل التحديثات
+  // جلب التحديثات من قاعدة البيانات
   useEffect(() => {
-    // محاكاة تحميل البيانات
-    setTimeout(() => {
-      setUpdates(sampleUpdates);
-      setLoadingUpdates(false);
-    }, 1000);
+    const fetchUpdates = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('updates')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching updates:', error);
+        } else {
+          setUpdates(data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching updates:', error);
+      } finally {
+        setLoadingUpdates(false);
+      }
+    };
+
+    fetchUpdates();
+  }, []);
+
+  // جلب روابط التحميل من قاعدة البيانات
+  useEffect(() => {
+    const fetchDownloadLinks = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('download_links')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching download links:', error);
+        } else {
+          setDownloadLinks(data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching download links:', error);
+      } finally {
+        setLoadingDownloads(false);
+      }
+    };
+
+    fetchDownloadLinks();
   }, []);
 
   const handleDownload = (name: string, url: string) => {
@@ -172,34 +182,46 @@ const Subscribers = () => {
             روابط التحميل
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {downloadLinks.map((item) => (
-              <Card key={item.id} className="gaming-card hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300">
-                <CardHeader className="bg-slate-900">
-                  <CardTitle className="text-xl text-white flex items-center justify-between">
-                    {item.name}
-                    <span className="text-sm text-purple-400 font-normal">{item.version}</span>
-                  </CardTitle>
-                  <CardDescription className="text-gray-300">
-                    {item.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="bg-slate-950 pt-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-gray-400">الحجم: {item.size}</span>
-                    <span className="text-sm text-green-400">متاح للتحميل</span>
-                  </div>
-                  <Button 
-                    onClick={() => handleDownload(item.name, item.downloadUrl)}
-                    className="w-full bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    تحميل الآن
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {loadingDownloads ? (
+            <div className="text-center py-8">
+              <div className="text-gray-300">جاري تحميل روابط التحميل...</div>
+            </div>
+          ) : downloadLinks.length === 0 ? (
+            <Card className="gaming-card">
+              <CardContent className="bg-slate-950 py-8 text-center">
+                <div className="text-gray-400">لا توجد روابط تحميل متاحة حالياً</div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {downloadLinks.map((item) => (
+                <Card key={item.id} className="gaming-card hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300">
+                  <CardHeader className="bg-slate-900">
+                    <CardTitle className="text-xl text-white flex items-center justify-between">
+                      {item.name}
+                      <span className="text-sm text-purple-400 font-normal">{item.version}</span>
+                    </CardTitle>
+                    <CardDescription className="text-gray-300">
+                      {item.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="bg-slate-950 pt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm text-gray-400">الحجم: {item.file_size || 'غير محدد'}</span>
+                      <span className="text-sm text-green-400">متاح للتحميل</span>
+                    </div>
+                    <Button 
+                      onClick={() => handleDownload(item.name, item.download_url)}
+                      className="w-full bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      تحميل الآن
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Updates Section */}

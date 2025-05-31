@@ -1,10 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductManagement from '../components/admin/ProductManagement';
 import AdminLogin from '../components/admin/AdminLogin';
 import AdminChat from '../components/admin/AdminChat';
+import UpdatesManagement from '../components/admin/UpdatesManagement';
+import DownloadsManagement from '../components/admin/DownloadsManagement';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 
@@ -78,6 +80,16 @@ const AdminDashboard = () => {
       icon: Package
     },
     {
+      id: 'downloads',
+      label: 'روابط التحميل',
+      icon: Download
+    },
+    {
+      id: 'updates',
+      label: 'التحديثات',
+      icon: Calendar
+    },
+    {
       id: 'chat',
       label: 'شات العملاء',
       icon: MessageSquare
@@ -123,12 +135,12 @@ const AdminDashboard = () => {
 
       <div className="container mx-auto px-4 py-8">
         {/* Navigation Tabs */}
-        <div className="flex space-x-1 mb-8 bg-gray-800/50 backdrop-blur-sm rounded-lg p-1">
+        <div className="flex space-x-1 mb-8 bg-gray-800/50 backdrop-blur-sm rounded-lg p-1 overflow-x-auto">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-2 px-6 py-3 rounded-md font-medium transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-4 py-3 rounded-md font-medium transition-all duration-200 whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'bg-gaming-gradient text-white shadow-lg'
                   : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
@@ -212,6 +224,10 @@ const AdminDashboard = () => {
         )}
 
         {activeTab === 'products' && <ProductManagement />}
+        
+        {activeTab === 'downloads' && <DownloadsManagement />}
+        
+        {activeTab === 'updates' && <UpdatesManagement />}
         
         {activeTab === 'chat' && <AdminChat />}
       </div>
