@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export interface Product {
   id: number;
@@ -58,25 +58,63 @@ const initialProducts: Product[] = [
   }
 ];
 
+const STORAGE_KEY = 'ghaly_products';
+
+const loadProductsFromStorage = (): Product[] => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      console.log('Loaded products from localStorage:', parsed);
+      return parsed;
+    }
+  } catch (error) {
+    console.error('Error loading products from localStorage:', error);
+  }
+  return initialProducts;
+};
+
+const saveProductsToStorage = (products: Product[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    console.log('Saved products to localStorage:', products);
+  } catch (error) {
+    console.error('Error saving products to localStorage:', error);
+  }
+};
+
 export function ProductsProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+
+  // Load products from localStorage on mount
+  useEffect(() => {
+    const loadedProducts = loadProductsFromStorage();
+    setProducts(loadedProducts);
+  }, []);
+
+  // Save to localStorage whenever products change
+  useEffect(() => {
+    if (products.length > 0) {
+      saveProductsToStorage(products);
+    }
+  }, [products]);
 
   const addProduct = (productData: Omit<Product, 'id'>) => {
     const newProduct: Product = {
       ...productData,
-      id: Math.max(...products.map(p => p.id)) + 1
+      id: Math.max(...products.map(p => p.id), 0) + 1
     };
-    setProducts([...products, newProduct]);
+    setProducts(prev => [...prev, newProduct]);
     console.log('Added new product:', newProduct);
   };
 
   const updateProduct = (id: number, productData: Omit<Product, 'id'>) => {
-    setProducts(products.map(p => p.id === id ? { ...productData, id } : p));
+    setProducts(prev => prev.map(p => p.id === id ? { ...productData, id } : p));
     console.log('Updated product:', productData);
   };
 
   const deleteProduct = (id: number) => {
-    setProducts(products.filter(p => p.id !== id));
+    setProducts(prev => prev.filter(p => p.id !== id));
     console.log(`Deleted product with id: ${id}`);
   };
 
