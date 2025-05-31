@@ -12,21 +12,28 @@ interface Update {
   created_at?: string;
 }
 
-export const useUpdates = () => {
+export const useUpdates = (targetLevel?: number) => {
   const [updates, setUpdates] = useState<Update[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // وظيفة لجلب التحديثات من Supabase
+  // وظيفة لجلب التحديثات من Supabase مع تصفية حسب المستوى
   const fetchUpdates = async () => {
     try {
       setLoading(true);
-      console.log('Fetching updates from Supabase...');
+      console.log('Fetching updates from Supabase for level:', targetLevel);
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('updates')
         .select('*')
         .order('created_at', { ascending: false });
+
+      // تصفية حسب المستوى إذا تم تحديده
+      if (targetLevel) {
+        query = query.eq('target_level', targetLevel);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching updates:', error);
@@ -52,11 +59,11 @@ export const useUpdates = () => {
     try {
       console.log('Adding new update:', newUpdate);
       
-      // إرسال البيانات الأساسية فقط
       const updateData = {
         title: newUpdate.title,
         description: newUpdate.description,
-        version: newUpdate.version
+        version: newUpdate.version,
+        target_level: newUpdate.target_level || targetLevel || null
       };
 
       console.log('Update data to insert:', updateData);
@@ -79,8 +86,10 @@ export const useUpdates = () => {
 
       console.log('Update added successfully:', data);
       
-      // تحديث القائمة المحلية
-      setUpdates(prev => [data, ...prev]);
+      // تحديث القائمة المحلية فقط إذا كان يطابق المستوى المطلوب
+      if (!targetLevel || data.target_level === targetLevel) {
+        setUpdates(prev => [data, ...prev]);
+      }
       
       toast({
         title: "نجح",
@@ -182,7 +191,7 @@ export const useUpdates = () => {
 
   useEffect(() => {
     fetchUpdates();
-  }, []);
+  }, [targetLevel]);
 
   return {
     updates,

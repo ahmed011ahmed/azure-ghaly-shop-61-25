@@ -14,21 +14,28 @@ interface DownloadLink {
   created_at?: string;
 }
 
-export const useDownloads = () => {
+export const useDownloads = (targetLevel?: number) => {
   const [downloads, setDownloads] = useState<DownloadLink[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // وظيفة لجلب روابط التحميل من Supabase
+  // وظيفة لجلب روابط التحميل من Supabase مع تصفية حسب المستوى
   const fetchDownloads = async () => {
     try {
       setLoading(true);
-      console.log('Fetching downloads from Supabase...');
+      console.log('Fetching downloads from Supabase for level:', targetLevel);
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('download_links')
         .select('*')
         .order('created_at', { ascending: false });
+
+      // تصفية حسب المستوى إذا تم تحديده
+      if (targetLevel) {
+        query = query.eq('target_level', targetLevel);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching downloads:', error);
@@ -54,13 +61,13 @@ export const useDownloads = () => {
     try {
       console.log('Adding new download:', newDownload);
       
-      // إرسال البيانات الأساسية فقط
       const downloadData = {
         name: newDownload.name,
         description: newDownload.description,
         download_url: newDownload.download_url,
         version: newDownload.version,
-        file_size: newDownload.file_size || ''
+        file_size: newDownload.file_size || '',
+        target_level: newDownload.target_level || targetLevel || null
       };
 
       console.log('Download data to insert:', downloadData);
@@ -83,8 +90,10 @@ export const useDownloads = () => {
 
       console.log('Download added successfully:', data);
 
-      // تحديث القائمة المحلية
-      setDownloads(prev => [data, ...prev]);
+      // تحديث القائمة المحلية فقط إذا كان يطابق المستوى المطلوب
+      if (!targetLevel || data.target_level === targetLevel) {
+        setDownloads(prev => [data, ...prev]);
+      }
       
       toast({
         title: "نجح",
@@ -188,7 +197,7 @@ export const useDownloads = () => {
 
   useEffect(() => {
     fetchDownloads();
-  }, []);
+  }, [targetLevel]);
 
   return {
     downloads,
