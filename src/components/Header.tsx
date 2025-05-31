@@ -19,7 +19,7 @@ const Header = () => {
   };
   return <header className="backdrop-blur-md border-b border-purple-800/30 sticky top-0 z-50 px-[14px] bg-[#1b1b1b]">
       <div className="container mx-auto px-4 py-4 bg-[#1c1c1c]">
-        <div className="flex items-center justify-between bg-[#141414]">
+        <div className="flex items-center justify-between bg-[#1b1b1b]">
           <div className="flex items-center space-x-3">
             <Link to="/" className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent px-[12px] hover:opacity-80 transition-opacity">
               GHALY HAX
