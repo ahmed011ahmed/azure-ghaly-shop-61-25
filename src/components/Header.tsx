@@ -1,14 +1,11 @@
-
 import { Gamepad, ShoppingCart, Settings } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { Link } from 'react-router-dom';
-
 const Header = () => {
   const {
     toggleCart,
     getTotalItems
   } = useCart();
-  
   return <header className="bg-gray-900/95 backdrop-blur-md border-b border-purple-800/30 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
@@ -25,12 +22,9 @@ const Header = () => {
             <a href="#products" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
               الأدوات
             </a>
-            <Link 
-              to="/admin" 
-              className="text-gray-300 hover:text-purple-400 font-medium transition-colors flex items-center space-x-2"
-            >
-              <Settings className="w-4 h-4" />
-              <span>لوحة التحكم</span>
+            <Link to="/admin" className="text-gray-300 hover:text-purple-400 font-medium transition-colors flex items-center space-x-2">
+              
+              
             </Link>
           </nav>
           
@@ -46,5 +40,4 @@ const Header = () => {
       </div>
     </header>;
 };
-
 export default Header;
