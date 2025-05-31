@@ -36,13 +36,28 @@ export const useDownloads = () => {
       }
 
       if (data && data.setting_value) {
-        const downloadsData = Array.isArray(data.setting_value) ? data.setting_value : [];
-        console.log('Downloads loaded from database:', downloadsData);
-        setDownloads(downloadsData);
+        // التأكد من أن البيانات في التنسيق الصحيح
+        const rawData = data.setting_value;
+        if (Array.isArray(rawData)) {
+          const downloadsData = rawData.map((item: any) => ({
+            id: item.id || Date.now(),
+            name: item.name || '',
+            description: item.description || '',
+            download_url: item.download_url || '',
+            version: item.version || '',
+            file_size: item.file_size || '',
+            created_at: item.created_at || new Date().toISOString()
+          } as DownloadLink));
+          
+          console.log('Downloads loaded from database:', downloadsData);
+          setDownloads(downloadsData);
+        } else {
+          setDownloads([]);
+        }
       } else {
         // البيانات الافتراضية
         console.log('No downloads found, using default data');
-        const defaultDownloads = [
+        const defaultDownloads: DownloadLink[] = [
           {
             id: 1,
             name: "GHALY BYPASS TOOL",
@@ -84,11 +99,22 @@ export const useDownloads = () => {
     try {
       console.log('Saving downloads:', updatedList);
       
+      // تحويل البيانات إلى تنسيق JSON متوافق
+      const jsonData = updatedList.map(item => ({
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        download_url: item.download_url,
+        version: item.version,
+        file_size: item.file_size,
+        created_at: item.created_at
+      }));
+
       const { error } = await supabase
         .from('global_settings')
         .upsert({
           setting_key: 'downloads',
-          setting_value: updatedList,
+          setting_value: jsonData as any,
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'setting_key'
@@ -112,7 +138,7 @@ export const useDownloads = () => {
     try {
       console.log('Adding new download:', newDownload);
       
-      const downloadWithId = {
+      const downloadWithId: DownloadLink = {
         id: Date.now(),
         ...newDownload,
         created_at: new Date().toISOString()
