@@ -14,6 +14,17 @@ interface DownloadLink {
   created_at?: string;
 }
 
+interface DownloadFromDB {
+  id: number;
+  name: string;
+  description: string;
+  download_url: string;
+  version: string;
+  file_size: string;
+  target_level?: number;
+  created_at: string;
+}
+
 export const useDownloads = (targetLevel?: number) => {
   const [downloads, setDownloads] = useState<DownloadLink[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,8 +102,8 @@ export const useDownloads = (targetLevel?: number) => {
       console.log('Download added successfully:', data);
 
       // تحديث القائمة المحلية فقط إذا كان يطابق المستوى المطلوب
-      if (!targetLevel || data.target_level === targetLevel) {
-        setDownloads(prev => [data, ...prev]);
+      if (!targetLevel || (data as DownloadFromDB).target_level === targetLevel) {
+        setDownloads(prev => [data as DownloadLink, ...prev]);
       }
       
       toast({

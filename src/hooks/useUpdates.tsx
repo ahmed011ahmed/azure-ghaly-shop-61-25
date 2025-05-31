@@ -12,6 +12,15 @@ interface Update {
   created_at?: string;
 }
 
+interface UpdateFromDB {
+  id: number;
+  title: string;
+  description: string;
+  version: string;
+  target_level?: number;
+  created_at: string;
+}
+
 export const useUpdates = (targetLevel?: number) => {
   const [updates, setUpdates] = useState<Update[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,8 +96,8 @@ export const useUpdates = (targetLevel?: number) => {
       console.log('Update added successfully:', data);
       
       // تحديث القائمة المحلية فقط إذا كان يطابق المستوى المطلوب
-      if (!targetLevel || data.target_level === targetLevel) {
-        setUpdates(prev => [data, ...prev]);
+      if (!targetLevel || (data as UpdateFromDB).target_level === targetLevel) {
+        setUpdates(prev => [data as Update, ...prev]);
       }
       
       toast({
