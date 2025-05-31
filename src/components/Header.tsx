@@ -1,8 +1,10 @@
+
 import { Gamepad, ShoppingCart, Settings, User, LogOut } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../hooks/useAuth';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
+
 const Header = () => {
   const {
     toggleCart,
@@ -14,9 +16,11 @@ const Header = () => {
     signOut,
     loading
   } = useAuth();
+  
   const handleSignOut = async () => {
     await signOut();
   };
+  
   return <header className="backdrop-blur-md border-b border-purple-800/30 sticky top-0 z-50 px-[14px] bg-[#1b1b1b]">
       <div className="container mx-auto px-4 py-4 bg-[#1c1c1c]">
         <div className="flex items-center justify-between bg-[#1b1b1b]">
@@ -33,6 +37,9 @@ const Header = () => {
             <a href="#products" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
               الأدوات
             </a>
+            <Link to="/subscribers" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
+              المشتركين
+            </Link>
             <Link to="/admin" className="text-gray-300 hover:text-purple-400 font-medium transition-colors flex items-center space-x-2">
               
               
@@ -69,4 +76,5 @@ const Header = () => {
       </div>
     </header>;
 };
+
 export default Header;

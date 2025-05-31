@@ -1,0 +1,250 @@
+
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, Download, Calendar, Shield, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '../hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface Update {
+  id: number;
+  title: string;
+  description: string;
+  version: string;
+  date: string;
+  created_at: string;
+}
+
+const Subscribers = () => {
+  const { user, loading } = useAuth();
+  const { toast } = useToast();
+  const [updates, setUpdates] = useState<Update[]>([]);
+  const [loadingUpdates, setLoadingUpdates] = useState(true);
+
+  // روابط التحميل
+  const downloadLinks = [
+    {
+      id: 1,
+      name: "GHALY BYPASS TOOL",
+      description: "أداة البايباس الأساسية - الإصدار الأحدث",
+      downloadUrl: "https://example.com/download1",
+      version: "v2.1.4",
+      size: "45 MB"
+    },
+    {
+      id: 2,
+      name: "RNG ADVANCED TOOL",
+      description: "أداة RNG المتقدمة - نسخة المشتركين الحصرية",
+      downloadUrl: "https://example.com/download2", 
+      version: "v1.8.3",
+      size: "32 MB"
+    }
+  ];
+
+  // جلب التحديثات من قاعدة البيانات
+  const fetchUpdates = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('updates')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching updates:', error);
+      } else {
+        setUpdates(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching updates:', error);
+    } finally {
+      setLoadingUpdates(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUpdates();
+  }, []);
+
+  const handleDownload = (name: string, url: string) => {
+    toast({
+      title: "جاري التحميل",
+      description: `بدء تحميل ${name}`,
+    });
+    window.open(url, '_blank');
+  };
+
+  // إذا لم يكن المستخدم مسجل دخول
+  if (!loading && !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900">
+        {/* Header */}
+        <header className="bg-gray-900/95 backdrop-blur-md border-b border-purple-800/30">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Link to="/" className="text-gray-300 hover:text-purple-400 transition-colors">
+                  <ArrowLeft className="w-6 h-6" />
+                </Link>
+                <h1 className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent mx-[13px]">
+                  منطقة المشتركين
+                </h1>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Login Required */}
+        <div className="container mx-auto px-4 py-20">
+          <div className="max-w-md mx-auto text-center">
+            <Card className="gaming-card">
+              <CardHeader className="bg-slate-900">
+                <Shield className="w-16 h-16 text-purple-400 mx-auto mb-4" />
+                <CardTitle className="text-2xl text-white">منطقة مقيدة</CardTitle>
+                <CardDescription className="text-gray-300">
+                  يجب تسجيل الدخول للوصول إلى منطقة المشتركين
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="bg-slate-950 pt-6">
+                <Link to="/auth">
+                  <Button className="w-full bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25">
+                    تسجيل الدخول
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center">
+        <div className="text-white text-xl">جاري التحميل...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900">
+      {/* Header */}
+      <header className="bg-gray-900/95 backdrop-blur-md border-b border-purple-800/30">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Link to="/" className="text-gray-300 hover:text-purple-400 transition-colors">
+                <ArrowLeft className="w-6 h-6" />
+              </Link>
+              <h1 className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent mx-[13px]">
+                منطقة المشتركين
+              </h1>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Users className="w-5 h-5 text-purple-400" />
+              <span className="text-gray-300">مرحباً، {user?.email}</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Welcome Section */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-white mb-4">
+            مرحباً بك في <span className="bg-gaming-gradient bg-clip-text text-transparent">منطقة المشتركين</span>
+          </h2>
+          <p className="text-xl text-purple-200 max-w-2xl mx-auto">
+            احصل على آخر الإصدارات والتحديثات الحصرية لأدوات GHALY HAX
+          </p>
+        </div>
+
+        {/* Download Section */}
+        <div className="mb-12">
+          <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+            <Download className="w-6 h-6 mr-3 text-purple-400" />
+            روابط التحميل
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {downloadLinks.map((item) => (
+              <Card key={item.id} className="gaming-card hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300">
+                <CardHeader className="bg-slate-900">
+                  <CardTitle className="text-xl text-white flex items-center justify-between">
+                    {item.name}
+                    <span className="text-sm text-purple-400 font-normal">{item.version}</span>
+                  </CardTitle>
+                  <CardDescription className="text-gray-300">
+                    {item.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="bg-slate-950 pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm text-gray-400">الحجم: {item.size}</span>
+                    <span className="text-sm text-green-400">متاح للتحميل</span>
+                  </div>
+                  <Button 
+                    onClick={() => handleDownload(item.name, item.downloadUrl)}
+                    className="w-full bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    تحميل الآن
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Updates Section */}
+        <div>
+          <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+            <Calendar className="w-6 h-6 mr-3 text-purple-400" />
+            آخر التحديثات
+          </h3>
+          
+          {loadingUpdates ? (
+            <div className="text-center py-8">
+              <div className="text-gray-300">جاري تحميل التحديثات...</div>
+            </div>
+          ) : updates.length === 0 ? (
+            <Card className="gaming-card">
+              <CardContent className="bg-slate-950 py-8 text-center">
+                <div className="text-gray-400">لا توجد تحديثات متاحة حالياً</div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {updates.map((update) => (
+                <Card key={update.id} className="gaming-card">
+                  <CardHeader className="bg-slate-900">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg text-white">{update.title}</CardTitle>
+                      <div className="flex items-center space-x-2">
+                        {update.version && (
+                          <span className="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">
+                            {update.version}
+                          </span>
+                        )}
+                        <span className="text-sm text-gray-400">
+                          {new Date(update.created_at).toLocaleDateString('ar-EG')}
+                        </span>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="bg-slate-950 pt-4">
+                    <p className="text-gray-300">{update.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Subscribers;
