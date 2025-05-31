@@ -23,24 +23,39 @@ const CustomerChat = () => {
     scrollToBottom();
   }, [messages]);
 
-  // إشعار صوتي عند استلام رسالة جديدة
+  // إشعار صوتي محسن مثل الواتساب
   useEffect(() => {
     if (messages.length > previousMessageCount && previousMessageCount > 0) {
       const lastMessage = messages[messages.length - 1];
       // تشغيل الصوت فقط إذا كانت الرسالة من الإدارة
       if (lastMessage.sender === 'admin') {
-        playNotificationSound();
+        playWhatsAppNotificationSound();
       }
     }
     setPreviousMessageCount(messages.length);
   }, [messages, previousMessageCount]);
 
-  const playNotificationSound = () => {
+  const playWhatsAppNotificationSound = () => {
     try {
-      const audio = new Audio();
-      audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMeBT2Q1fLNeSs=';
-      audio.volume = 0.3;
-      audio.play().catch(e => console.log('صوت الإشعار غير متاح:', e));
+      // صوت إشعار مثل الواتساب
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // تردد الصوت مثل الواتساب
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
+      
+      // مستوى الصوت
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
     } catch (error) {
       console.log('خطأ في تشغيل الصوت:', error);
     }
@@ -139,7 +154,7 @@ const CustomerChat = () => {
 
   if (!user) {
     return (
-      <Card className="gaming-card">
+      <Card className="gaming-card w-full max-w-md">
         <CardContent className="bg-slate-950 text-center py-8">
           <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-300 mb-4">يجب تسجيل الدخول أولاً للتواصل مع فريق الدعم</p>
@@ -152,53 +167,53 @@ const CustomerChat = () => {
   }
 
   return (
-    <Card className="gaming-card h-[400px] flex flex-col">
+    <Card className="gaming-card w-full max-w-md h-96 flex flex-col">
       <CardHeader className="bg-slate-900 flex-shrink-0 py-3">
         <div className="flex items-center space-x-3">
           <MessageSquare className="w-5 h-5 text-purple-400" />
           <div>
-            <CardTitle className="text-white text-lg">دعم العملاء</CardTitle>
-            <CardDescription className="text-gray-300 text-sm">
-              تواصل مع فريق الدعم - مرحباً {profile?.nickname}
+            <CardTitle className="text-white text-sm">دعم العملاء</CardTitle>
+            <CardDescription className="text-gray-300 text-xs">
+              مرحباً {profile?.nickname}
             </CardDescription>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="bg-slate-950 flex-1 flex flex-col p-0">
-        {/* Messages Area */}
-        <ScrollArea className="flex-1 p-3">
+      <CardContent className="bg-slate-950 flex-1 flex flex-col p-0 min-h-0">
+        {/* Messages Area with Fixed Height and Scroll */}
+        <ScrollArea className="flex-1 p-3 h-64">
           {loading ? (
             <div className="flex items-center justify-center h-full">
-              <Loader2 className="w-6 h-6 text-purple-400 animate-spin" />
-              <span className="text-gray-300 mr-2">جاري تحميل الرسائل...</span>
+              <Loader2 className="w-4 h-4 text-purple-400 animate-spin" />
+              <span className="text-gray-300 mr-2 text-xs">جاري تحميل الرسائل...</span>
             </div>
           ) : customerMessages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <MessageSquare className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-300 text-sm">لا توجد رسائل بعد. ابدأ محادثة جديدة!</p>
+                <MessageSquare className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-300 text-xs">لا توجد رسائل بعد</p>
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {customerMessages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${message.sender === 'admin' ? 'justify-start' : 'justify-end'}`}
                 >
                   <div
-                    className={`max-w-[75%] rounded-lg p-2.5 ${
+                    className={`max-w-[75%] rounded-lg p-2 ${
                       message.sender === 'admin'
                         ? 'bg-purple-600/20 border border-purple-500/30'
                         : 'bg-blue-600/20 border border-blue-500/30'
                     }`}
                   >
-                    <div className="flex items-center space-x-2 mb-1">
+                    <div className="flex items-center space-x-1 mb-1">
                       <span className={`text-xs font-medium ${
                         message.sender === 'admin' ? 'text-purple-300' : 'text-blue-300'
                       }`}>
-                        {message.sender === 'admin' ? 'فريق الدعم' : 'أنت'}
+                        {message.sender === 'admin' ? 'الدعم' : 'أنت'}
                       </span>
                       <span className="text-xs text-gray-400">
                         {formatTime(message.timestamp)}
@@ -209,7 +224,7 @@ const CustomerChat = () => {
                         </span>
                       )}
                     </div>
-                    <div className="text-white text-sm leading-relaxed">
+                    <div className="text-white text-xs leading-relaxed">
                       {renderMessageContent(message.text)}
                     </div>
                   </div>
@@ -220,14 +235,14 @@ const CustomerChat = () => {
           )}
         </ScrollArea>
 
-        {/* Message Input */}
-        <div className="border-t border-gray-700 p-3">
-          <form onSubmit={handleSendMessage} className="flex space-x-2">
+        {/* Message Input - Fixed Height */}
+        <div className="border-t border-gray-700 p-2 flex-shrink-0">
+          <form onSubmit={handleSendMessage} className="flex space-x-1">
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="اكتب رسالتك أو رابط..."
-              className="flex-1 bg-gray-800/50 border-gray-600 text-white text-sm"
+              placeholder="اكتب رسالتك..."
+              className="flex-1 bg-gray-800/50 border-gray-600 text-white text-xs h-8"
               disabled={loading}
             />
             
@@ -242,24 +257,24 @@ const CustomerChat = () => {
             <Button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="bg-green-600 hover:bg-green-700 px-3"
+              className="bg-green-600 hover:bg-green-700 px-2 h-8"
               disabled={loading}
               size="sm"
             >
-              <Image className="w-4 h-4" />
+              <Image className="w-3 h-3" />
             </Button>
             
             <Button
               type="submit"
-              className="bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25 px-3"
+              className="bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25 px-2 h-8"
               disabled={!newMessage.trim() || loading}
               size="sm"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-3 h-3" />
             </Button>
           </form>
           <p className="text-xs text-gray-400 mt-1">
-            يمكنك إرسال النصوص والصور والروابط
+            النصوص والصور والروابط
           </p>
         </div>
       </CardContent>
