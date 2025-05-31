@@ -160,10 +160,10 @@ const ProductManagement = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm" onClick={() => handleEditProduct(product)} className="border-blue-500 hover:bg-blue-500/10 text-green-200 px-[13px] py-[16px] my-[10px] mx-[12px]">
+                        <Button variant="outline" size="sm" onClick={() => handleEditProduct(product)} className="border-blue-500 text-green-200 px-[13px] py-[16px] my-[10px] mx-[12px] bg-[#4bf41f]/10">
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleDeleteProduct(product.id)} className="border-red-500 hover:bg-red-500/10 font-normal text-red-600">
+                        <Button variant="outline" size="sm" onClick={() => handleDeleteProduct(product.id)} className="border-red-500 font-normal text-red-600 bg-[#e11b1b]/10">
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
