@@ -39,6 +39,36 @@ export type Database = {
         }
         Relationships: []
       }
+      download_links: {
+        Row: {
+          created_at: string | null
+          description: string
+          download_url: string
+          file_size: string | null
+          id: number
+          name: string
+          version: string
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          download_url: string
+          file_size?: string | null
+          id?: number
+          name: string
+          version: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          download_url?: string
+          file_size?: string | null
+          id?: number
+          name?: string
+          version?: string
+        }
+        Relationships: []
+      }
       global_settings: {
         Row: {
           id: string
@@ -114,6 +144,30 @@ export type Database = {
           id?: string
           nickname?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      updates: {
+        Row: {
+          created_at: string | null
+          description: string
+          id: number
+          title: string
+          version: string
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          id?: number
+          title: string
+          version: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          id?: number
+          title?: string
+          version?: string
         }
         Relationships: []
       }

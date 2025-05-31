@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DownloadLink {
   id?: number;
@@ -18,28 +18,24 @@ export const useDownloads = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // وظيفة لجلب روابط التحميل من localStorage أو البيانات الافتراضية
+  // وظيفة لجلب روابط التحميل من Supabase
   const fetchDownloads = async () => {
     try {
       setLoading(true);
-      console.log('Fetching downloads from localStorage...');
+      console.log('Fetching downloads from Supabase...');
       
-      // محاولة جلب البيانات من localStorage أولاً
-      const storedDownloads = localStorage.getItem('downloads_data');
-      
-      if (storedDownloads) {
-        try {
-          const parsedDownloads = JSON.parse(storedDownloads);
-          console.log('Downloads loaded from localStorage:', parsedDownloads);
-          setDownloads(parsedDownloads);
-        } catch (parseError) {
-          console.error('Error parsing localStorage data:', parseError);
-          loadDefaultDownloads();
-        }
-      } else {
-        // إذا لم توجد بيانات في localStorage، استخدم البيانات الافتراضية
-        loadDefaultDownloads();
+      const { data, error } = await supabase
+        .from('download_links')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching downloads:', error);
+        throw error;
       }
+
+      console.log('Downloads loaded from Supabase:', data);
+      setDownloads(data || []);
     } catch (error) {
       console.error('Error in fetchDownloads:', error);
       toast({
@@ -47,50 +43,8 @@ export const useDownloads = () => {
         description: "فشل في تحميل روابط التحميل",
         variant: "destructive"
       });
-      loadDefaultDownloads();
     } finally {
       setLoading(false);
-    }
-  };
-
-  // وظيفة لتحميل البيانات الافتراضية
-  const loadDefaultDownloads = () => {
-    console.log('Loading default downloads');
-    const defaultDownloads: DownloadLink[] = [
-      {
-        id: 1,
-        name: "GHALY BYPASS TOOL",
-        description: "أداة البايباس الحصرية من GHALY HAX للتجاوز المتقدم",
-        download_url: "https://example.com/download1",
-        version: "v2.1.4",
-        file_size: "45 MB",
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 2,
-        name: "GHALY INJECTOR",
-        description: "أداة الحقن المتقدمة للألعاب مع دعم أحدث الألعاب",
-        download_url: "https://example.com/download2",
-        version: "v1.8.2",
-        file_size: "32 MB",
-        created_at: new Date().toISOString()
-      }
-    ];
-    setDownloads(defaultDownloads);
-    // حفظ البيانات الافتراضية في localStorage
-    localStorage.setItem('downloads_data', JSON.stringify(defaultDownloads));
-  };
-
-  // وظيفة مساعدة لحفظ البيانات في localStorage
-  const saveDownloads = async (updatedList: DownloadLink[]) => {
-    try {
-      console.log('Saving downloads to localStorage:', updatedList);
-      localStorage.setItem('downloads_data', JSON.stringify(updatedList));
-      console.log('Downloads saved successfully to localStorage');
-      return true;
-    } catch (error) {
-      console.error('Error saving downloads to localStorage:', error);
-      throw error;
     }
   };
 
@@ -99,16 +53,19 @@ export const useDownloads = () => {
     try {
       console.log('Adding new download:', newDownload);
       
-      const downloadWithId: DownloadLink = {
-        id: Date.now(),
-        ...newDownload,
-        created_at: new Date().toISOString()
-      };
+      const { data, error } = await supabase
+        .from('download_links')
+        .insert([newDownload])
+        .select()
+        .single();
 
-      const updatedList = [downloadWithId, ...downloads];
-      
-      await saveDownloads(updatedList);
-      setDownloads(updatedList);
+      if (error) {
+        console.error('Error adding download:', error);
+        throw error;
+      }
+
+      // تحديث القائمة المحلية
+      setDownloads(prev => [data, ...prev]);
       
       toast({
         title: "نجح",
@@ -129,12 +86,22 @@ export const useDownloads = () => {
     try {
       console.log('Updating download:', id, updatedData);
       
-      const updatedList = downloads.map(download => 
-        download.id === id ? { ...download, ...updatedData } : download
-      );
+      const { data, error } = await supabase
+        .from('download_links')
+        .update(updatedData)
+        .eq('id', id)
+        .select()
+        .single();
 
-      await saveDownloads(updatedList);
-      setDownloads(updatedList);
+      if (error) {
+        console.error('Error updating download:', error);
+        throw error;
+      }
+
+      // تحديث القائمة المحلية
+      setDownloads(prev => prev.map(download => 
+        download.id === id ? data : download
+      ));
       
       toast({
         title: "نجح",
@@ -155,10 +122,18 @@ export const useDownloads = () => {
     try {
       console.log('Deleting download:', id);
       
-      const updatedList = downloads.filter(download => download.id !== id);
+      const { error } = await supabase
+        .from('download_links')
+        .delete()
+        .eq('id', id);
 
-      await saveDownloads(updatedList);
-      setDownloads(updatedList);
+      if (error) {
+        console.error('Error deleting download:', error);
+        throw error;
+      }
+
+      // تحديث القائمة المحلية
+      setDownloads(prev => prev.filter(download => download.id !== id));
       
       toast({
         title: "نجح",

@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Update {
   id?: number;
@@ -15,28 +16,24 @@ export const useUpdates = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // وظيفة لجلب التحديثات من localStorage أو البيانات الافتراضية
+  // وظيفة لجلب التحديثات من Supabase
   const fetchUpdates = async () => {
     try {
       setLoading(true);
-      console.log('Fetching updates from localStorage...');
+      console.log('Fetching updates from Supabase...');
       
-      // محاولة جلب البيانات من localStorage أولاً
-      const storedUpdates = localStorage.getItem('updates_data');
-      
-      if (storedUpdates) {
-        try {
-          const parsedUpdates = JSON.parse(storedUpdates);
-          console.log('Updates loaded from localStorage:', parsedUpdates);
-          setUpdates(parsedUpdates);
-        } catch (parseError) {
-          console.error('Error parsing localStorage data:', parseError);
-          loadDefaultUpdates();
-        }
-      } else {
-        // إذا لم توجد بيانات في localStorage، استخدم البيانات الافتراضية
-        loadDefaultUpdates();
+      const { data, error } = await supabase
+        .from('updates')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching updates:', error);
+        throw error;
       }
+
+      console.log('Updates loaded from Supabase:', data);
+      setUpdates(data || []);
     } catch (error) {
       console.error('Error in fetchUpdates:', error);
       toast({
@@ -44,46 +41,8 @@ export const useUpdates = () => {
         description: "فشل في تحميل التحديثات",
         variant: "destructive"
       });
-      loadDefaultUpdates();
     } finally {
       setLoading(false);
-    }
-  };
-
-  // وظيفة لتحميل البيانات الافتراضية
-  const loadDefaultUpdates = () => {
-    console.log('Loading default updates');
-    const defaultUpdates: Update[] = [
-      {
-        id: 1,
-        title: "تحديث البايباس الجديد",
-        description: "تحديث شامل لنظام البايباس مع تحسينات في الأداء والأمان وإضافة ميزات جديدة لتجاوز أحدث أنظمة الحماية",
-        version: "v2.1.4",
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 2,
-        title: "إصلاح أخطاء الإصدار السابق",
-        description: "تم إصلاح المشاكل المتعلقة بالاتصال وتحسين استقرار البرنامج",
-        version: "v2.1.3",
-        created_at: new Date(Date.now() - 86400000).toISOString()
-      }
-    ];
-    setUpdates(defaultUpdates);
-    // حفظ البيانات الافتراضية في localStorage
-    localStorage.setItem('updates_data', JSON.stringify(defaultUpdates));
-  };
-
-  // وظيفة مساعدة لحفظ البيانات في localStorage
-  const saveUpdates = async (updatedList: Update[]) => {
-    try {
-      console.log('Saving updates to localStorage:', updatedList);
-      localStorage.setItem('updates_data', JSON.stringify(updatedList));
-      console.log('Updates saved successfully to localStorage');
-      return true;
-    } catch (error) {
-      console.error('Error saving updates to localStorage:', error);
-      throw error;
     }
   };
 
@@ -92,16 +51,19 @@ export const useUpdates = () => {
     try {
       console.log('Adding new update:', newUpdate);
       
-      const updateWithId: Update = {
-        id: Date.now(),
-        ...newUpdate,
-        created_at: new Date().toISOString()
-      };
+      const { data, error } = await supabase
+        .from('updates')
+        .insert([newUpdate])
+        .select()
+        .single();
 
-      const updatedList = [updateWithId, ...updates];
-      
-      await saveUpdates(updatedList);
-      setUpdates(updatedList);
+      if (error) {
+        console.error('Error adding update:', error);
+        throw error;
+      }
+
+      // تحديث القائمة المحلية
+      setUpdates(prev => [data, ...prev]);
       
       toast({
         title: "نجح",
@@ -122,12 +84,22 @@ export const useUpdates = () => {
     try {
       console.log('Updating update:', id, updatedData);
       
-      const updatedList = updates.map(update => 
-        update.id === id ? { ...update, ...updatedData } : update
-      );
+      const { data, error } = await supabase
+        .from('updates')
+        .update(updatedData)
+        .eq('id', id)
+        .select()
+        .single();
 
-      await saveUpdates(updatedList);
-      setUpdates(updatedList);
+      if (error) {
+        console.error('Error updating update:', error);
+        throw error;
+      }
+
+      // تحديث القائمة المحلية
+      setUpdates(prev => prev.map(update => 
+        update.id === id ? data : update
+      ));
       
       toast({
         title: "نجح",
@@ -148,10 +120,18 @@ export const useUpdates = () => {
     try {
       console.log('Deleting update:', id);
       
-      const updatedList = updates.filter(update => update.id !== id);
+      const { error } = await supabase
+        .from('updates')
+        .delete()
+        .eq('id', id);
 
-      await saveUpdates(updatedList);
-      setUpdates(updatedList);
+      if (error) {
+        console.error('Error deleting update:', error);
+        throw error;
+      }
+
+      // تحديث القائمة المحلية
+      setUpdates(prev => prev.filter(update => update.id !== id));
       
       toast({
         title: "نجح",
