@@ -28,7 +28,18 @@ const AdminChat = () => {
         alert('يرجى إدخال اسم المستخدم أولاً');
         return;
       }
-      addMessage(newMessage.trim(), isUserMode ? 'user' : 'admin', isUserMode ? userName : undefined);
+      
+      let messageText = newMessage.trim();
+      // إذا كانت رسالة إدارة وتحتوي على @ في البداية، فهي موجهة لعميل محدد
+      if (!isUserMode && messageText.startsWith('@')) {
+        // التأكد من وجود مسافة بعد اسم المستخدم
+        if (!messageText.includes(' ')) {
+          alert('يرجى كتابة الرسالة بعد اسم المستخدم. مثال: @احمد مرحباً بك');
+          return;
+        }
+      }
+      
+      addMessage(messageText, isUserMode ? 'user' : 'admin', isUserMode ? userName : undefined);
       setNewMessage('');
     }
   };
@@ -40,6 +51,14 @@ const AdminChat = () => {
       hour12: true 
     });
   };
+
+  // الحصول على قائمة العملاء الفريدة
+  const uniqueCustomers = Array.from(
+    new Set(messages
+      .filter(msg => msg.sender === 'user' && msg.userName)
+      .map(msg => msg.userName)
+    )
+  );
 
   return (
     <Card className="gaming-card h-[600px] flex flex-col">
@@ -85,6 +104,24 @@ const AdminChat = () => {
             />
           </div>
         )}
+
+        {/* قائمة العملاء النشطين */}
+        {uniqueCustomers.length > 0 && !isUserMode && (
+          <div className="mt-3">
+            <p className="text-sm text-gray-400 mb-2">العملاء النشطين:</p>
+            <div className="flex flex-wrap gap-2">
+              {uniqueCustomers.map((customer, index) => (
+                <button
+                  key={index}
+                  onClick={() => setNewMessage(`@${customer} `)}
+                  className="text-xs bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 px-2 py-1 rounded transition-colors"
+                >
+                  @{customer}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className="bg-slate-950 flex-1 flex flex-col p-0">
@@ -123,6 +160,11 @@ const AdminChat = () => {
 
         {/* Message Input */}
         <div className="border-t border-gray-700 p-4">
+          <div className="mb-2">
+            <p className="text-xs text-gray-400">
+              {!isUserMode && 'للرد على عميل محدد: اكتب @اسم_العميل ثم الرسالة'}
+            </p>
+          </div>
           <form onSubmit={handleSendMessage} className="flex space-x-2">
             <Input
               value={newMessage}
