@@ -8,30 +8,16 @@ import { useAuth } from '../hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useUpdates } from '../hooks/useUpdates';
 import { useDownloads } from '../hooks/useDownloads';
+import { useSubscriberPermissions } from '../hooks/useSubscriberPermissions';
 
 const Subscribers = () => {
   const { user, loading } = useAuth();
   const { toast } = useToast();
   const { updates, loading: updatesLoading } = useUpdates();
   const { downloads, loading: downloadsLoading } = useDownloads();
+  const { checkPermission, loading: permissionsLoading } = useSubscriberPermissions();
 
-  // التحقق من الأذونات
-  const checkPermissions = () => {
-    if (!user?.email) return false;
-    
-    const storedPermissions = localStorage.getItem('subscriberPermissions');
-    if (!storedPermissions) return false;
-    
-    try {
-      const permissions = JSON.parse(storedPermissions);
-      return permissions.some((permission: any) => permission.email === user.email);
-    } catch (error) {
-      console.error('Error checking permissions:', error);
-      return false;
-    }
-  };
-
-  const hasPermission = checkPermissions();
+  const hasPermission = user?.email ? checkPermission(user.email) : false;
 
   const handleDownload = (name: string, url: string) => {
     toast({
@@ -87,7 +73,7 @@ const Subscribers = () => {
   }
 
   // إذا كان المستخدم مسجل دخول لكن ليس لديه إذن
-  if (!loading && user && !hasPermission) {
+  if (!loading && !permissionsLoading && user && !hasPermission) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900">
         {/* Header */}
@@ -138,7 +124,7 @@ const Subscribers = () => {
     );
   }
 
-  if (loading || updatesLoading || downloadsLoading) {
+  if (loading || updatesLoading || downloadsLoading || permissionsLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center">
         <div className="text-white text-xl">جاري التحميل...</div>

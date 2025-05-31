@@ -1,62 +1,29 @@
 
-import React, { useState, useEffect } from 'react';
-import { Shield, UserPlus, Trash2, Search, Users, Eye, EyeOff } from 'lucide-react';
+import React, { useState } from 'react';
+import { Shield, UserPlus, Trash2, Search, Users } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-
-interface Permission {
-  id: string;
-  email: string;
-  granted_at: string;
-  granted_by: string;
-}
+import { useSubscriberPermissions } from '@/hooks/useSubscriberPermissions';
 
 const PermissionsManagement = () => {
-  const [permissions, setPermissions] = useState<Permission[]>([]);
   const [newEmail, setNewEmail] = useState('');
-  const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
-
-  // جلب قائمة الأذونات
-  const fetchPermissions = async () => {
-    try {
-      setLoading(true);
-      
-      // محاولة جلب البيانات من localStorage أولاً
-      const storedPermissions = localStorage.getItem('subscriberPermissions');
-      if (storedPermissions) {
-        setPermissions(JSON.parse(storedPermissions));
-      } else {
-        // إذا لم توجد بيانات، نبدأ بقائمة فارغة
-        setPermissions([]);
-      }
-    } catch (error) {
-      console.error('Error fetching permissions:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في تحميل قائمة الأذونات",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // حفظ الأذونات في localStorage
-  const savePermissions = (newPermissions: Permission[]) => {
-    localStorage.setItem('subscriberPermissions', JSON.stringify(newPermissions));
-    setPermissions(newPermissions);
-  };
+  
+  const { 
+    permissions, 
+    loading, 
+    addPermission, 
+    removePermission 
+  } = useSubscriberPermissions();
 
   // إضافة إذن جديد
-  const addPermission = async () => {
+  const handleAddPermission = async () => {
     if (!newEmail.trim()) {
       toast({
         title: "خطأ",
@@ -78,7 +45,7 @@ const PermissionsManagement = () => {
     }
 
     // التحقق من عدم وجود البريد مسبقاً
-    if (permissions.some(p => p.email === newEmail.trim())) {
+    if (permissions.some(p => p.email === newEmail.trim() && p.is_active)) {
       toast({
         title: "خطأ",
         description: "هذا البريد الإلكتروني موجود بالفعل في القائمة",
@@ -89,69 +56,32 @@ const PermissionsManagement = () => {
 
     try {
       setActionLoading('add');
-      
-      const newPermission: Permission = {
-        id: Date.now().toString(),
-        email: newEmail.trim(),
-        granted_at: new Date().toISOString(),
-        granted_by: 'admin'
-      };
-
-      const updatedPermissions = [...permissions, newPermission];
-      savePermissions(updatedPermissions);
-      
-      setNewEmail('');
-      toast({
-        title: "تم بنجاح",
-        description: `تم إضافة إذن الوصول للبريد: ${newPermission.email}`
-      });
-    } catch (error) {
-      console.error('Error adding permission:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في إضافة الإذن",
-        variant: "destructive"
-      });
+      const success = await addPermission(newEmail.trim());
+      if (success) {
+        setNewEmail('');
+      }
     } finally {
       setActionLoading(null);
     }
   };
 
   // حذف إذن
-  const removePermission = async (id: string, email: string) => {
+  const handleRemovePermission = async (id: string, email: string) => {
     if (!window.confirm(`هل أنت متأكد من حذف إذن الوصول للبريد: ${email}؟`)) {
       return;
     }
 
     try {
       setActionLoading(id);
-      
-      const updatedPermissions = permissions.filter(p => p.id !== id);
-      savePermissions(updatedPermissions);
-      
-      toast({
-        title: "تم الحذف",
-        description: `تم حذف إذن الوصول للبريد: ${email}`
-      });
-    } catch (error) {
-      console.error('Error removing permission:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في حذف الإذن",
-        variant: "destructive"
-      });
+      await removePermission(id, email);
     } finally {
       setActionLoading(null);
     }
   };
 
   const filteredPermissions = permissions.filter(permission =>
-    permission.email.toLowerCase().includes(searchTerm.toLowerCase())
+    permission.is_active && permission.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  useEffect(() => {
-    fetchPermissions();
-  }, []);
 
   return (
     <div className="space-y-6">
@@ -184,12 +114,12 @@ const PermissionsManagement = () => {
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 className="bg-gray-800/50 border-gray-600 text-white"
-                onKeyPress={(e) => e.key === 'Enter' && addPermission()}
+                onKeyPress={(e) => e.key === 'Enter' && handleAddPermission()}
               />
             </div>
             <div className="flex items-end">
               <Button
-                onClick={addPermission}
+                onClick={handleAddPermission}
                 disabled={actionLoading === 'add'}
                 className="bg-green-600 hover:bg-green-700"
               >
@@ -213,7 +143,7 @@ const PermissionsManagement = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-400">إجمالي الأذونات الممنوحة</p>
-              <p className="text-2xl font-bold text-white">{permissions.length}</p>
+              <p className="text-2xl font-bold text-white">{filteredPermissions.length}</p>
             </div>
             <Shield className="w-8 h-8 text-purple-400" />
           </div>
@@ -274,7 +204,7 @@ const PermissionsManagement = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => removePermission(permission.id, permission.email)}
+                          onClick={() => handleRemovePermission(permission.id, permission.email)}
                           className="border-red-500 text-red-600 bg-red-500/10"
                           disabled={actionLoading === permission.id}
                         >

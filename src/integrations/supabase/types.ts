@@ -147,6 +147,30 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriber_permissions: {
+        Row: {
+          email: string
+          granted_at: string
+          granted_by: string
+          id: string
+          is_active: boolean
+        }
+        Insert: {
+          email: string
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          is_active?: boolean
+        }
+        Update: {
+          email?: string
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          is_active?: boolean
+        }
+        Relationships: []
+      }
       updates: {
         Row: {
           created_at: string | null
