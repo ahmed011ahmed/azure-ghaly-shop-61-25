@@ -51,7 +51,7 @@ const Hero = () => {
         </div>
       </div>
       
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-purple-900/20 bg-[#222222]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-purple-900/20 rounded-none bg-slate-950" />
     </section>;
 };
 export default Hero;
