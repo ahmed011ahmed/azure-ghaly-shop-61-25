@@ -46,7 +46,7 @@ const Header = () => {
                     <div className="text-gray-300 text-sm px-[23px]">
                       مرحباً، {profile?.nickname || 'مستخدم'}
                     </div>
-                    <Button onClick={handleSignOut} variant="outline" size="sm" className="border-red-500 text-red-400 hover:bg-red-500/10">
+                    <Button onClick={handleSignOut} variant="outline" size="sm" className="border-red-500 text-red-400 bg-[#fe1c1c]/10">
                       <LogOut className="w-4 h-4 mr-2" />
                       خروج
                     </Button>
