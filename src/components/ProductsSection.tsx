@@ -1,12 +1,10 @@
-
 import ProductCard from './ProductCard';
 import { useProducts } from '../contexts/ProductsContext';
-
 const ProductsSection = () => {
-  const { products } = useProducts();
-
-  return (
-    <section id="products" className="py-20 bg-gradient-to-b from-gray-900 to-gray-800">
+  const {
+    products
+  } = useProducts();
+  return <section id="products" className="py-20 bg-gradient-to-b from-gray-900 to-gray-800 bg-[#222222]">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -21,19 +19,13 @@ const ProductsSection = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {products.map((product, index) => (
-            <div 
-              key={product.id} 
-              className="animate-fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
+          {products.map((product, index) => <div key={product.id} className="animate-fade-in" style={{
+          animationDelay: `${index * 0.1}s`
+        }}>
               <ProductCard {...product} />
-            </div>
-          ))}
+            </div>)}
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default ProductsSection;
