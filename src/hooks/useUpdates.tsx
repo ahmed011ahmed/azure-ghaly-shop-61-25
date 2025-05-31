@@ -8,6 +8,7 @@ interface Update {
   title: string;
   description: string;
   version: string;
+  target_level?: number;
   created_at?: string;
 }
 

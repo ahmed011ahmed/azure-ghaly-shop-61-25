@@ -20,19 +20,8 @@ export const useLevelContent = () => {
       const levels = [1, 2, 3, 4, 5];
       const organized = levels.map(level => ({
         level,
-        updates: updates.filter(update => {
-          // نفترض أن التحديثات تحتوي على مستوى في الوصف أو العنوان
-          // يمكن تطوير هذا المنطق لاحقاً
-          return update.title.includes(`مستوى ${level}`) || 
-                 update.description.includes(`مستوى ${level}`) ||
-                 level <= 3; // التحديثات العامة متاحة للمستويات 1-3
-        }),
-        downloads: downloads.filter(download => {
-          // نفس المنطق للتحميلات
-          return download.name.includes(`مستوى ${level}`) || 
-                 download.description.includes(`مستوى ${level}`) ||
-                 level <= 2; // التحميلات العامة متاحة للمستويات 1-2
-        })
+        updates: updates.filter(update => update.target_level === level),
+        downloads: downloads.filter(download => download.target_level === level)
       }));
       
       setLevelContent(organized);

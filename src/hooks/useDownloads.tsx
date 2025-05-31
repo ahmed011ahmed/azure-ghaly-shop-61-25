@@ -10,6 +10,7 @@ interface DownloadLink {
   download_url: string;
   version: string;
   file_size: string;
+  target_level?: number;
   created_at?: string;
 }
 

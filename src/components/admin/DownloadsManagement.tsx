@@ -7,6 +7,8 @@ import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Badge } from '../ui/badge';
 import { useDownloads } from '../../hooks/useDownloads';
 
 interface DownloadLink {
@@ -16,6 +18,7 @@ interface DownloadLink {
   download_url: string;
   version: string;
   file_size: string;
+  target_level?: number;
   created_at?: string;
 }
 
@@ -28,9 +31,32 @@ const DownloadsManagement = () => {
     description: '',
     download_url: '',
     version: '',
-    file_size: ''
+    file_size: '',
+    target_level: 1
   });
   const [actionLoading, setActionLoading] = useState<number | null>(null);
+
+  const getLevelName = (level: number) => {
+    const names = {
+      1: 'برونزي',
+      2: 'فضي',
+      3: 'ذهبي', 
+      4: 'بلاتيني',
+      5: 'ماسي'
+    };
+    return names[level as keyof typeof names] || `المستوى ${level}`;
+  };
+
+  const getLevelColor = (level: number) => {
+    const colors = {
+      1: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+      2: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+      3: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+      4: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+      5: 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+    };
+    return colors[level as keyof typeof colors] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +71,7 @@ const DownloadsManagement = () => {
         await addDownload(formData);
       }
       
-      setFormData({ name: '', description: '', download_url: '', version: '', file_size: '' });
+      setFormData({ name: '', description: '', download_url: '', version: '', file_size: '', target_level: 1 });
       setShowForm(false);
       setEditingDownload(null);
     } catch (error) {
@@ -60,7 +86,8 @@ const DownloadsManagement = () => {
       description: download.description,
       download_url: download.download_url,
       version: download.version,
-      file_size: download.file_size
+      file_size: download.file_size,
+      target_level: download.target_level || 1
     });
     setShowForm(true);
   };
@@ -89,7 +116,7 @@ const DownloadsManagement = () => {
             onClick={() => {
               setShowForm(false);
               setEditingDownload(null);
-              setFormData({ name: '', description: '', download_url: '', version: '', file_size: '' });
+              setFormData({ name: '', description: '', download_url: '', version: '', file_size: '', target_level: 1 });
             }}
             variant="outline"
             className="border-gray-500 text-gray-300"
@@ -123,6 +150,25 @@ const DownloadsManagement = () => {
                   placeholder="مثال: v2.1.4"
                   required
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="target_level" className="text-gray-300">المستوى المستهدف</Label>
+                <Select 
+                  value={formData.target_level.toString()} 
+                  onValueChange={(value) => setFormData({ ...formData, target_level: parseInt(value) })}
+                >
+                  <SelectTrigger className="bg-gray-800/50 border-gray-600 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-600">
+                    {[1, 2, 3, 4, 5].map(level => (
+                      <SelectItem key={level} value={level.toString()} className="text-white">
+                        المستوى {level} - {getLevelName(level)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
@@ -205,6 +251,7 @@ const DownloadsManagement = () => {
                   <TableRow>
                     <TableHead className="text-gray-300">اسم البرنامج</TableHead>
                     <TableHead className="text-gray-300">الإصدار</TableHead>
+                    <TableHead className="text-gray-300">المستوى المستهدف</TableHead>
                     <TableHead className="text-gray-300">الحجم</TableHead>
                     <TableHead className="text-gray-300">الوصف</TableHead>
                     <TableHead className="text-gray-300">الإجراءات</TableHead>
@@ -218,6 +265,11 @@ const DownloadsManagement = () => {
                       </TableCell>
                       <TableCell className="text-purple-400">
                         {download.version}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getLevelColor(download.target_level || 1)}>
+                          {getLevelName(download.target_level || 1)}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-green-400">
                         {download.file_size || 'غير محدد'}

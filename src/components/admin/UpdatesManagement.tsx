@@ -7,6 +7,8 @@ import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Badge } from '../ui/badge';
 import { useUpdates } from '../../hooks/useUpdates';
 
 interface Update {
@@ -14,6 +16,7 @@ interface Update {
   title: string;
   description: string;
   version: string;
+  target_level?: number;
   created_at?: string;
 }
 
@@ -21,8 +24,35 @@ const UpdatesManagement = () => {
   const { updates, loading, addUpdate, updateUpdate, deleteUpdate } = useUpdates();
   const [showForm, setShowForm] = useState(false);
   const [editingUpdate, setEditingUpdate] = useState<Update | null>(null);
-  const [formData, setFormData] = useState({ title: '', description: '', version: '' });
+  const [formData, setFormData] = useState({ 
+    title: '', 
+    description: '', 
+    version: '', 
+    target_level: 1 
+  });
   const [actionLoading, setActionLoading] = useState<number | null>(null);
+
+  const getLevelName = (level: number) => {
+    const names = {
+      1: 'برونزي',
+      2: 'فضي',
+      3: 'ذهبي', 
+      4: 'بلاتيني',
+      5: 'ماسي'
+    };
+    return names[level as keyof typeof names] || `المستوى ${level}`;
+  };
+
+  const getLevelColor = (level: number) => {
+    const colors = {
+      1: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+      2: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+      3: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+      4: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+      5: 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+    };
+    return colors[level as keyof typeof colors] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +67,7 @@ const UpdatesManagement = () => {
         await addUpdate(formData);
       }
       
-      setFormData({ title: '', description: '', version: '' });
+      setFormData({ title: '', description: '', version: '', target_level: 1 });
       setShowForm(false);
       setEditingUpdate(null);
     } catch (error) {
@@ -50,7 +80,8 @@ const UpdatesManagement = () => {
     setFormData({
       title: update.title,
       description: update.description,
-      version: update.version
+      version: update.version,
+      target_level: update.target_level || 1
     });
     setShowForm(true);
   };
@@ -79,7 +110,7 @@ const UpdatesManagement = () => {
             onClick={() => {
               setShowForm(false);
               setEditingUpdate(null);
-              setFormData({ title: '', description: '', version: '' });
+              setFormData({ title: '', description: '', version: '', target_level: 1 });
             }}
             variant="outline"
             className="border-gray-500 text-gray-300"
@@ -113,6 +144,25 @@ const UpdatesManagement = () => {
                   placeholder="مثال: v2.1.4"
                   required
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="target_level" className="text-gray-300">المستوى المستهدف</Label>
+                <Select 
+                  value={formData.target_level.toString()} 
+                  onValueChange={(value) => setFormData({ ...formData, target_level: parseInt(value) })}
+                >
+                  <SelectTrigger className="bg-gray-800/50 border-gray-600 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-600">
+                    {[1, 2, 3, 4, 5].map(level => (
+                      <SelectItem key={level} value={level.toString()} className="text-white">
+                        المستوى {level} - {getLevelName(level)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
@@ -171,6 +221,7 @@ const UpdatesManagement = () => {
                   <TableRow>
                     <TableHead className="text-gray-300">العنوان</TableHead>
                     <TableHead className="text-gray-300">الإصدار</TableHead>
+                    <TableHead className="text-gray-300">المستوى المستهدف</TableHead>
                     <TableHead className="text-gray-300">الوصف</TableHead>
                     <TableHead className="text-gray-300">التاريخ</TableHead>
                     <TableHead className="text-gray-300">الإجراءات</TableHead>
@@ -184,6 +235,11 @@ const UpdatesManagement = () => {
                       </TableCell>
                       <TableCell className="text-purple-400">
                         {update.version}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getLevelColor(update.target_level || 1)}>
+                          {getLevelName(update.target_level || 1)}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-gray-300 max-w-md">
                         <div className="truncate">{update.description}</div>
