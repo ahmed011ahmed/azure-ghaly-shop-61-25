@@ -12,16 +12,16 @@ interface Subscriber {
   last_login?: string;
 }
 
-export const useSubscribers = () => {
+export const useSubscribers = (targetLevel?: number) => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // جلب المشتركين من جدول profiles
+  // جلب المشتركين من جدول profiles مع تصفية حسب المستوى
   const fetchSubscribers = async () => {
     try {
       setLoading(true);
-      console.log('Fetching subscribers...');
+      console.log('Fetching subscribers for level:', targetLevel);
       
       // نجلب المشتركين من جدول profiles
       const { data: profilesData, error: profilesError } = await supabase
@@ -34,9 +34,9 @@ export const useSubscribers = () => {
       }
 
       // نحول بيانات profiles إلى تنسيق المشتركين
-      const subscribersData = profilesData?.map(profile => ({
+      let subscribersData = profilesData?.map(profile => ({
         id: profile.id,
-        email: profile.id, // نستخدم ID كـ email مؤقتاً
+        email: profile.id,
         nickname: profile.nickname,
         subscription_status: 'active' as const,
         subscription_level: 1 as const, // مستوى افتراضي
@@ -44,7 +44,12 @@ export const useSubscribers = () => {
         last_login: profile.updated_at
       })) || [];
 
-      console.log('Subscribers loaded:', subscribersData);
+      // تصفية حسب المستوى إذا تم تحديده
+      if (targetLevel) {
+        subscribersData = subscribersData.filter(sub => sub.subscription_level === targetLevel);
+      }
+
+      console.log('Subscribers loaded for level', targetLevel, ':', subscribersData);
       setSubscribers(subscribersData);
     } catch (error) {
       console.error('Error fetching subscribers:', error);
@@ -55,13 +60,13 @@ export const useSubscribers = () => {
       });
       
       // بيانات تجريبية في حالة الفشل
-      setSubscribers([
+      const mockData = [
         {
           id: '1',
           email: 'subscriber1@example.com',
           nickname: 'مشترك 1',
-          subscription_status: 'active',
-          subscription_level: 1,
+          subscription_status: 'active' as const,
+          subscription_level: targetLevel || 1,
           subscription_date: new Date().toISOString(),
           last_login: new Date().toISOString()
         },
@@ -69,12 +74,14 @@ export const useSubscribers = () => {
           id: '2',
           email: 'subscriber2@example.com',
           nickname: 'مشترك 2',
-          subscription_status: 'inactive',
-          subscription_level: 3,
+          subscription_status: 'inactive' as const,
+          subscription_level: targetLevel || 1,
           subscription_date: new Date(Date.now() - 86400000).toISOString(),
           last_login: new Date(Date.now() - 86400000).toISOString()
         }
-      ]);
+      ];
+      
+      setSubscribers(targetLevel ? mockData.filter(sub => sub.subscription_level === targetLevel) : mockData);
     } finally {
       setLoading(false);
     }
@@ -93,7 +100,7 @@ export const useSubscribers = () => {
       const { data, error } = await supabase
         .from('profiles')
         .insert([{
-          id: newSubscriber.email, // نستخدم البريد كـ ID
+          id: newSubscriber.email,
           nickname: newSubscriber.nickname,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
@@ -116,11 +123,14 @@ export const useSubscribers = () => {
         last_login: data.updated_at
       };
 
-      setSubscribers(prev => [addedSubscriber, ...prev]);
+      // إضافة المشترك فقط إذا كان يطابق المستوى المطلوب أو لا يوجد تصفية
+      if (!targetLevel || addedSubscriber.subscription_level === targetLevel) {
+        setSubscribers(prev => [addedSubscriber, ...prev]);
+      }
       
       toast({
         title: "تم بنجاح",
-        description: `تم إضافة المشترك ${newSubscriber.nickname} بنجاح`
+        description: `تم إضافة المشترك ${newSubscriber.nickname} بنجاح للمستوى ${newSubscriber.subscription_level}`
       });
 
     } catch (error) {
@@ -186,13 +196,21 @@ export const useSubscribers = () => {
         throw error;
       }
 
-      setSubscribers(prev => 
-        prev.map(sub => 
+      // تحديث المشترك محلياً أو إزالته إذا لم يعد يطابق المستوى المطلوب
+      setSubscribers(prev => {
+        const updated = prev.map(sub => 
           sub.id === id 
             ? { ...sub, subscription_level: level, last_login: new Date().toISOString() }
             : sub
-        )
-      );
+        );
+        
+        // إذا كان هناك تصفية حسب المستوى، إزالة المشترك إذا لم يعد يطابق
+        if (targetLevel) {
+          return updated.filter(sub => sub.subscription_level === targetLevel);
+        }
+        
+        return updated;
+      });
 
       toast({
         title: "تم التحديث بنجاح",
@@ -243,7 +261,7 @@ export const useSubscribers = () => {
 
   useEffect(() => {
     fetchSubscribers();
-  }, []);
+  }, [targetLevel]);
 
   return {
     subscribers,
