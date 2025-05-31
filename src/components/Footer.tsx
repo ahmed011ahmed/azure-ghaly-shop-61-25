@@ -1,6 +1,6 @@
 import { Mail, Phone, MapPin, Gamepad2, Joystick, GamepadIcon, MessageCircle } from 'lucide-react';
 const Footer = () => {
-  return <footer className="bg-gray-900 text-white py-16 border-t border-purple-800/30">
+  return <footer className="text-white py-16 border-t border-purple-800/30 bg-[#141414]">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
