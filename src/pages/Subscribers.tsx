@@ -1,70 +1,19 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Download, Calendar, Shield, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-
-interface Update {
-  id: number;
-  title: string;
-  description: string;
-  version: string;
-  created_at: string;
-}
-
-interface DownloadLink {
-  id: number;
-  name: string;
-  description: string;
-  download_url: string;
-  version: string;
-  file_size: string;
-}
+import { useUpdates } from '../hooks/useUpdates';
+import { useDownloads } from '../hooks/useDownloads';
 
 const Subscribers = () => {
   const { user, loading } = useAuth();
   const { toast } = useToast();
-  
-  // بيانات محلية للتحديثات
-  const [updates] = useState<Update[]>([
-    {
-      id: 1,
-      title: "تحديث البايباس الجديد",
-      description: "تحديث شامل لنظام البايباس مع تحسينات في الأداء والأمان وإضافة ميزات جديدة لتجاوز أحدث أنظمة الحماية",
-      version: "v2.1.4",
-      created_at: new Date().toISOString()
-    },
-    {
-      id: 2,
-      title: "إصلاح أخطاء الإصدار السابق",
-      description: "تم إصلاح المشاكل المتعلقة بالاتصال وتحسين استقرار البرنامج",
-      version: "v2.1.3",
-      created_at: new Date(Date.now() - 86400000).toISOString()
-    }
-  ]);
-
-  // بيانات محلية لروابط التحميل
-  const [downloadLinks] = useState<DownloadLink[]>([
-    {
-      id: 1,
-      name: "GHALY BYPASS TOOL",
-      description: "أداة البايباس الحصرية من GHALY HAX للتجاوز المتقدم",
-      download_url: "https://example.com/download1",
-      version: "v2.1.4",
-      file_size: "45 MB"
-    },
-    {
-      id: 2,
-      name: "GHALY INJECTOR",
-      description: "أداة الحقن المتقدمة للألعاب مع دعم أحدث الألعاب",
-      download_url: "https://example.com/download2",
-      version: "v1.8.2",
-      file_size: "32 MB"
-    }
-  ]);
+  const { updates, loading: updatesLoading } = useUpdates();
+  const { downloads, loading: downloadsLoading } = useDownloads();
 
   const handleDownload = (name: string, url: string) => {
     toast({
@@ -119,7 +68,7 @@ const Subscribers = () => {
     );
   }
 
-  if (loading) {
+  if (loading || updatesLoading || downloadsLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center">
         <div className="text-white text-xl">جاري التحميل...</div>
@@ -168,7 +117,7 @@ const Subscribers = () => {
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {downloadLinks.map((item) => (
+            {downloads.map((item) => (
               <Card key={item.id} className="gaming-card hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300">
                 <CardHeader className="bg-slate-900">
                   <CardTitle className="text-xl text-white flex items-center justify-between">
@@ -217,7 +166,7 @@ const Subscribers = () => {
                         </span>
                       )}
                       <span className="text-sm text-gray-400">
-                        {new Date(update.created_at).toLocaleDateString('ar-EG')}
+                        {new Date(update.created_at || '').toLocaleDateString('ar-EG')}
                       </span>
                     </div>
                   </div>

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Calendar, Loader2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -7,7 +7,7 @@ import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { useToast } from '@/hooks/use-toast';
+import { useUpdates } from '../../hooks/useUpdates';
 
 interface Update {
   id?: number;
@@ -18,55 +18,23 @@ interface Update {
 }
 
 const UpdatesManagement = () => {
-  const [updates, setUpdates] = useState<Update[]>([
-    {
-      id: 1,
-      title: "تحديث البايباس الجديد",
-      description: "تحديث شامل لنظام البايباس مع تحسينات في الأداء والأمان",
-      version: "v2.1.4",
-      created_at: new Date().toISOString()
-    }
-  ]);
-  const [loading, setLoading] = useState(false);
+  const { updates, loading, addUpdate, updateUpdate, deleteUpdate } = useUpdates();
   const [showForm, setShowForm] = useState(false);
   const [editingUpdate, setEditingUpdate] = useState<Update | null>(null);
   const [formData, setFormData] = useState({ title: '', description: '', version: '' });
   const [actionLoading, setActionLoading] = useState<number | null>(null);
-  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.description || !formData.version) {
-      toast({
-        title: "خطأ",
-        description: "يجب ملء جميع الحقول",
-        variant: "destructive"
-      });
       return;
     }
 
     try {
       if (editingUpdate) {
-        setUpdates(prev => prev.map(update => 
-          update.id === editingUpdate.id 
-            ? { ...update, ...formData }
-            : update
-        ));
-        toast({
-          title: "نجح",
-          description: "تم تحديث الإصدار بنجاح"
-        });
+        await updateUpdate(editingUpdate.id!, formData);
       } else {
-        const newUpdate = {
-          id: Date.now(),
-          ...formData,
-          created_at: new Date().toISOString()
-        };
-        setUpdates(prev => [newUpdate, ...prev]);
-        toast({
-          title: "نجح",
-          description: "تم إضافة التحديث بنجاح"
-        });
+        await addUpdate(formData);
       }
       
       setFormData({ title: '', description: '', version: '' });
@@ -74,11 +42,6 @@ const UpdatesManagement = () => {
       setEditingUpdate(null);
     } catch (error) {
       console.error('Error saving update:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في حفظ التحديث",
-        variant: "destructive"
-      });
     }
   };
 
@@ -97,19 +60,9 @@ const UpdatesManagement = () => {
 
     try {
       setActionLoading(id);
-      setUpdates(prev => prev.filter(update => update.id !== id));
-      
-      toast({
-        title: "نجح",
-        description: "تم حذف التحديث بنجاح"
-      });
+      await deleteUpdate(id);
     } catch (error) {
       console.error('Error deleting update:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في حذف التحديث",
-        variant: "destructive"
-      });
     } finally {
       setActionLoading(null);
     }

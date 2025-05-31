@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Download, Loader2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -7,7 +7,7 @@ import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { useToast } from '@/hooks/use-toast';
+import { useDownloads } from '../../hooks/useDownloads';
 
 interface DownloadLink {
   id?: number;
@@ -20,27 +20,7 @@ interface DownloadLink {
 }
 
 const DownloadsManagement = () => {
-  const [downloads, setDownloads] = useState<DownloadLink[]>([
-    {
-      id: 1,
-      name: "GHALY BYPASS TOOL",
-      description: "أداة البايباس الحصرية من GHALY HAX",
-      download_url: "https://example.com/download1",
-      version: "v2.1.4",
-      file_size: "45 MB",
-      created_at: new Date().toISOString()
-    },
-    {
-      id: 2,
-      name: "GHALY INJECTOR",
-      description: "أداة الحقن المتقدمة للألعاب",
-      download_url: "https://example.com/download2",
-      version: "v1.8.2",
-      file_size: "32 MB",
-      created_at: new Date().toISOString()
-    }
-  ]);
-  const [loading, setLoading] = useState(false);
+  const { downloads, loading, addDownload, updateDownload, deleteDownload } = useDownloads();
   const [showForm, setShowForm] = useState(false);
   const [editingDownload, setEditingDownload] = useState<DownloadLink | null>(null);
   const [formData, setFormData] = useState({
@@ -51,41 +31,18 @@ const DownloadsManagement = () => {
     file_size: ''
   });
   const [actionLoading, setActionLoading] = useState<number | null>(null);
-  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.description || !formData.download_url || !formData.version) {
-      toast({
-        title: "خطأ",
-        description: "يجب ملء جميع الحقول المطلوبة",
-        variant: "destructive"
-      });
       return;
     }
 
     try {
       if (editingDownload) {
-        setDownloads(prev => prev.map(download => 
-          download.id === editingDownload.id 
-            ? { ...download, ...formData }
-            : download
-        ));
-        toast({
-          title: "نجح",
-          description: "تم تحديث رابط التحميل بنجاح"
-        });
+        await updateDownload(editingDownload.id!, formData);
       } else {
-        const newDownload = {
-          id: Date.now(),
-          ...formData,
-          created_at: new Date().toISOString()
-        };
-        setDownloads(prev => [newDownload, ...prev]);
-        toast({
-          title: "نجح",
-          description: "تم إضافة رابط التحميل بنجاح"
-        });
+        await addDownload(formData);
       }
       
       setFormData({ name: '', description: '', download_url: '', version: '', file_size: '' });
@@ -93,11 +50,6 @@ const DownloadsManagement = () => {
       setEditingDownload(null);
     } catch (error) {
       console.error('Error saving download:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في حفظ رابط التحميل",
-        variant: "destructive"
-      });
     }
   };
 
@@ -118,19 +70,9 @@ const DownloadsManagement = () => {
 
     try {
       setActionLoading(id);
-      setDownloads(prev => prev.filter(download => download.id !== id));
-      
-      toast({
-        title: "نجح",
-        description: "تم حذف رابط التحميل بنجاح"
-      });
+      await deleteDownload(id);
     } catch (error) {
       console.error('Error deleting download:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في حذف رابط التحميل",
-        variant: "destructive"
-      });
     } finally {
       setActionLoading(null);
     }
