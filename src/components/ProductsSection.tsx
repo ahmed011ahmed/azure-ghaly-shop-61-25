@@ -1,41 +1,9 @@
 
 import ProductCard from './ProductCard';
+import { useProducts } from '../contexts/ProductsContext';
 
 const ProductsSection = () => {
-  const products = [
-    {
-      id: 1,
-      name: "🎯 Bypass GHALY + HAK RNG",
-      price: "$60",
-      description: "أداة متقدمة للبايباس والهاكينج - تجربة جيمنج لا تُضاهى مع حماية 100%",
-      image: "https://i.imgur.com/ogU7D3c.jpeg",
-      rating: 5
-    },
-    {
-      id: 2,
-      name: "🔥 RNG Tool",
-      price: "$35",
-      description: "أداة RNG متطورة - امان مضمون 100% مع أداء فائق",
-      image: "https://i.imgur.com/SJJK1ZQ.jpeg",
-      rating: 4
-    },
-    {
-      id: 3,
-      name: "⚡ Bypass GHALY+ HAK GHALY",
-      price: "$50",
-      description: "طريقك المضمون للكونكر - أداة شاملة للجيمرز المحترفين",
-      image: "https://i.imgur.com/TzAjRA0.jpeg",
-      rating: 5
-    },
-    {
-      id: 4,
-      name: "🛡️ Bypass GHALY",
-      price: "$40",
-      description: "بايباس غالي المتخصص - حل مثالي للعبة آمنة ومتقدمة",
-      image: "https://i.imgur.com/viiCVaD.jpeg",
-      rating: 4
-    }
-  ];
+  const { products } = useProducts();
 
   return (
     <section id="products" className="py-20 bg-gradient-to-b from-gray-900 to-gray-800">
