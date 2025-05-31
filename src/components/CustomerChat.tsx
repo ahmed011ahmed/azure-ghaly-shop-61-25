@@ -154,7 +154,7 @@ const CustomerChat = () => {
 
   if (!user) {
     return (
-      <Card className="gaming-card w-full max-w-md">
+      <Card className="gaming-card w-full max-w-4xl">
         <CardContent className="bg-slate-950 text-center py-8">
           <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-300 mb-4">يجب تسجيل الدخول أولاً للتواصل مع فريق الدعم</p>
@@ -167,7 +167,7 @@ const CustomerChat = () => {
   }
 
   return (
-    <Card className="gaming-card w-full max-w-md h-96 flex flex-col">
+    <Card className="gaming-card w-full max-w-4xl h-96 flex flex-col">
       <CardHeader className="bg-slate-900 flex-shrink-0 py-3">
         <div className="flex items-center space-x-3">
           <MessageSquare className="w-5 h-5 text-purple-400" />

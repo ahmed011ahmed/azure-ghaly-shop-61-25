@@ -178,7 +178,7 @@ const AdminChat = () => {
   );
 
   return (
-    <Card className="gaming-card w-full max-w-2xl h-[500px] flex flex-col">
+    <Card className="gaming-card w-full max-w-6xl h-[500px] flex flex-col">
       <CardHeader className="bg-slate-900 flex-shrink-0 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
