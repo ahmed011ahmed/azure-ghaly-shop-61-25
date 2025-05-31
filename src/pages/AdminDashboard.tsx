@@ -1,13 +1,41 @@
 
-import React, { useState } from 'react';
-import { ArrowLeft, Plus, Edit, Trash2, Eye, Package, Users, DollarSign, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductManagement from '../components/admin/ProductManagement';
+import AdminLogin from '../components/admin/AdminLogin';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 
 const AdminDashboard = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+
+  // التحقق من حالة تسجيل الدخول عند تحميل الصفحة
+  useEffect(() => {
+    const adminAuth = localStorage.getItem('adminAuthenticated');
+    if (adminAuth === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+    localStorage.setItem('adminAuthenticated', 'true');
+    console.log('Admin logged in successfully');
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('adminAuthenticated');
+    setActiveTab('overview');
+    console.log('Admin logged out');
+  };
+
+  // إذا لم يكن مسجل الدخول، اظهر صفحة تسجيل الدخول
+  if (!isAuthenticated) {
+    return <AdminLogin onLogin={handleLogin} />;
+  }
 
   // بيانات إحصائية وهمية
   const stats = [
@@ -67,6 +95,15 @@ const AdminDashboard = () => {
               >
                 <Plus className="w-4 h-4 mr-2" />
                 إضافة منتج جديد
+              </Button>
+              
+              <Button 
+                onClick={handleLogout}
+                variant="outline"
+                className="border-red-500 text-red-400 hover:bg-red-500/10"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                تسجيل خروج
               </Button>
             </div>
           </div>
