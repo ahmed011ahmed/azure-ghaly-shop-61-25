@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download } from 'lucide-react';
+import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductManagement from '../components/admin/ProductManagement';
 import AdminLogin from '../components/admin/AdminLogin';
@@ -8,6 +8,7 @@ import AdminChat from '../components/admin/AdminChat';
 import UpdatesManagement from '../components/admin/UpdatesManagement';
 import DownloadsManagement from '../components/admin/DownloadsManagement';
 import SubscribersManagement from '../components/admin/SubscribersManagement';
+import UserLookup from '../components/admin/UserLookup';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 
@@ -84,6 +85,11 @@ const AdminDashboard = () => {
       id: 'subscribers',
       label: 'إدارة المشتركين',
       icon: Users
+    },
+    {
+      id: 'user-lookup',
+      label: 'البحث عن مشترك',
+      icon: UserSearch
     },
     {
       id: 'downloads',
@@ -232,6 +238,8 @@ const AdminDashboard = () => {
         {activeTab === 'products' && <ProductManagement />}
         
         {activeTab === 'subscribers' && <SubscribersManagement />}
+        
+        {activeTab === 'user-lookup' && <UserLookup />}
         
         {activeTab === 'downloads' && <DownloadsManagement />}
         
