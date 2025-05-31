@@ -9,6 +9,7 @@ import { useChat } from '../../contexts/ChatContext';
 const AdminChat = () => {
   const { messages, addMessage, clearMessages, loading } = useChat();
   const [newMessage, setNewMessage] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState<string>('');
   const [userName, setUserName] = useState('');
   const [isUserMode, setIsUserMode] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -29,17 +30,16 @@ const AdminChat = () => {
         return;
       }
       
-      let messageText = newMessage.trim();
-      // إذا كانت رسالة إدارة وتحتوي على @ في البداية، فهي موجهة لعميل محدد
-      if (!isUserMode && messageText.startsWith('@')) {
-        // التأكد من وجود مسافة بعد اسم المستخدم
-        if (!messageText.includes(' ')) {
-          alert('يرجى كتابة الرسالة بعد اسم المستخدم. مثال: @احمد مرحباً بك');
-          return;
-        }
+      const messageText = newMessage.trim();
+      
+      if (!isUserMode) {
+        // رسالة من الإدارة
+        addMessage(messageText, 'admin', undefined, selectedCustomer || undefined);
+      } else {
+        // رسالة كمستخدم
+        addMessage(messageText, 'user', userName);
       }
       
-      addMessage(messageText, isUserMode ? 'user' : 'admin', isUserMode ? userName : undefined);
       setNewMessage('');
     }
   };
@@ -106,21 +106,45 @@ const AdminChat = () => {
           </div>
         )}
 
-        {/* قائمة العملاء النشطين */}
-        {uniqueCustomers.length > 0 && !isUserMode && (
-          <div className="mt-3">
-            <p className="text-sm text-gray-400 mb-2">العملاء النشطين:</p>
-            <div className="flex flex-wrap gap-2">
-              {uniqueCustomers.map((customer, index) => (
-                <button
-                  key={index}
-                  onClick={() => setNewMessage(`@${customer} `)}
-                  className="text-xs bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 px-2 py-1 rounded transition-colors"
-                >
-                  @{customer}
-                </button>
-              ))}
+        {/* اختيار العميل للرد عليه */}
+        {!isUserMode && (
+          <div className="mt-3 space-y-2">
+            <div className="flex items-center space-x-2">
+              <label className="text-sm text-gray-400">الرد على:</label>
+              <select
+                value={selectedCustomer}
+                onChange={(e) => setSelectedCustomer(e.target.value)}
+                className="bg-gray-800/50 border border-gray-600 text-white rounded px-2 py-1 text-sm"
+              >
+                <option value="">رسالة عامة لجميع العملاء</option>
+                {uniqueCustomers.map((customer, index) => (
+                  <option key={index} value={customer}>
+                    {customer}
+                  </option>
+                ))}
+              </select>
             </div>
+            
+            {uniqueCustomers.length > 0 && (
+              <div>
+                <p className="text-sm text-gray-400 mb-2">العملاء النشطين:</p>
+                <div className="flex flex-wrap gap-2">
+                  {uniqueCustomers.map((customer, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedCustomer(customer)}
+                      className={`text-xs px-2 py-1 rounded transition-colors ${
+                        selectedCustomer === customer
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-purple-600/30 hover:bg-purple-600/50 text-purple-300'
+                      }`}
+                    >
+                      {customer}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </CardHeader>
@@ -153,7 +177,7 @@ const AdminChat = () => {
                       : 'bg-blue-600/20 border border-blue-500/30'
                   }`}
                 >
-                  <div className="flex items-center space-x-2 mb-1">
+                  <div className="flex items-center space-x-2 mb-1 flex-wrap">
                     <span className={`text-xs font-medium ${
                       message.sender === 'admin' ? 'text-purple-300' : 'text-blue-300'
                     }`}>
@@ -162,6 +186,16 @@ const AdminChat = () => {
                     <span className="text-xs text-gray-400">
                       {formatTime(message.timestamp)}
                     </span>
+                    {message.sender === 'admin' && message.targetUser && (
+                      <span className="text-xs bg-purple-700 px-1 rounded text-white">
+                        إلى: {message.targetUser}
+                      </span>
+                    )}
+                    {message.sender === 'admin' && !message.targetUser && (
+                      <span className="text-xs bg-green-700 px-1 rounded text-white">
+                        عام
+                      </span>
+                    )}
                   </div>
                   <p className="text-white text-sm leading-relaxed">
                     {message.text}
@@ -177,14 +211,19 @@ const AdminChat = () => {
         <div className="border-t border-gray-700 p-4">
           <div className="mb-2">
             <p className="text-xs text-gray-400">
-              {!isUserMode && 'للرد على عميل محدد: اكتب @اسم_العميل ثم الرسالة'}
+              {!isUserMode && selectedCustomer 
+                ? `سيتم إرسال الرسالة إلى: ${selectedCustomer}`
+                : !isUserMode 
+                ? 'رسالة عامة لجميع العملاء'
+                : `رسالة كمستخدم: ${userName}`
+              }
             </p>
           </div>
           <form onSubmit={handleSendMessage} className="flex space-x-2">
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder={`اكتب رسالة ${isUserMode ? 'كمستخدم' : 'كإدارة'}...`}
+              placeholder={`اكتب رسالة ${isUserMode ? 'كمستخدم' : selectedCustomer ? `لـ ${selectedCustomer}` : 'عامة'}...`}
               className="flex-1 bg-gray-800/50 border-gray-600 text-white"
               disabled={loading}
             />

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
@@ -8,12 +7,13 @@ export interface ChatMessage {
   sender: 'admin' | 'user';
   timestamp: Date;
   userName?: string;
+  targetUser?: string; // المستخدم المستهدف للرسالة
   created_at?: string;
 }
 
 interface ChatContextType {
   messages: ChatMessage[];
-  addMessage: (text: string, sender: 'admin' | 'user', userName?: string) => void;
+  addMessage: (text: string, sender: 'admin' | 'user', userName?: string, targetUser?: string) => void;
   clearMessages: () => void;
   loading: boolean;
 }
@@ -88,7 +88,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addMessage = async (text: string, sender: 'admin' | 'user', userName?: string) => {
+  const addMessage = async (text: string, sender: 'admin' | 'user', userName?: string, targetUser?: string) => {
     try {
       const newMessage: ChatMessage = {
         id: Date.now() + Math.random(), // معرف فريد
@@ -96,6 +96,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         sender,
         timestamp: new Date(),
         userName: sender === 'user' ? (profile?.nickname || userName || 'مستخدم') : undefined,
+        targetUser: targetUser, // إضافة المستخدم المستهدف
         created_at: new Date().toISOString()
       };
 

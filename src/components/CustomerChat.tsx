@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, MessageSquare, User, Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
@@ -40,8 +39,8 @@ const CustomerChat = () => {
   // فلترة الرسائل للعميل الحالي
   const customerMessages = messages.filter(message => {
     if (message.sender === 'admin') {
-      // رسائل الإدارة: إما عامة أو موجهة للعميل الحالي
-      return !message.text.includes('@') || message.text.includes(`@${profile?.nickname}`);
+      // رسائل الإدارة: إما عامة (بدون targetUser) أو موجهة للعميل الحالي
+      return !message.targetUser || message.targetUser === profile?.nickname;
     }
     // رسائل العميل: فقط رسائله الخاصة
     return message.userName === profile?.nickname;
@@ -91,43 +90,39 @@ const CustomerChat = () => {
               </div>
             </div>
           ) : (
-            customerMessages.map((message) => {
-              // تنظيف رسائل الإدارة من أسماء المستخدمين
-              let displayText = message.text;
-              if (message.sender === 'admin' && message.text.includes('@')) {
-                // إزالة @username من بداية الرسالة
-                displayText = message.text.replace(/@\w+\s*/, '').trim();
-              }
-
-              return (
+            customerMessages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.sender === 'admin' ? 'justify-start' : 'justify-end'}`}
+              >
                 <div
-                  key={message.id}
-                  className={`flex ${message.sender === 'admin' ? 'justify-start' : 'justify-end'}`}
+                  className={`max-w-[70%] rounded-lg p-3 ${
+                    message.sender === 'admin'
+                      ? 'bg-purple-600/20 border border-purple-500/30'
+                      : 'bg-blue-600/20 border border-blue-500/30'
+                  }`}
                 >
-                  <div
-                    className={`max-w-[70%] rounded-lg p-3 ${
-                      message.sender === 'admin'
-                        ? 'bg-purple-600/20 border border-purple-500/30'
-                        : 'bg-blue-600/20 border border-blue-500/30'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className={`text-xs font-medium ${
-                        message.sender === 'admin' ? 'text-purple-300' : 'text-blue-300'
-                      }`}>
-                        {message.sender === 'admin' ? 'فريق الدعم' : 'أنت'}
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span className={`text-xs font-medium ${
+                      message.sender === 'admin' ? 'text-purple-300' : 'text-blue-300'
+                    }`}>
+                      {message.sender === 'admin' ? 'فريق الدعم' : 'أنت'}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {formatTime(message.timestamp)}
+                    </span>
+                    {message.sender === 'admin' && message.targetUser && (
+                      <span className="text-xs bg-purple-700/30 px-1 rounded text-purple-200">
+                        خاص
                       </span>
-                      <span className="text-xs text-gray-400">
-                        {formatTime(message.timestamp)}
-                      </span>
-                    </div>
-                    <p className="text-white text-sm leading-relaxed">
-                      {displayText}
-                    </p>
+                    )}
                   </div>
+                  <p className="text-white text-sm leading-relaxed">
+                    {message.text}
+                  </p>
                 </div>
-              );
-            })
+              </div>
+            ))
           )}
           <div ref={messagesEndRef} />
         </div>
