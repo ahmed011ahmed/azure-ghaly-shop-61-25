@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
@@ -8,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import EmailVerification from '@/components/EmailVerification';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,6 +16,8 @@ const Auth = () => {
   const [nickname, setNickname] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState('');
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -44,44 +46,72 @@ const Auth = () => {
       return;
     }
 
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          nickname: nickname,
+    try {
+      // Create user without email confirmation
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            nickname: nickname,
+          }
         }
+      });
+
+      if (error) {
+        if (error.message.includes('User already registered')) {
+          toast({
+            title: 'خطأ',
+            description: 'هذا الإيميل مسجل بالفعل. جرب تسجيل الدخول بدلاً من ذلك.',
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'خطأ في التسجيل',
+            description: error.message,
+            variant: 'destructive',
+          });
+        }
+        setIsLoading(false);
+        return;
       }
-    });
 
-    setIsLoading(false);
+      // Generate verification code
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    if (error) {
-      if (error.message.includes('User already registered')) {
+      // Send verification code
+      const { error: codeError } = await supabase.functions.invoke('send-verification-code', {
+        body: { 
+          email, 
+          code: verificationCode,
+          user_id: data.user?.id
+        }
+      });
+
+      if (codeError) {
+        console.error('Error sending verification code:', codeError);
         toast({
-          title: 'خطأ',
-          description: 'هذا الإيميل مسجل بالفعل. جرب تسجيل الدخول بدلاً من ذلك.',
+          title: 'تم إنشاء الحساب',
+          description: 'تم إنشاء حسابك، لكن حدث خطأ في إرسال كود التأكيد. يمكنك المحاولة مرة أخرى.',
           variant: 'destructive',
         });
       } else {
         toast({
-          title: 'خطأ في التسجيل',
-          description: error.message,
-          variant: 'destructive',
+          title: 'تم إنشاء الحساب!',
+          description: 'تم إرسال كود التأكيد إلى بريدك الإلكتروني',
         });
       }
-    } else {
+
+      setPendingEmail(email);
+      setShowVerification(true);
+    } catch (error: any) {
       toast({
-        title: 'تم إنشاء الحساب بنجاح!',
-        description: 'تم تسجيلك بنجاح. يمكنك الآن تسجيل الدخول.',
+        title: 'خطأ في التسجيل',
+        description: error.message,
+        variant: 'destructive',
       });
-      setIsLogin(true);
-      setEmail('');
-      setPassword('');
-      setNickname('');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -118,6 +148,50 @@ const Auth = () => {
       navigate('/');
     }
   };
+
+  const handleVerificationSuccess = () => {
+    setShowVerification(false);
+    setIsLogin(true);
+    setEmail('');
+    setPassword('');
+    setNickname('');
+    setPendingEmail('');
+    toast({
+      title: 'تم التأكيد بنجاح!',
+      description: 'يمكنك الآن تسجيل الدخول بحسابك',
+    });
+  };
+
+  const handleBackToSignup = () => {
+    setShowVerification(false);
+    setPendingEmail('');
+  };
+
+  if (showVerification) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <div className="flex items-center mb-6">
+            <button 
+              onClick={handleBackToSignup}
+              className="text-gray-300 hover:text-purple-400 transition-colors"
+            >
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+            <h1 className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent mr-4">
+              تأكيد البريد الإلكتروني
+            </h1>
+          </div>
+          
+          <EmailVerification
+            email={pendingEmail}
+            onVerificationSuccess={handleVerificationSuccess}
+            onBack={handleBackToSignup}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center px-4">
