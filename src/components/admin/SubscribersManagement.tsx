@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Users, UserCheck, UserX, Clock, Trash2, Search, Filter, Loader2, Star } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -9,9 +8,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Badge } from '../ui/badge';
 import { useSubscribers } from '../../hooks/useSubscribers';
+import { useLevelContent } from '../../hooks/useLevelContent';
+import AddSubscriberForm from './AddSubscriberForm';
 
 const SubscribersManagement = () => {
-  const { subscribers, loading, updateSubscriptionStatus, updateSubscriptionLevel, deleteSubscriber } = useSubscribers();
+  const { subscribers, loading, addSubscriber, updateSubscriptionStatus, updateSubscriptionLevel, deleteSubscriber } = useSubscribers();
+  const { getLevelName, getLevelColor } = useLevelContent();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [levelFilter, setLevelFilter] = useState<string>('all');
@@ -52,6 +54,14 @@ const SubscribersManagement = () => {
     }
   };
 
+  const handleAddSubscriber = async (newSubscriber: {
+    email: string;
+    nickname: string;
+    subscription_level: 1 | 2 | 3 | 4 | 5;
+  }) => {
+    await addSubscriber(newSubscriber);
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
@@ -66,18 +76,10 @@ const SubscribersManagement = () => {
   };
 
   const getLevelBadge = (level: number) => {
-    const colors = {
-      1: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-      2: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      3: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-      4: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-      5: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-    };
-    
     return (
-      <Badge className={colors[level as keyof typeof colors]}>
+      <Badge className={`${getLevelColor(level)} bg-opacity-20 border-opacity-30`}>
         <Star className="w-3 h-3 mr-1" />
-        المستوى {level}
+        {getLevelName(level)}
       </Badge>
     );
   };
@@ -116,6 +118,9 @@ const SubscribersManagement = () => {
           <p className="text-gray-300 mt-1">إدارة وعرض قائمة المشتركين والعضويات والمستويات</p>
         </div>
       </div>
+
+      {/* Add Subscriber Form */}
+      <AddSubscriberForm onAdd={handleAddSubscriber} />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

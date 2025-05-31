@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -78,6 +77,55 @@ export const useSubscribers = () => {
       ]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // إضافة مشترك جديد
+  const addSubscriber = async (newSubscriber: {
+    email: string;
+    nickname: string;
+    subscription_level: 1 | 2 | 3 | 4 | 5;
+  }) => {
+    try {
+      console.log('Adding new subscriber:', newSubscriber);
+      
+      // إنشاء profile جديد
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert([{
+          id: newSubscriber.email, // نستخدم البريد كـ ID
+          nickname: newSubscriber.nickname,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error adding subscriber:', error);
+        throw error;
+      }
+
+      const addedSubscriber: Subscriber = {
+        id: data.id,
+        email: newSubscriber.email,
+        nickname: newSubscriber.nickname,
+        subscription_status: 'active',
+        subscription_level: newSubscriber.subscription_level,
+        subscription_date: data.created_at,
+        last_login: data.updated_at
+      };
+
+      setSubscribers(prev => [addedSubscriber, ...prev]);
+      
+      toast({
+        title: "تم بنجاح",
+        description: `تم إضافة المشترك ${newSubscriber.nickname} بنجاح`
+      });
+
+    } catch (error) {
+      console.error('Error adding subscriber:', error);
+      throw error;
     }
   };
 
@@ -200,6 +248,7 @@ export const useSubscribers = () => {
   return {
     subscribers,
     loading,
+    addSubscriber,
     updateSubscriptionStatus,
     updateSubscriptionLevel,
     deleteSubscriber,
