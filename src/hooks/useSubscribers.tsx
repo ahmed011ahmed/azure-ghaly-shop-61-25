@@ -8,6 +8,7 @@ interface Subscriber {
   email: string;
   nickname?: string;
   subscription_status: 'active' | 'inactive' | 'pending';
+  subscription_level: 1 | 2 | 3 | 4 | 5;
   subscription_date?: string;
   last_login?: string;
 }
@@ -39,6 +40,7 @@ export const useSubscribers = () => {
         email: profile.id, // نستخدم ID كـ email مؤقتاً
         nickname: profile.nickname,
         subscription_status: 'active' as const,
+        subscription_level: 1 as const, // مستوى افتراضي
         subscription_date: profile.created_at,
         last_login: profile.updated_at
       })) || [];
@@ -60,6 +62,7 @@ export const useSubscribers = () => {
           email: 'subscriber1@example.com',
           nickname: 'مشترك 1',
           subscription_status: 'active',
+          subscription_level: 1,
           subscription_date: new Date().toISOString(),
           last_login: new Date().toISOString()
         },
@@ -68,6 +71,7 @@ export const useSubscribers = () => {
           email: 'subscriber2@example.com',
           nickname: 'مشترك 2',
           subscription_status: 'inactive',
+          subscription_level: 3,
           subscription_date: new Date(Date.now() - 86400000).toISOString(),
           last_login: new Date(Date.now() - 86400000).toISOString()
         }
@@ -82,7 +86,6 @@ export const useSubscribers = () => {
     try {
       console.log(`Updating subscriber ${id} status to ${status}`);
       
-      // نحدث في جدول profiles
       const { error } = await supabase
         .from('profiles')
         .update({ 
@@ -95,7 +98,6 @@ export const useSubscribers = () => {
         throw error;
       }
 
-      // نحدث البيانات المحلية
       setSubscribers(prev => 
         prev.map(sub => 
           sub.id === id 
@@ -114,6 +116,46 @@ export const useSubscribers = () => {
       toast({
         title: "خطأ في التحديث",
         description: "فشل في تحديث حالة المشترك",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // تحديث مستوى الاشتراك
+  const updateSubscriptionLevel = async (id: string, level: 1 | 2 | 3 | 4 | 5) => {
+    try {
+      console.log(`Updating subscriber ${id} level to ${level}`);
+      
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Update level error:', error);
+        throw error;
+      }
+
+      setSubscribers(prev => 
+        prev.map(sub => 
+          sub.id === id 
+            ? { ...sub, subscription_level: level, last_login: new Date().toISOString() }
+            : sub
+        )
+      );
+
+      toast({
+        title: "تم التحديث بنجاح",
+        description: `تم تحديث مستوى المشترك إلى المستوى ${level}`
+      });
+
+    } catch (error) {
+      console.error('Error updating subscription level:', error);
+      toast({
+        title: "خطأ في التحديث",
+        description: "فشل في تحديث مستوى المشترك",
         variant: "destructive"
       });
     }
@@ -159,6 +201,7 @@ export const useSubscribers = () => {
     subscribers,
     loading,
     updateSubscriptionStatus,
+    updateSubscriptionLevel,
     deleteSubscriber,
     refetch: fetchSubscribers
   };
