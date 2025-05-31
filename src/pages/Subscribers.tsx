@@ -5,7 +5,6 @@ import { ArrowLeft, Download, Calendar, Shield, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '../hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface Update {
@@ -43,28 +42,33 @@ const Subscribers = () => {
     }
   ];
 
-  // جلب التحديثات من قاعدة البيانات
-  const fetchUpdates = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('updates')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching updates:', error);
-      } else {
-        setUpdates(data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching updates:', error);
-    } finally {
-      setLoadingUpdates(false);
+  // بيانات التحديثات المحلية (يمكن ربطها بقاعدة البيانات لاحقاً)
+  const sampleUpdates: Update[] = [
+    {
+      id: 1,
+      title: "تحديث البايباس الجديد",
+      description: "تم إضافة دعم للألعاب الجديدة وإصلاح مشاكل الاتصال",
+      version: "v2.1.4",
+      date: "2024-01-15",
+      created_at: "2024-01-15T10:00:00Z"
+    },
+    {
+      id: 2,
+      title: "تحسينات في أداة RNG",
+      description: "تحسين سرعة المعالجة وإضافة خيارات جديدة للتخصيص",
+      version: "v1.8.3",
+      date: "2024-01-10",
+      created_at: "2024-01-10T14:30:00Z"
     }
-  };
+  ];
 
+  // تحميل التحديثات
   useEffect(() => {
-    fetchUpdates();
+    // محاكاة تحميل البيانات
+    setTimeout(() => {
+      setUpdates(sampleUpdates);
+      setLoadingUpdates(false);
+    }, 1000);
   }, []);
 
   const handleDownload = (name: string, url: string) => {
