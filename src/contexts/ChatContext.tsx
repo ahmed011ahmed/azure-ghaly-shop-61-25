@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { useAuth } from '../hooks/useAuth';
 
 export interface ChatMessage {
   id: number;
@@ -18,6 +19,7 @@ interface ChatContextType {
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
+  const { profile } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
@@ -33,7 +35,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       text,
       sender,
       timestamp: new Date(),
-      userName: sender === 'user' ? userName : undefined
+      userName: sender === 'user' ? (profile?.nickname || userName || 'مستخدم') : undefined
     };
     setMessages(prev => [...prev, newMessage]);
   };

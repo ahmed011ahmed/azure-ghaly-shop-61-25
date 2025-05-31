@@ -1,10 +1,17 @@
 
-import { Gamepad, ShoppingCart, Settings } from 'lucide-react';
+import { Gamepad, ShoppingCart, Settings, User, LogOut } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../hooks/useAuth';
 import { Link } from 'react-router-dom';
+import { Button } from './ui/button';
 
 const Header = () => {
   const { toggleCart, getTotalItems } = useCart();
+  const { user, profile, signOut, loading } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <header className="bg-gray-900/95 backdrop-blur-md border-b border-purple-800/30 sticky top-0 z-50">
@@ -42,6 +49,39 @@ const Header = () => {
           </nav>
           
           <div className="flex items-center space-x-3">
+            {/* Auth buttons */}
+            {!loading && (
+              <>
+                {user ? (
+                  <div className="flex items-center space-x-3">
+                    <div className="text-gray-300 text-sm">
+                      مرحباً، {profile?.nickname || 'مستخدم'}
+                    </div>
+                    <Button
+                      onClick={handleSignOut}
+                      variant="outline"
+                      size="sm"
+                      className="border-red-500 text-red-400 hover:bg-red-500/10"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      خروج
+                    </Button>
+                  </div>
+                ) : (
+                  <Link to="/auth">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-purple-500 text-purple-400 hover:bg-purple-500/10"
+                    >
+                      <User className="w-4 h-4 mr-2" />
+                      دخول
+                    </Button>
+                  </Link>
+                )}
+              </>
+            )}
+            
             <button
               onClick={toggleCart}
               className="relative bg-gaming-gradient text-white p-2 rounded-lg hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 py-[8px] mx-[8px] my-[8px] px-[8px]"
