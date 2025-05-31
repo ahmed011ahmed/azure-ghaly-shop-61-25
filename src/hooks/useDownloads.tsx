@@ -22,19 +22,26 @@ export const useDownloads = () => {
   const fetchDownloads = async () => {
     try {
       setLoading(true);
+      console.log('Fetching downloads...');
       
       const { data, error } = await supabase
         .from('global_settings')
         .select('*')
-        .eq('setting_key', 'downloads');
+        .eq('setting_key', 'downloads')
+        .single();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching downloads:', error);
+        throw error;
+      }
 
-      if (data && data.length > 0) {
-        const downloadsData = data[0].setting_value as unknown as DownloadLink[];
-        setDownloads(downloadsData || []);
+      if (data && data.setting_value) {
+        const downloadsData = Array.isArray(data.setting_value) ? data.setting_value : [];
+        console.log('Downloads loaded from database:', downloadsData);
+        setDownloads(downloadsData);
       } else {
         // البيانات الافتراضية
+        console.log('No downloads found, using default data');
         const defaultDownloads = [
           {
             id: 1,
@@ -58,20 +65,53 @@ export const useDownloads = () => {
         setDownloads(defaultDownloads);
       }
     } catch (error) {
-      console.error('Error fetching downloads:', error);
+      console.error('Error in fetchDownloads:', error);
       toast({
         title: "خطأ",
         description: "فشل في تحميل روابط التحميل",
         variant: "destructive"
       });
+      
+      // البيانات التجريبية في حالة الفشل
+      setDownloads([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // وظيفة مساعدة لحفظ البيانات
+  const saveDownloads = async (updatedList: DownloadLink[]) => {
+    try {
+      console.log('Saving downloads:', updatedList);
+      
+      const { error } = await supabase
+        .from('global_settings')
+        .upsert({
+          setting_key: 'downloads',
+          setting_value: updatedList,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'setting_key'
+        });
+
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+
+      console.log('Downloads saved successfully');
+      return true;
+    } catch (error) {
+      console.error('Error saving downloads:', error);
+      throw error;
     }
   };
 
   // وظيفة لإضافة رابط تحميل جديد
   const addDownload = async (newDownload: Omit<DownloadLink, 'id'>) => {
     try {
+      console.log('Adding new download:', newDownload);
+      
       const downloadWithId = {
         id: Date.now(),
         ...newDownload,
@@ -80,17 +120,9 @@ export const useDownloads = () => {
 
       const updatedList = [downloadWithId, ...downloads];
       
-      const { error } = await supabase
-        .from('global_settings')
-        .upsert({
-          setting_key: 'downloads',
-          setting_value: updatedList as any,
-          updated_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
-
+      await saveDownloads(updatedList);
       setDownloads(updatedList);
+      
       toast({
         title: "نجح",
         description: "تم إضافة رابط التحميل بنجاح"
@@ -108,21 +140,15 @@ export const useDownloads = () => {
   // وظيفة لتحديث رابط تحميل موجود
   const updateDownload = async (id: number, updatedData: Omit<DownloadLink, 'id'>) => {
     try {
+      console.log('Updating download:', id, updatedData);
+      
       const updatedList = downloads.map(download => 
         download.id === id ? { ...download, ...updatedData } : download
       );
 
-      const { error } = await supabase
-        .from('global_settings')
-        .upsert({
-          setting_key: 'downloads',
-          setting_value: updatedList as any,
-          updated_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
-
+      await saveDownloads(updatedList);
       setDownloads(updatedList);
+      
       toast({
         title: "نجح",
         description: "تم تحديث رابط التحميل بنجاح"
@@ -140,19 +166,13 @@ export const useDownloads = () => {
   // وظيفة لحذف رابط تحميل
   const deleteDownload = async (id: number) => {
     try {
+      console.log('Deleting download:', id);
+      
       const updatedList = downloads.filter(download => download.id !== id);
 
-      const { error } = await supabase
-        .from('global_settings')
-        .upsert({
-          setting_key: 'downloads',
-          setting_value: updatedList as any,
-          updated_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
-
+      await saveDownloads(updatedList);
       setDownloads(updatedList);
+      
       toast({
         title: "نجح",
         description: "تم حذف رابط التحميل بنجاح"
