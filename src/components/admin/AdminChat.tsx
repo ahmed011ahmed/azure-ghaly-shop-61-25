@@ -1,13 +1,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageSquare, Trash2, User } from 'lucide-react';
+import { Send, MessageSquare, Trash2, User, Loader2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { useChat } from '../../contexts/ChatContext';
 
 const AdminChat = () => {
-  const { messages, addMessage, clearMessages } = useChat();
+  const { messages, addMessage, clearMessages, loading } = useChat();
   const [newMessage, setNewMessage] = useState('');
   const [userName, setUserName] = useState('');
   const [isUserMode, setIsUserMode] = useState(false);
@@ -88,6 +88,7 @@ const AdminChat = () => {
               variant="outline"
               size="sm"
               className="border-red-500 text-red-400 hover:bg-red-500/10"
+              disabled={loading}
             >
               <Trash2 className="w-4 h-4" />
             </Button>
@@ -127,34 +128,48 @@ const AdminChat = () => {
       <CardContent className="bg-slate-950 flex-1 flex flex-col p-0">
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.sender === 'admin' ? 'justify-start' : 'justify-end'}`}
-            >
-              <div
-                className={`max-w-[70%] rounded-lg p-3 ${
-                  message.sender === 'admin'
-                    ? 'bg-purple-600/20 border border-purple-500/30'
-                    : 'bg-blue-600/20 border border-blue-500/30'
-                }`}
-              >
-                <div className="flex items-center space-x-2 mb-1">
-                  <span className={`text-xs font-medium ${
-                    message.sender === 'admin' ? 'text-purple-300' : 'text-blue-300'
-                  }`}>
-                    {message.sender === 'admin' ? 'الإدارة' : message.userName || 'مستخدم'}
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    {formatTime(message.timestamp)}
-                  </span>
-                </div>
-                <p className="text-white text-sm leading-relaxed">
-                  {message.text}
-                </p>
+          {loading ? (
+            <div className="flex items-center justify-center h-full">
+              <Loader2 className="w-6 h-6 text-purple-400 animate-spin" />
+              <span className="text-gray-300 mr-2">جاري تحميل الرسائل...</span>
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-300">لا توجد رسائل بعد.</p>
               </div>
             </div>
-          ))}
+          ) : (
+            messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.sender === 'admin' ? 'justify-start' : 'justify-end'}`}
+              >
+                <div
+                  className={`max-w-[70%] rounded-lg p-3 ${
+                    message.sender === 'admin'
+                      ? 'bg-purple-600/20 border border-purple-500/30'
+                      : 'bg-blue-600/20 border border-blue-500/30'
+                  }`}
+                >
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span className={`text-xs font-medium ${
+                      message.sender === 'admin' ? 'text-purple-300' : 'text-blue-300'
+                    }`}>
+                      {message.sender === 'admin' ? 'الإدارة' : message.userName || 'مستخدم'}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {formatTime(message.timestamp)}
+                    </span>
+                  </div>
+                  <p className="text-white text-sm leading-relaxed">
+                    {message.text}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -171,6 +186,7 @@ const AdminChat = () => {
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder={`اكتب رسالة ${isUserMode ? 'كمستخدم' : 'كإدارة'}...`}
               className="flex-1 bg-gray-800/50 border-gray-600 text-white"
+              disabled={loading}
             />
             <Button
               type="submit"
@@ -179,7 +195,7 @@ const AdminChat = () => {
                   ? 'bg-blue-600 hover:bg-blue-700' 
                   : 'bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25'
               }`}
-              disabled={!newMessage.trim() || (isUserMode && !userName.trim())}
+              disabled={!newMessage.trim() || (isUserMode && !userName.trim()) || loading}
             >
               <Send className="w-4 h-4" />
             </Button>
