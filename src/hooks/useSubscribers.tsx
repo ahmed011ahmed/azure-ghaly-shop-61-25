@@ -8,23 +8,21 @@ interface Subscriber {
   email: string;
   nickname?: string;
   subscription_status: 'active' | 'inactive' | 'pending';
-  subscription_level: 1 | 2 | 3 | 4 | 5;
   subscription_date?: string;
   last_login?: string;
 }
 
-export const useSubscribers = (targetLevel?: number) => {
+export const useSubscribers = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // جلب المشتركين من جدول profiles مع تصفية حسب المستوى
+  // جلب المشتركين من جدول profiles
   const fetchSubscribers = async () => {
     try {
       setLoading(true);
-      console.log('Fetching subscribers for level:', targetLevel);
+      console.log('Fetching subscribers');
       
-      // نجلب المشتركين من جدول profiles
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('*');
@@ -34,23 +32,16 @@ export const useSubscribers = (targetLevel?: number) => {
         throw profilesError;
       }
 
-      // نحول بيانات profiles إلى تنسيق المشتركين
-      let subscribersData = profilesData?.map(profile => ({
+      const subscribersData = profilesData?.map(profile => ({
         id: profile.id,
         email: profile.id,
         nickname: profile.nickname,
         subscription_status: 'active' as const,
-        subscription_level: 1 as const, // مستوى افتراضي
         subscription_date: profile.created_at,
         last_login: profile.updated_at
       })) || [];
 
-      // تصفية حسب المستوى إذا تم تحديده
-      if (targetLevel) {
-        subscribersData = subscribersData.filter(sub => sub.subscription_level === targetLevel);
-      }
-
-      console.log('Subscribers loaded for level', targetLevel, ':', subscribersData);
+      console.log('Subscribers loaded:', subscribersData);
       setSubscribers(subscribersData);
     } catch (error) {
       console.error('Error fetching subscribers:', error);
@@ -67,7 +58,6 @@ export const useSubscribers = (targetLevel?: number) => {
           email: 'subscriber1@example.com',
           nickname: 'مشترك 1',
           subscription_status: 'active',
-          subscription_level: (targetLevel as 1 | 2 | 3 | 4 | 5) || 1,
           subscription_date: new Date().toISOString(),
           last_login: new Date().toISOString()
         },
@@ -76,13 +66,12 @@ export const useSubscribers = (targetLevel?: number) => {
           email: 'subscriber2@example.com',
           nickname: 'مشترك 2',
           subscription_status: 'inactive',
-          subscription_level: (targetLevel as 1 | 2 | 3 | 4 | 5) || 1,
           subscription_date: new Date(Date.now() - 86400000).toISOString(),
           last_login: new Date(Date.now() - 86400000).toISOString()
         }
       ];
       
-      setSubscribers(targetLevel ? mockData.filter(sub => sub.subscription_level === targetLevel) : mockData);
+      setSubscribers(mockData);
     } finally {
       setLoading(false);
     }
@@ -92,12 +81,10 @@ export const useSubscribers = (targetLevel?: number) => {
   const addSubscriber = async (newSubscriber: {
     email: string;
     nickname: string;
-    subscription_level: 1 | 2 | 3 | 4 | 5;
   }) => {
     try {
       console.log('Adding new subscriber:', newSubscriber);
       
-      // إنشاء profile جديد
       const { data, error } = await supabase
         .from('profiles')
         .insert([{
@@ -119,19 +106,15 @@ export const useSubscribers = (targetLevel?: number) => {
         email: newSubscriber.email,
         nickname: newSubscriber.nickname,
         subscription_status: 'active',
-        subscription_level: newSubscriber.subscription_level,
         subscription_date: data.created_at,
         last_login: data.updated_at
       };
 
-      // إضافة المشترك فقط إذا كان يطابق المستوى المطلوب أو لا يوجد تصفية
-      if (!targetLevel || addedSubscriber.subscription_level === targetLevel) {
-        setSubscribers(prev => [addedSubscriber, ...prev]);
-      }
+      setSubscribers(prev => [addedSubscriber, ...prev]);
       
       toast({
         title: "تم بنجاح",
-        description: `تم إضافة المشترك ${newSubscriber.nickname} بنجاح للمستوى ${newSubscriber.subscription_level}`
+        description: `تم إضافة المشترك ${newSubscriber.nickname} بنجاح`
       });
 
     } catch (error) {
@@ -180,54 +163,6 @@ export const useSubscribers = (targetLevel?: number) => {
     }
   };
 
-  // تحديث مستوى الاشتراك
-  const updateSubscriptionLevel = async (id: string, level: 1 | 2 | 3 | 4 | 5) => {
-    try {
-      console.log(`Updating subscriber ${id} level to ${level}`);
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update({ 
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id);
-
-      if (error) {
-        console.error('Update level error:', error);
-        throw error;
-      }
-
-      // تحديث المشترك محلياً أو إزالته إذا لم يعد يطابق المستوى المطلوب
-      setSubscribers(prev => {
-        const updated = prev.map(sub => 
-          sub.id === id 
-            ? { ...sub, subscription_level: level, last_login: new Date().toISOString() }
-            : sub
-        );
-        
-        // إذا كان هناك تصفية حسب المستوى، إزالة المشترك إذا لم يعد يطابق
-        if (targetLevel) {
-          return updated.filter(sub => sub.subscription_level === targetLevel);
-        }
-        
-        return updated;
-      });
-
-      toast({
-        title: "تم التحديث بنجاح",
-        description: `تم تحديث مستوى المشترك إلى المستوى ${level}`
-      });
-
-    } catch (error) {
-      console.error('Error updating subscription level:', error);
-      toast({
-        title: "خطأ في التحديث",
-        description: "فشل في تحديث مستوى المشترك",
-        variant: "destructive"
-      });
-    }
-  };
-
   // حذف مشترك
   const deleteSubscriber = async (id: string) => {
     try {
@@ -262,14 +197,13 @@ export const useSubscribers = (targetLevel?: number) => {
 
   useEffect(() => {
     fetchSubscribers();
-  }, [targetLevel]);
+  }, []);
 
   return {
     subscribers,
     loading,
     addSubscriber,
     updateSubscriptionStatus,
-    updateSubscriptionLevel,
     deleteSubscriber,
     refetch: fetchSubscribers
   };

@@ -10,7 +10,6 @@ interface DownloadLink {
   download_url: string;
   version: string;
   file_size: string;
-  target_level?: number;
   created_at?: string;
 }
 
@@ -21,32 +20,24 @@ interface DownloadFromDB {
   download_url: string;
   version: string;
   file_size: string;
-  target_level?: number;
   created_at: string;
 }
 
-export const useDownloads = (targetLevel?: number) => {
+export const useDownloads = () => {
   const [downloads, setDownloads] = useState<DownloadLink[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // وظيفة لجلب روابط التحميل من Supabase مع تصفية حسب المستوى
+  // وظيفة لجلب روابط التحميل من Supabase
   const fetchDownloads = async () => {
     try {
       setLoading(true);
-      console.log('Fetching downloads from Supabase for level:', targetLevel);
+      console.log('Fetching downloads from Supabase');
       
-      let query = supabase
+      const { data, error } = await supabase
         .from('download_links')
         .select('*')
         .order('created_at', { ascending: false });
-
-      // تصفية حسب المستوى إذا تم تحديده
-      if (targetLevel) {
-        query = query.eq('target_level', targetLevel);
-      }
-
-      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching downloads:', error);
@@ -77,8 +68,7 @@ export const useDownloads = (targetLevel?: number) => {
         description: newDownload.description,
         download_url: newDownload.download_url,
         version: newDownload.version,
-        file_size: newDownload.file_size || '',
-        target_level: newDownload.target_level || targetLevel || null
+        file_size: newDownload.file_size || ''
       };
 
       console.log('Download data to insert:', downloadData);
@@ -100,11 +90,7 @@ export const useDownloads = (targetLevel?: number) => {
       }
 
       console.log('Download added successfully:', data);
-
-      // تحديث القائمة المحلية فقط إذا كان يطابق المستوى المطلوب
-      if (!targetLevel || (data as DownloadFromDB).target_level === targetLevel) {
-        setDownloads(prev => [data as DownloadLink, ...prev]);
-      }
+      setDownloads(prev => [data as DownloadLink, ...prev]);
       
       toast({
         title: "نجح",
@@ -150,7 +136,6 @@ export const useDownloads = (targetLevel?: number) => {
         return;
       }
 
-      // تحديث القائمة المحلية
       setDownloads(prev => prev.map(download => 
         download.id === id ? data : download
       ));
@@ -189,7 +174,6 @@ export const useDownloads = (targetLevel?: number) => {
         return;
       }
 
-      // تحديث القائمة المحلية
       setDownloads(prev => prev.filter(download => download.id !== id));
       
       toast({
@@ -208,7 +192,7 @@ export const useDownloads = (targetLevel?: number) => {
 
   useEffect(() => {
     fetchDownloads();
-  }, [targetLevel]);
+  }, []);
 
   return {
     downloads,

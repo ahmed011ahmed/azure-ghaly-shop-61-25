@@ -8,7 +8,6 @@ interface Update {
   title: string;
   description: string;
   version: string;
-  target_level?: number;
   created_at?: string;
 }
 
@@ -17,32 +16,24 @@ interface UpdateFromDB {
   title: string;
   description: string;
   version: string;
-  target_level?: number;
   created_at: string;
 }
 
-export const useUpdates = (targetLevel?: number) => {
+export const useUpdates = () => {
   const [updates, setUpdates] = useState<Update[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // وظيفة لجلب التحديثات من Supabase مع تصفية حسب المستوى
+  // وظيفة لجلب التحديثات من Supabase
   const fetchUpdates = async () => {
     try {
       setLoading(true);
-      console.log('Fetching updates from Supabase for level:', targetLevel);
+      console.log('Fetching updates from Supabase');
       
-      let query = supabase
+      const { data, error } = await supabase
         .from('updates')
         .select('*')
         .order('created_at', { ascending: false });
-
-      // تصفية حسب المستوى إذا تم تحديده
-      if (targetLevel) {
-        query = query.eq('target_level', targetLevel);
-      }
-
-      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching updates:', error);
@@ -71,8 +62,7 @@ export const useUpdates = (targetLevel?: number) => {
       const updateData = {
         title: newUpdate.title,
         description: newUpdate.description,
-        version: newUpdate.version,
-        target_level: newUpdate.target_level || targetLevel || null
+        version: newUpdate.version
       };
 
       console.log('Update data to insert:', updateData);
@@ -94,11 +84,7 @@ export const useUpdates = (targetLevel?: number) => {
       }
 
       console.log('Update added successfully:', data);
-      
-      // تحديث القائمة المحلية فقط إذا كان يطابق المستوى المطلوب
-      if (!targetLevel || (data as UpdateFromDB).target_level === targetLevel) {
-        setUpdates(prev => [data as Update, ...prev]);
-      }
+      setUpdates(prev => [data as Update, ...prev]);
       
       toast({
         title: "نجح",
@@ -142,7 +128,6 @@ export const useUpdates = (targetLevel?: number) => {
         return;
       }
 
-      // تحديث القائمة المحلية
       setUpdates(prev => prev.map(update => 
         update.id === id ? data : update
       ));
@@ -181,7 +166,6 @@ export const useUpdates = (targetLevel?: number) => {
         return;
       }
 
-      // تحديث القائمة المحلية
       setUpdates(prev => prev.filter(update => update.id !== id));
       
       toast({
@@ -200,7 +184,7 @@ export const useUpdates = (targetLevel?: number) => {
 
   useEffect(() => {
     fetchUpdates();
-  }, [targetLevel]);
+  }, []);
 
   return {
     updates,
