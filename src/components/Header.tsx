@@ -51,7 +51,7 @@ const Header = () => {
                       خروج
                     </Button>
                   </div> : <Link to="/auth">
-                    <Button variant="outline" size="sm" className="border-purple-500 text-purple-400 hover:bg-purple-500/10 px-[12px] py-[9px] my-[12px] mx-[25px]">
+                    <Button variant="outline" size="sm" className="border-purple-500 px-[12px] py-[9px] my-[12px] mx-[25px] bg-[#7f00fa]/10 text-slate-50">
                       <User className="w-4 h-4 mr-2" />
                       دخول
                     </Button>
