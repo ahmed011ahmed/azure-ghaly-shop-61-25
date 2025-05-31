@@ -54,14 +54,16 @@ export const useDownloads = () => {
     try {
       console.log('Adding new download:', newDownload);
       
+      // إرسال البيانات الأساسية فقط
       const downloadData = {
         name: newDownload.name,
         description: newDownload.description,
         download_url: newDownload.download_url,
         version: newDownload.version,
-        file_size: newDownload.file_size,
-        target_level: newDownload.target_level || 1
+        file_size: newDownload.file_size || ''
       };
+
+      console.log('Download data to insert:', downloadData);
 
       const { data, error } = await supabase
         .from('download_links')
@@ -70,9 +72,16 @@ export const useDownloads = () => {
         .single();
 
       if (error) {
-        console.error('Error adding download:', error);
-        throw error;
+        console.error('Supabase error details:', error);
+        toast({
+          title: "خطأ في قاعدة البيانات",
+          description: `فشل في إضافة رابط التحميل: ${error.message}`,
+          variant: "destructive"
+        });
+        return;
       }
+
+      console.log('Download added successfully:', data);
 
       // تحديث القائمة المحلية
       setDownloads(prev => [data, ...prev]);
@@ -85,7 +94,7 @@ export const useDownloads = () => {
       console.error('Error adding download:', error);
       toast({
         title: "خطأ",
-        description: "فشل في إضافة رابط التحميل",
+        description: "حدث خطأ غير متوقع في إضافة رابط التحميل",
         variant: "destructive"
       });
     }
@@ -101,8 +110,7 @@ export const useDownloads = () => {
         description: updatedData.description,
         download_url: updatedData.download_url,
         version: updatedData.version,
-        file_size: updatedData.file_size,
-        target_level: updatedData.target_level || 1
+        file_size: updatedData.file_size || ''
       };
 
       const { data, error } = await supabase
@@ -114,7 +122,12 @@ export const useDownloads = () => {
 
       if (error) {
         console.error('Error updating download:', error);
-        throw error;
+        toast({
+          title: "خطأ في قاعدة البيانات",
+          description: `فشل في تحديث رابط التحميل: ${error.message}`,
+          variant: "destructive"
+        });
+        return;
       }
 
       // تحديث القائمة المحلية
@@ -148,7 +161,12 @@ export const useDownloads = () => {
 
       if (error) {
         console.error('Error deleting download:', error);
-        throw error;
+        toast({
+          title: "خطأ في قاعدة البيانات",
+          description: `فشل في حذف رابط التحميل: ${error.message}`,
+          variant: "destructive"
+        });
+        return;
       }
 
       // تحديث القائمة المحلية

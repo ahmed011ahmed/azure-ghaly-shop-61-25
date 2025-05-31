@@ -52,12 +52,14 @@ export const useUpdates = () => {
     try {
       console.log('Adding new update:', newUpdate);
       
+      // إرسال البيانات الأساسية فقط
       const updateData = {
         title: newUpdate.title,
         description: newUpdate.description,
-        version: newUpdate.version,
-        target_level: newUpdate.target_level || 1
+        version: newUpdate.version
       };
+
+      console.log('Update data to insert:', updateData);
 
       const { data, error } = await supabase
         .from('updates')
@@ -66,10 +68,17 @@ export const useUpdates = () => {
         .single();
 
       if (error) {
-        console.error('Error adding update:', error);
-        throw error;
+        console.error('Supabase error details:', error);
+        toast({
+          title: "خطأ في قاعدة البيانات",
+          description: `فشل في إضافة التحديث: ${error.message}`,
+          variant: "destructive"
+        });
+        return;
       }
 
+      console.log('Update added successfully:', data);
+      
       // تحديث القائمة المحلية
       setUpdates(prev => [data, ...prev]);
       
@@ -81,7 +90,7 @@ export const useUpdates = () => {
       console.error('Error adding update:', error);
       toast({
         title: "خطأ",
-        description: "فشل في إضافة التحديث",
+        description: "حدث خطأ غير متوقع في إضافة التحديث",
         variant: "destructive"
       });
     }
@@ -95,8 +104,7 @@ export const useUpdates = () => {
       const updatePayload = {
         title: updatedData.title,
         description: updatedData.description,
-        version: updatedData.version,
-        target_level: updatedData.target_level || 1
+        version: updatedData.version
       };
 
       const { data, error } = await supabase
@@ -108,7 +116,12 @@ export const useUpdates = () => {
 
       if (error) {
         console.error('Error updating update:', error);
-        throw error;
+        toast({
+          title: "خطأ في قاعدة البيانات",
+          description: `فشل في تحديث الإصدار: ${error.message}`,
+          variant: "destructive"
+        });
+        return;
       }
 
       // تحديث القائمة المحلية
@@ -142,7 +155,12 @@ export const useUpdates = () => {
 
       if (error) {
         console.error('Error deleting update:', error);
-        throw error;
+        toast({
+          title: "خطأ في قاعدة البيانات",
+          description: `فشل في حذف التحديث: ${error.message}`,
+          variant: "destructive"
+        });
+        return;
       }
 
       // تحديث القائمة المحلية
