@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Download, Calendar, Shield, Users } from 'lucide-react';
+import { ArrowLeft, Download, Calendar, Shield, Users, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '../hooks/useAuth';
@@ -14,6 +14,24 @@ const Subscribers = () => {
   const { toast } = useToast();
   const { updates, loading: updatesLoading } = useUpdates();
   const { downloads, loading: downloadsLoading } = useDownloads();
+
+  // التحقق من الأذونات
+  const checkPermissions = () => {
+    if (!user?.email) return false;
+    
+    const storedPermissions = localStorage.getItem('subscriberPermissions');
+    if (!storedPermissions) return false;
+    
+    try {
+      const permissions = JSON.parse(storedPermissions);
+      return permissions.some((permission: any) => permission.email === user.email);
+    } catch (error) {
+      console.error('Error checking permissions:', error);
+      return false;
+    }
+  };
+
+  const hasPermission = checkPermissions();
 
   const handleDownload = (name: string, url: string) => {
     toast({
@@ -58,6 +76,58 @@ const Subscribers = () => {
                 <Link to="/auth">
                   <Button className="w-full bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25">
                     تسجيل الدخول
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // إذا كان المستخدم مسجل دخول لكن ليس لديه إذن
+  if (!loading && user && !hasPermission) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900">
+        {/* Header */}
+        <header className="bg-gray-900/95 backdrop-blur-md border-b border-purple-800/30">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Link to="/" className="text-gray-300 hover:text-purple-400 transition-colors">
+                  <ArrowLeft className="w-6 h-6" />
+                </Link>
+                <h1 className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent mx-[13px]">
+                  منطقة المشتركين
+                </h1>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Users className="w-5 h-5 text-purple-400" />
+                <span className="text-gray-300">مرحباً، {user?.email}</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Access Denied */}
+        <div className="container mx-auto px-4 py-20">
+          <div className="max-w-md mx-auto text-center">
+            <Card className="gaming-card">
+              <CardHeader className="bg-slate-900">
+                <Lock className="w-16 h-16 text-red-400 mx-auto mb-4" />
+                <CardTitle className="text-2xl text-white">وصول مرفوض</CardTitle>
+                <CardDescription className="text-gray-300">
+                  ليس لديك صلاحية للوصول إلى منطقة المشتركين
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="bg-slate-950 pt-6">
+                <p className="text-gray-400 mb-4">
+                  يرجى التواصل مع الإدارة للحصول على صلاحية الوصول
+                </p>
+                <Link to="/">
+                  <Button variant="outline" className="w-full border-gray-600 text-gray-300 hover:bg-gray-700">
+                    العودة للصفحة الرئيسية
                   </Button>
                 </Link>
               </CardContent>

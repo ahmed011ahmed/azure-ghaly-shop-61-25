@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch } from 'lucide-react';
+import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductManagement from '../components/admin/ProductManagement';
 import AdminLogin from '../components/admin/AdminLogin';
@@ -9,6 +8,7 @@ import UpdatesManagement from '../components/admin/UpdatesManagement';
 import DownloadsManagement from '../components/admin/DownloadsManagement';
 import SubscribersManagement from '../components/admin/SubscribersManagement';
 import UserLookup from '../components/admin/UserLookup';
+import PermissionsManagement from '../components/admin/PermissionsManagement';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 
@@ -90,6 +90,11 @@ const AdminDashboard = () => {
       id: 'user-lookup',
       label: 'البحث عن مشترك',
       icon: UserSearch
+    },
+    {
+      id: 'permissions',
+      label: 'أذونات المشتركين',
+      icon: Shield
     },
     {
       id: 'downloads',
@@ -240,6 +245,8 @@ const AdminDashboard = () => {
         {activeTab === 'subscribers' && <SubscribersManagement />}
         
         {activeTab === 'user-lookup' && <UserLookup />}
+        
+        {activeTab === 'permissions' && <PermissionsManagement />}
         
         {activeTab === 'downloads' && <DownloadsManagement />}
         
