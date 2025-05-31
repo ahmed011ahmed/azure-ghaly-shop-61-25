@@ -34,8 +34,8 @@ const Header = () => {
               الأدوات
             </a>
             <Link to="/admin" className="text-gray-300 hover:text-purple-400 font-medium transition-colors flex items-center space-x-2">
-              <Settings className="w-4 h-4" />
-              <span>الإدارة</span>
+              
+              
             </Link>
           </nav>
           
@@ -51,7 +51,7 @@ const Header = () => {
                       خروج
                     </Button>
                   </div> : <Link to="/auth">
-                    <Button variant="outline" size="sm" className="border-purple-500 text-purple-400 hover:bg-purple-500/10">
+                    <Button variant="outline" size="sm" className="border-purple-500 text-purple-400 hover:bg-purple-500/10 px-[12px] py-[9px] my-[12px] mx-[25px]">
                       <User className="w-4 h-4 mr-2" />
                       دخول
                     </Button>
