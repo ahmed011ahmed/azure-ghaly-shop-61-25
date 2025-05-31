@@ -18,71 +18,27 @@ export const useDownloads = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // وظيفة لجلب روابط التحميل من قاعدة البيانات
+  // وظيفة لجلب روابط التحميل من localStorage أو البيانات الافتراضية
   const fetchDownloads = async () => {
     try {
       setLoading(true);
-      console.log('Fetching downloads...');
+      console.log('Fetching downloads from localStorage...');
       
-      const { data, error } = await supabase
-        .from('global_settings')
-        .select('*')
-        .eq('setting_key', 'downloads')
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching downloads:', error);
-        throw error;
-      }
-
-      if (data && data.setting_value) {
-        // التأكد من أن البيانات في التنسيق الصحيح
-        let downloadsData: DownloadLink[] = [];
-        
+      // محاولة جلب البيانات من localStorage أولاً
+      const storedDownloads = localStorage.getItem('downloads_data');
+      
+      if (storedDownloads) {
         try {
-          const rawData = data.setting_value;
-          if (Array.isArray(rawData)) {
-            downloadsData = rawData.map((item: any, index: number) => ({
-              id: item.id || Date.now() + index,
-              name: item.name || '',
-              description: item.description || '',
-              download_url: item.download_url || '',
-              version: item.version || '',
-              file_size: item.file_size || '',
-              created_at: item.created_at || new Date().toISOString()
-            }));
-          }
+          const parsedDownloads = JSON.parse(storedDownloads);
+          console.log('Downloads loaded from localStorage:', parsedDownloads);
+          setDownloads(parsedDownloads);
         } catch (parseError) {
-          console.error('Error parsing downloads data:', parseError);
-          downloadsData = [];
+          console.error('Error parsing localStorage data:', parseError);
+          loadDefaultDownloads();
         }
-        
-        console.log('Downloads loaded from database:', downloadsData);
-        setDownloads(downloadsData);
       } else {
-        // البيانات الافتراضية
-        console.log('No downloads found, using default data');
-        const defaultDownloads: DownloadLink[] = [
-          {
-            id: 1,
-            name: "GHALY BYPASS TOOL",
-            description: "أداة البايباس الحصرية من GHALY HAX للتجاوز المتقدم",
-            download_url: "https://example.com/download1",
-            version: "v2.1.4",
-            file_size: "45 MB",
-            created_at: new Date().toISOString()
-          },
-          {
-            id: 2,
-            name: "GHALY INJECTOR",
-            description: "أداة الحقن المتقدمة للألعاب مع دعم أحدث الألعاب",
-            download_url: "https://example.com/download2",
-            version: "v1.8.2",
-            file_size: "32 MB",
-            created_at: new Date().toISOString()
-          }
-        ];
-        setDownloads(defaultDownloads);
+        // إذا لم توجد بيانات في localStorage، استخدم البيانات الافتراضية
+        loadDefaultDownloads();
       }
     } catch (error) {
       console.error('Error in fetchDownloads:', error);
@@ -91,51 +47,49 @@ export const useDownloads = () => {
         description: "فشل في تحميل روابط التحميل",
         variant: "destructive"
       });
-      
-      // البيانات التجريبية في حالة الفشل
-      setDownloads([]);
+      loadDefaultDownloads();
     } finally {
       setLoading(false);
     }
   };
 
-  // وظيفة مساعدة لحفظ البيانات
+  // وظيفة لتحميل البيانات الافتراضية
+  const loadDefaultDownloads = () => {
+    console.log('Loading default downloads');
+    const defaultDownloads: DownloadLink[] = [
+      {
+        id: 1,
+        name: "GHALY BYPASS TOOL",
+        description: "أداة البايباس الحصرية من GHALY HAX للتجاوز المتقدم",
+        download_url: "https://example.com/download1",
+        version: "v2.1.4",
+        file_size: "45 MB",
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 2,
+        name: "GHALY INJECTOR",
+        description: "أداة الحقن المتقدمة للألعاب مع دعم أحدث الألعاب",
+        download_url: "https://example.com/download2",
+        version: "v1.8.2",
+        file_size: "32 MB",
+        created_at: new Date().toISOString()
+      }
+    ];
+    setDownloads(defaultDownloads);
+    // حفظ البيانات الافتراضية في localStorage
+    localStorage.setItem('downloads_data', JSON.stringify(defaultDownloads));
+  };
+
+  // وظيفة مساعدة لحفظ البيانات في localStorage
   const saveDownloads = async (updatedList: DownloadLink[]) => {
     try {
-      console.log('Saving downloads:', updatedList);
-      
-      // تحويل البيانات إلى تنسيق JSON بسيط
-      const jsonData = updatedList.map(item => ({
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        download_url: item.download_url,
-        version: item.version,
-        file_size: item.file_size,
-        created_at: item.created_at
-      }));
-
-      console.log('Prepared JSON data:', jsonData);
-
-      const { error } = await supabase
-        .from('global_settings')
-        .upsert({
-          setting_key: 'downloads',
-          setting_value: JSON.parse(JSON.stringify(jsonData)),
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'setting_key'
-        });
-
-      if (error) {
-        console.error('Database error:', error);
-        throw error;
-      }
-
-      console.log('Downloads saved successfully');
+      console.log('Saving downloads to localStorage:', updatedList);
+      localStorage.setItem('downloads_data', JSON.stringify(updatedList));
+      console.log('Downloads saved successfully to localStorage');
       return true;
     } catch (error) {
-      console.error('Error saving downloads:', error);
+      console.error('Error saving downloads to localStorage:', error);
       throw error;
     }
   };
