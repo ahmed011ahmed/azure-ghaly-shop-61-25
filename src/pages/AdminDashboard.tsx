@@ -107,13 +107,13 @@ const AdminDashboard = () => {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {stats.map((stat, index) => <Card key={index} className="gaming-card">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-slate-950">
                     <CardTitle className="text-sm font-medium text-gray-300">
                       {stat.title}
                     </CardTitle>
                     <stat.icon className={`w-5 h-5 ${stat.color}`} />
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="bg-slate-950">
                     <div className="text-2xl font-bold text-white">{stat.value}</div>
                   </CardContent>
                 </Card>)}
@@ -121,13 +121,13 @@ const AdminDashboard = () => {
 
             {/* Quick Actions */}
             <Card className="gaming-card">
-              <CardHeader>
+              <CardHeader className="bg-slate-950">
                 <CardTitle className="text-xl text-white">إجراءات سريعة</CardTitle>
                 <CardDescription className="text-gray-300">
                   الإجراءات الأكثر استخداماً في لوحة التحكم
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="bg-slate-950">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Button onClick={() => setActiveTab('products')} className="bg-purple-600 hover:bg-purple-700 text-white p-6 h-auto flex-col space-y-2">
                     <Package className="w-8 h-8" />
@@ -135,13 +135,13 @@ const AdminDashboard = () => {
                     <span className="text-sm opacity-80">إضافة وتعديل المنتجات</span>
                   </Button>
                   
-                  <Button variant="outline" className="border-pink-500 text-pink-400 hover:bg-pink-500/10 p-6 h-auto flex-col space-y-2">
+                  <Button variant="outline" className="border-pink-500 hover:bg-pink-500/10 p-6 h-auto flex-col space-y-2 text-slate-50">
                     <Users className="w-8 h-8" />
-                    <span className="font-semibold">إدارة العملاء</span>
-                    <span className="text-sm opacity-80">عرض وإدارة العملاء</span>
+                    <span className="font-semibold text-slate-50">إدارة العملاء</span>
+                    <span className="text-sm opacity-80 text-slate-50">عرض وإدارة العملاء</span>
                   </Button>
                   
-                  <Button variant="outline" className="border-blue-500 text-blue-400 hover:bg-blue-500/10 p-6 h-auto flex-col space-y-2">
+                  <Button variant="outline" className="border-blue-500 hover:bg-blue-500/10 p-6 h-auto flex-col space-y-2 text-slate-50">
                     <TrendingUp className="w-8 h-8" />
                     <span className="font-semibold">التقارير</span>
                     <span className="text-sm opacity-80">مشاهدة الإحصائيات</span>
