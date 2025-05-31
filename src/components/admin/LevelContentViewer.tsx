@@ -14,6 +14,8 @@ const LevelContentViewer = ({ level }: LevelContentViewerProps) => {
   const { getContentForLevel, getLevelName, getLevelColor } = useLevelContent();
   const content = getContentForLevel(level);
 
+  console.log(`Loading content for level ${level}:`, content);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -24,7 +26,7 @@ const LevelContentViewer = ({ level }: LevelContentViewerProps) => {
       </div>
 
       {/* التحديثات المتاحة لهذا المستوى */}
-      <Card className="gaming-card">
+      <Card className="bg-gray-900 border-gray-700">
         <CardHeader className="bg-slate-900">
           <CardTitle className="text-white flex items-center">
             <RefreshCw className="w-5 h-5 mr-2 text-blue-400" />
@@ -69,7 +71,7 @@ const LevelContentViewer = ({ level }: LevelContentViewerProps) => {
       </Card>
 
       {/* التحميلات المتاحة لهذا المستوى */}
-      <Card className="gaming-card">
+      <Card className="bg-gray-900 border-gray-700">
         <CardHeader className="bg-slate-900">
           <CardTitle className="text-white flex items-center">
             <Download className="w-5 h-5 mr-2 text-green-400" />

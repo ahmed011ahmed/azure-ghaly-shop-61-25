@@ -15,6 +15,10 @@ export const useLevelContent = () => {
   const [levelContent, setLevelContent] = useState<LevelContent[]>([]);
 
   useEffect(() => {
+    console.log('Organizing content by level...');
+    console.log('Updates:', updates);
+    console.log('Downloads:', downloads);
+    
     // تنظيم المحتوى حسب المستويات
     const organizeContentByLevel = () => {
       const levels = [1, 2, 3, 4, 5];
@@ -24,6 +28,7 @@ export const useLevelContent = () => {
         downloads: downloads.filter(download => download.target_level === level)
       }));
       
+      console.log('Organized content:', organized);
       setLevelContent(organized);
     };
 
@@ -31,7 +36,8 @@ export const useLevelContent = () => {
   }, [updates, downloads]);
 
   const getContentForLevel = (level: number) => {
-    return levelContent.find(content => content.level === level) || {
+    const content = levelContent.find(content => content.level === level);
+    return content || {
       level,
       updates: [],
       downloads: []
