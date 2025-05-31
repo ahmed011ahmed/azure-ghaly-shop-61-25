@@ -52,9 +52,16 @@ export const useUpdates = () => {
     try {
       console.log('Adding new update:', newUpdate);
       
+      const updateData = {
+        title: newUpdate.title,
+        description: newUpdate.description,
+        version: newUpdate.version,
+        target_level: newUpdate.target_level || 1
+      };
+
       const { data, error } = await supabase
         .from('updates')
-        .insert([newUpdate])
+        .insert([updateData])
         .select()
         .single();
 
@@ -85,9 +92,16 @@ export const useUpdates = () => {
     try {
       console.log('Updating update:', id, updatedData);
       
+      const updatePayload = {
+        title: updatedData.title,
+        description: updatedData.description,
+        version: updatedData.version,
+        target_level: updatedData.target_level || 1
+      };
+
       const { data, error } = await supabase
         .from('updates')
-        .update(updatedData)
+        .update(updatePayload)
         .eq('id', id)
         .select()
         .single();

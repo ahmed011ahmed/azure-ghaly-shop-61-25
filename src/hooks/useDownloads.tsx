@@ -54,9 +54,18 @@ export const useDownloads = () => {
     try {
       console.log('Adding new download:', newDownload);
       
+      const downloadData = {
+        name: newDownload.name,
+        description: newDownload.description,
+        download_url: newDownload.download_url,
+        version: newDownload.version,
+        file_size: newDownload.file_size,
+        target_level: newDownload.target_level || 1
+      };
+
       const { data, error } = await supabase
         .from('download_links')
-        .insert([newDownload])
+        .insert([downloadData])
         .select()
         .single();
 
@@ -87,9 +96,18 @@ export const useDownloads = () => {
     try {
       console.log('Updating download:', id, updatedData);
       
+      const downloadPayload = {
+        name: updatedData.name,
+        description: updatedData.description,
+        download_url: updatedData.download_url,
+        version: updatedData.version,
+        file_size: updatedData.file_size,
+        target_level: updatedData.target_level || 1
+      };
+
       const { data, error } = await supabase
         .from('download_links')
-        .update(updatedData)
+        .update(downloadPayload)
         .eq('id', id)
         .select()
         .single();
