@@ -26,7 +26,7 @@ export const usePubgAccounts = () => {
       console.log('البيانات المحملة من قاعدة البيانات:', data);
 
       // تحويل البيانات للتوافق مع النوع المطلوب
-      const formattedAccounts: PubgAccount[] = (data || []).map((account) => {
+      const formattedAccounts: PubgAccount[] = (data || []).map((account: any) => {
         // توليد ID ثابت من معرف الحساب في قاعدة البيانات
         const randomId = account.id.replace(/-/g, '').slice(0, 8).toUpperCase();
 
