@@ -12,6 +12,7 @@ import PubgAccounts from "./pages/PubgAccounts";
 import NotFound from "./pages/NotFound";
 import { ProductsProvider } from "./contexts/ProductsContext";
 import { ChatProvider } from "./contexts/ChatContext";
+import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider } from "./hooks/useAuth";
 import { LanguageProvider } from "./contexts/LanguageContext";
 
@@ -22,23 +23,25 @@ const App = () => (
     <TooltipProvider>
       <LanguageProvider>
         <AuthProvider>
-          <ProductsProvider>
-            <ChatProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/subscribers" element={<Subscribers />} />
-                  <Route path="/pubg-accounts" element={<PubgAccounts />} />
-                  <Route path="/admin" element={<AdminDashboard />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </ChatProvider>
-          </ProductsProvider>
+          <CartProvider>
+            <ProductsProvider>
+              <ChatProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/subscribers" element={<Subscribers />} />
+                    <Route path="/pubg-accounts" element={<PubgAccounts />} />
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </ChatProvider>
+            </ProductsProvider>
+          </CartProvider>
         </AuthProvider>
       </LanguageProvider>
     </TooltipProvider>
