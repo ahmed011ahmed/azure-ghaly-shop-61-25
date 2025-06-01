@@ -69,6 +69,45 @@ export type Database = {
         }
         Relationships: []
       }
+      giveaways: {
+        Row: {
+          created_at: string
+          description: string
+          end_date: string
+          id: string
+          image: string
+          is_active: boolean
+          participants_count: number
+          prize: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          end_date: string
+          id?: string
+          image: string
+          is_active?: boolean
+          participants_count?: number
+          prize: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          end_date?: string
+          id?: string
+          image?: string
+          is_active?: boolean
+          participants_count?: number
+          prize?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       global_settings: {
         Row: {
           id: string

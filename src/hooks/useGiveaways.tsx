@@ -22,7 +22,7 @@ export const useGiveaways = () => {
       }
 
       // تحويل البيانات للتوافق مع النوع المطلوب
-      const formattedGiveaways: Giveaway[] = data?.map(giveaway => ({
+      const formattedGiveaways: Giveaway[] = data?.map((giveaway: any) => ({
         id: giveaway.id,
         title: giveaway.title,
         description: giveaway.description,
