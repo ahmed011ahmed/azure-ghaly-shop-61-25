@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { PubgAccount, NewPubgAccount } from '../types/pubgAccount';
@@ -37,6 +38,7 @@ export const usePubgAccounts = () => {
           image: account.image,
           description: account.description,
           video: account.video || undefined,
+          notes: account.notes || undefined,
           isAvailable: account.is_available,
           createdAt: account.created_at,
           updatedAt: account.updated_at
@@ -93,6 +95,11 @@ export const usePubgAccounts = () => {
         accountData.video = newAccount.video;
       }
 
+      // إضافة الملاحظات فقط إذا كانت متوفرة
+      if (newAccount.notes && newAccount.notes.trim()) {
+        accountData.notes = newAccount.notes;
+      }
+
       console.log('البيانات التي سيتم إرسالها:', accountData);
 
       const { data, error } = await supabase
@@ -132,6 +139,7 @@ export const usePubgAccounts = () => {
       if (updates.image !== undefined) dbUpdates.image = updates.image;
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.video !== undefined) dbUpdates.video = updates.video;
+      if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
       if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
       dbUpdates.updated_at = new Date().toISOString();
 

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Label } from '../ui/label';
 import { Star } from 'lucide-react';
@@ -19,7 +20,8 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
     image: '',
     description: '',
     video: '',
-    rating: 5
+    rating: 5,
+    notes: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -32,7 +34,8 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
       image: '',
       description: '',
       video: '',
-      rating: 5
+      rating: 5,
+      notes: ''
     });
   };
 
@@ -127,12 +130,12 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
 
           <div className="space-y-2">
             <Label htmlFor="description" className="text-white">وصف المنتج</Label>
-            <textarea
+            <Textarea
               id="description"
               name="description"
               value={formData.description}
               onChange={handleChange}
-              className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white resize-none"
+              className="bg-gray-800 border-gray-600 text-white resize-none"
               placeholder="أدخل وصف تفصيلي للمنتج..."
               maxLength={200}
               required
@@ -140,6 +143,19 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
             <p className="text-sm text-gray-400">
               {formData.description.length}/200 حرف (الحد الأدنى 20 حرف)
             </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="notes" className="text-white">ملاحظات إضافية (اختياري)</Label>
+            <Input
+              id="notes"
+              name="notes"
+              type="text"
+              value={formData.notes}
+              onChange={handleChange}
+              className="bg-gray-800 border-gray-600 text-white"
+              placeholder="أدخل أي ملاحظات إضافية..."
+            />
           </div>
 
           <div className="space-y-2">

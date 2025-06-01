@@ -8,6 +8,7 @@ export interface PubgAccount {
   description: string;
   video?: string; // رابط فيديو اختياري
   rating: number; // التقييم من 1 إلى 5
+  notes?: string; // ملاحظات إضافية
   isAvailable: boolean;
   createdAt: string;
   updatedAt: string;
@@ -20,4 +21,5 @@ export interface NewPubgAccount {
   description: string;
   video?: string; // رابط فيديو اختياري
   rating: number; // التقييم من 1 إلى 5
+  notes?: string; // ملاحظات إضافية
 }
