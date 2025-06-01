@@ -27,12 +27,13 @@ export function PubgChatProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<PubgChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // تحميل الرسائل من قاعدة البيانات
+  // تحميل الرسائل من قاعدة البيانات - استخدام chat_messages مع فلترة PUBG
   const loadMessages = async () => {
     try {
       const { data, error } = await supabase
-        .from('pubg_chat_messages')
+        .from('chat_messages')
         .select('*')
+        .like('text', '%PUBG%')
         .order('created_at', { ascending: true });
 
       if (error) {
@@ -40,7 +41,7 @@ export function PubgChatProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const formattedMessages = data.map((msg: any) => ({
+      const formattedMessages = data?.map((msg: any) => ({
         id: msg.id,
         text: msg.text,
         sender: msg.sender as 'admin' | 'user',
@@ -48,7 +49,7 @@ export function PubgChatProvider({ children }: { children: ReactNode }) {
         userName: msg.user_name,
         targetUser: msg.target_user,
         created_at: msg.created_at
-      }));
+      })) || [];
 
       setMessages(formattedMessages);
     } catch (error) {
@@ -69,23 +70,26 @@ export function PubgChatProvider({ children }: { children: ReactNode }) {
         {
           event: '*',
           schema: 'public',
-          table: 'pubg_chat_messages'
+          table: 'chat_messages'
         },
         (payload) => {
           console.log('Real-time PUBG chat update:', payload);
           
           if (payload.eventType === 'INSERT') {
-            const newMessage = {
-              id: payload.new.id,
-              text: payload.new.text,
-              sender: payload.new.sender as 'admin' | 'user',
-              timestamp: new Date(payload.new.created_at),
-              userName: payload.new.user_name,
-              targetUser: payload.new.target_user,
-              created_at: payload.new.created_at
-            };
-            
-            setMessages(prev => [...prev, newMessage]);
+            // فلترة الرسائل المتعلقة بـ PUBG فقط
+            if (payload.new.text?.includes('PUBG')) {
+              const newMessage = {
+                id: payload.new.id,
+                text: payload.new.text,
+                sender: payload.new.sender as 'admin' | 'user',
+                timestamp: new Date(payload.new.created_at),
+                userName: payload.new.user_name,
+                targetUser: payload.new.target_user,
+                created_at: payload.new.created_at
+              };
+              
+              setMessages(prev => [...prev, newMessage]);
+            }
           } else if (payload.eventType === 'DELETE') {
             setMessages(prev => prev.filter(msg => msg.id !== payload.old.id));
           }
@@ -100,15 +104,18 @@ export function PubgChatProvider({ children }: { children: ReactNode }) {
 
   const addMessage = async (text: string, sender: 'admin' | 'user', userName?: string, targetUser?: string) => {
     try {
+      // إضافة PUBG في بداية النص للتمييز
+      const pubgText = text.startsWith('[PUBG]') ? text : `[PUBG] ${text}`;
+      
       const messageData = {
-        text,
+        text: pubgText,
         sender,
         user_name: sender === 'user' ? (profile?.nickname || userName || 'مستخدم') : null,
         target_user: targetUser || null,
       };
 
       const { error } = await supabase
-        .from('pubg_chat_messages')
+        .from('chat_messages')
         .insert([messageData]);
 
       if (error) {
@@ -125,9 +132,9 @@ export function PubgChatProvider({ children }: { children: ReactNode }) {
   const clearMessages = async () => {
     try {
       const { error } = await supabase
-        .from('pubg_chat_messages')
+        .from('chat_messages')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
+        .like('text', '%PUBG%');
 
       if (error) {
         console.error('Error clearing PUBG chat messages:', error);

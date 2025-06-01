@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 interface AdminUser {
   id: string;
@@ -16,25 +15,20 @@ export const useAdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // جلب قائمة مستخدمي الإدارة
+  // حفظ البيانات في localStorage مؤقتاً حتى يتم إنشاء جدول admin_users
+  const STORAGE_KEY = 'admin_users_data';
+
+  // جلب قائمة مستخدمي الإدارة من localStorage
   const fetchAdminUsers = async () => {
     try {
       setLoading(true);
-      console.log('Fetching admin users from database');
+      console.log('Loading admin users from localStorage');
       
-      const { data, error } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching admin users:', error);
-        throw error;
-      }
-
-      console.log('Admin users loaded from database:', data);
-      setAdminUsers(data || []);
+      const storedData = localStorage.getItem(STORAGE_KEY);
+      const users = storedData ? JSON.parse(storedData) : [];
+      
+      console.log('Admin users loaded from localStorage:', users);
+      setAdminUsers(users);
     } catch (error) {
       console.error('Error in fetchAdminUsers:', error);
       toast({
@@ -53,17 +47,12 @@ export const useAdminUsers = () => {
       console.log('Adding admin user:', email, 'with permissions:', permissions);
       
       // التحقق من عدم وجود البريد الإلكتروني مسبقاً
-      const { data: existingUser, error: checkError } = await supabase
-        .from('admin_users')
-        .select('email')
-        .eq('email', email)
-        .eq('is_active', true)
-        .maybeSingle();
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        console.error('Error checking existing user:', checkError);
-        throw checkError;
-      }
+      const storedData = localStorage.getItem(STORAGE_KEY);
+      const existingUsers = storedData ? JSON.parse(storedData) : [];
+      
+      const existingUser = existingUsers.find((user: AdminUser) => 
+        user.email === email && user.is_active
+      );
 
       if (existingUser) {
         toast({
@@ -74,28 +63,19 @@ export const useAdminUsers = () => {
         return false;
       }
 
-      const { data, error } = await supabase
-        .from('admin_users')
-        .insert([{
-          email: email,
-          password_hash: password, // في التطبيق الحقيقي يجب تشفير كلمة المرور
-          permissions: permissions,
-          is_active: true
-        }])
-        .select()
-        .single();
+      const newUser: AdminUser = {
+        id: Date.now().toString(),
+        email: email,
+        permissions: permissions,
+        created_at: new Date().toISOString(),
+        is_active: true
+      };
 
-      if (error) {
-        console.error('Error adding admin user:', error);
-        toast({
-          title: "خطأ في قاعدة البيانات",
-          description: `فشل في إضافة مستخدم الإدارة: ${error.message}`,
-          variant: "destructive"
-        });
-        return false;
-      }
+      const updatedUsers = [...existingUsers, newUser];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUsers));
+      setAdminUsers(updatedUsers);
 
-      console.log('Admin user added successfully:', data);
+      console.log('Admin user added successfully:', newUser);
       toast({
         title: "تم بنجاح",
         description: `تم إضافة مستخدم الإدارة: ${email}`
@@ -118,20 +98,15 @@ export const useAdminUsers = () => {
     try {
       console.log('Updating admin user permissions:', userId, permissions);
       
-      const { error } = await supabase
-        .from('admin_users')
-        .update({ permissions: permissions })
-        .eq('id', userId);
-
-      if (error) {
-        console.error('Error updating admin user:', error);
-        toast({
-          title: "خطأ في قاعدة البيانات",
-          description: `فشل في تحديث الصلاحيات: ${error.message}`,
-          variant: "destructive"
-        });
-        return false;
-      }
+      const storedData = localStorage.getItem(STORAGE_KEY);
+      const existingUsers = storedData ? JSON.parse(storedData) : [];
+      
+      const updatedUsers = existingUsers.map((user: AdminUser) =>
+        user.id === userId ? { ...user, permissions } : user
+      );
+      
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUsers));
+      setAdminUsers(updatedUsers);
 
       toast({
         title: "تم التحديث",
@@ -155,20 +130,15 @@ export const useAdminUsers = () => {
     try {
       console.log('Removing admin user:', email);
       
-      const { error } = await supabase
-        .from('admin_users')
-        .update({ is_active: false })
-        .eq('id', userId);
-
-      if (error) {
-        console.error('Error removing admin user:', error);
-        toast({
-          title: "خطأ في قاعدة البيانات",
-          description: `فشل في حذف مستخدم الإدارة: ${error.message}`,
-          variant: "destructive"
-        });
-        return false;
-      }
+      const storedData = localStorage.getItem(STORAGE_KEY);
+      const existingUsers = storedData ? JSON.parse(storedData) : [];
+      
+      const updatedUsers = existingUsers.map((user: AdminUser) =>
+        user.id === userId ? { ...user, is_active: false } : user
+      ).filter((user: AdminUser) => user.is_active);
+      
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUsers));
+      setAdminUsers(updatedUsers);
 
       toast({
         title: "تم الحذف",
@@ -189,36 +159,6 @@ export const useAdminUsers = () => {
 
   useEffect(() => {
     fetchAdminUsers();
-
-    // إعداد التحديثات الفورية
-    const channel = supabase
-      .channel('admin_users_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'admin_users'
-        },
-        (payload) => {
-          console.log('Real-time admin user update:', payload);
-          
-          if (payload.eventType === 'INSERT') {
-            setAdminUsers(prev => [payload.new as AdminUser, ...prev]);
-          } else if (payload.eventType === 'UPDATE') {
-            setAdminUsers(prev => prev.map(user => 
-              user.id === payload.new.id ? payload.new as AdminUser : user
-            ));
-          } else if (payload.eventType === 'DELETE') {
-            setAdminUsers(prev => prev.filter(user => user.id !== payload.old.id));
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   return {
