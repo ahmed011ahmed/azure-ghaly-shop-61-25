@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 interface AdminUser {
   id: string;
   username: string;
+  password: string;
   permissions: string[];
   created_at: string;
   is_active: boolean;
@@ -66,6 +67,7 @@ export const useAdminUsers = () => {
       const newUser: AdminUser = {
         id: Date.now().toString(),
         username: username,
+        password: password,
         permissions: permissions,
         created_at: new Date().toISOString(),
         is_active: true

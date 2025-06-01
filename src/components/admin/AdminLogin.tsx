@@ -26,7 +26,30 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
 
     // محاكاة تأخير تسجيل الدخول
     setTimeout(() => {
+      // التحقق من اليوزر الافتراضي
       if (username === 'GHALY' && password === 'Admin Team') {
+        onLogin();
+        setIsLoading(false);
+        return;
+      }
+
+      // التحقق من المستخدمين المضافين من localStorage
+      const storedData = localStorage.getItem('admin_users_data');
+      const adminUsers = storedData ? JSON.parse(storedData) : [];
+      
+      const validUser = adminUsers.find((user: any) => 
+        user.username === username && 
+        user.password === password && 
+        user.is_active
+      );
+
+      if (validUser) {
+        // حفظ معلومات المستخدم المسجل للدخول
+        localStorage.setItem('current_admin_user', JSON.stringify({
+          id: validUser.id,
+          username: validUser.username,
+          permissions: validUser.permissions
+        }));
         onLogin();
       } else {
         setError('اسم المستخدم أو كلمة المرور غير صحيحة');
@@ -111,7 +134,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
           {/* Hint */}
           <div className="mt-6 pt-6 border-t border-gray-700">
             <p className="text-xs text-gray-500 text-center">
-              اسم المستخدم: GHALY | كلمة المرور: Admin Team
+              اسم المستخدم الافتراضي: GHALY | كلمة المرور: Admin Team
             </p>
           </div>
         </CardContent>
