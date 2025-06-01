@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
@@ -7,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import EmailVerification from '@/components/EmailVerification';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,8 +16,6 @@ const Auth = () => {
   const [nickname, setNickname] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showVerification, setShowVerification] = useState(false);
-  const [pendingEmail, setPendingEmail] = useState('');
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -49,12 +47,12 @@ const Auth = () => {
     try {
       console.log('Starting signup process for:', email);
       
-      // Create user without email confirmation
+      // Create user and confirm email automatically
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: undefined, // Disable automatic email confirmation
+          emailRedirectTo: undefined, // Disable email confirmation
           data: {
             nickname: nickname,
           }
@@ -82,32 +80,28 @@ const Auth = () => {
 
       console.log('User created successfully:', data.user?.id);
 
-      // Generate verification code
-      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-      console.log('Generated verification code:', verificationCode);
-
-      // Send verification code
-      const { data: codeResponse, error: codeError } = await supabase.functions.invoke('send-verification-code', {
-        body: { 
-          email, 
-          code: verificationCode,
-          user_id: data.user?.id
+      // If user was created and is confirmed, confirm email programmatically
+      if (data.user && !data.user.email_confirmed_at) {
+        const { error: confirmError } = await supabase.auth.admin.updateUserById(
+          data.user.id,
+          { email_confirm: true }
+        );
+        
+        if (confirmError) {
+          console.error('Error confirming email:', confirmError);
         }
-      });
-
-      console.log('Send verification response:', { codeResponse, codeError });
-
-      if (codeError) {
-        console.error('Error sending verification code:', codeError);
-        toast({
-          title: 'تم إنشاء الحساب',
-          description: 'تم إنشاء حسابك، لكن حدث خطأ في إرسال كود التأكيد. يمكنك المحاولة مرة أخرى.',
-          variant: 'destructive',
-        });
       }
 
-      setPendingEmail(email);
-      setShowVerification(true);
+      toast({
+        title: 'تم إنشاء الحساب بنجاح!',
+        description: 'تم إنشاء حسابك بنجاح، يمكنك الآن تسجيل الدخول',
+      });
+
+      // Switch to login form
+      setIsLogin(true);
+      setEmail('');
+      setPassword('');
+      setNickname('');
     } catch (error: any) {
       console.error('Unexpected signup error:', error);
       toast({
@@ -166,50 +160,6 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
-
-  const handleVerificationSuccess = () => {
-    setShowVerification(false);
-    setIsLogin(true);
-    setEmail('');
-    setPassword('');
-    setNickname('');
-    setPendingEmail('');
-    toast({
-      title: 'تم التأكيد بنجاح!',
-      description: 'يمكنك الآن تسجيل الدخول بحسابك',
-    });
-  };
-
-  const handleBackToSignup = () => {
-    setShowVerification(false);
-    setPendingEmail('');
-  };
-
-  if (showVerification) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center px-4">
-        <div className="w-full max-w-md">
-          <div className="flex items-center mb-6">
-            <button 
-              onClick={handleBackToSignup}
-              className="text-gray-300 hover:text-purple-400 transition-colors"
-            >
-              <ArrowLeft className="w-6 h-6" />
-            </button>
-            <h1 className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent mr-4">
-              تأكيد البريد الإلكتروني
-            </h1>
-          </div>
-          
-          <EmailVerification
-            email={pendingEmail}
-            onVerificationSuccess={handleVerificationSuccess}
-            onBack={handleBackToSignup}
-          />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center px-4">
