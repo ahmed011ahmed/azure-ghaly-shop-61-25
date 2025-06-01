@@ -37,7 +37,7 @@ export const usePubgAccounts = () => {
           image: account.image,
           description: account.description,
           video: account.video || undefined,
-          price: 0, // قيمة افتراضية حتى يتم إضافة العمود لقاعدة البيانات
+          price: account.price || 0, // استخدام السعر من قاعدة البيانات أو 0 كقيمة افتراضية
           isAvailable: account.is_available,
           createdAt: account.created_at,
           updatedAt: account.updated_at
@@ -82,7 +82,7 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة إضافة حساب جديد:', newAccount);
       
-      // إرسال فقط الحقول الموجودة في قاعدة البيانات
+      // إرسال البيانات الأساسية فقط (بدون السعر للآن)
       const accountData: any = {
         image: newAccount.image,
         description: newAccount.description,
@@ -94,6 +94,11 @@ export const usePubgAccounts = () => {
         accountData.video = newAccount.video;
       }
 
+      // محاولة إضافة السعر إذا كان العمود موجود
+      if (newAccount.price !== undefined) {
+        accountData.price = newAccount.price;
+      }
+
       console.log('البيانات التي سيتم إرسالها:', accountData);
 
       const { data, error } = await supabase
@@ -103,6 +108,31 @@ export const usePubgAccounts = () => {
 
       if (error) {
         console.error('خطأ في إضافة حساب PUBG:', error);
+        
+        // إذا كان الخطأ متعلق بعمود غير موجود، نحاول بدون السعر
+        if (error.message?.includes('price') || error.code === '42703') {
+          console.log('محاولة الإضافة بدون حقل السعر...');
+          const accountDataWithoutPrice = { ...accountData };
+          delete accountDataWithoutPrice.price;
+          
+          const { data: retryData, error: retryError } = await supabase
+            .from('pubg_accounts')
+            .insert(accountDataWithoutPrice)
+            .select();
+            
+          if (retryError) {
+            throw retryError;
+          }
+          
+          toast({
+            title: "تم إضافة الحساب بنجاح",
+            description: "تم إضافة حساب PUBG جديد (بدون حفظ السعر).",
+          });
+          
+          await loadAccounts();
+          return;
+        }
+        
         toast({
           title: "خطأ في إضافة الحساب",
           description: "حدث خطأ أثناء إضافة الحساب. حاول مرة أخرى.",
@@ -134,6 +164,7 @@ export const usePubgAccounts = () => {
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.video !== undefined) dbUpdates.video = updates.video;
       if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
+      if (updates.price !== undefined) dbUpdates.price = updates.price;
       dbUpdates.updated_at = new Date().toISOString();
 
       const { error } = await supabase

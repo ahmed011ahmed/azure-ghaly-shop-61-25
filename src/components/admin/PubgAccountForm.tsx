@@ -90,6 +90,22 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
             />
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="price" className="text-white">السعر ($)</Label>
+            <Input
+              id="price"
+              name="price"
+              type="number"
+              min="0"
+              step="0.01"
+              value={formData.price}
+              onChange={handleChange}
+              className="bg-gray-800 border-gray-600 text-white"
+              placeholder="0.00"
+              required
+            />
+          </div>
+
           <div className="flex space-x-3 justify-end pt-4">
             <Button
               type="button"
