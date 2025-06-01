@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
@@ -47,7 +46,17 @@ const Auth = () => {
     try {
       console.log('Starting signup process for:', email);
       
-      // Create user and confirm email automatically
+      // Check if email already exists in subscriber_permissions
+      const { data: existingPermission } = await supabase
+        .from('subscriber_permissions')
+        .select('email')
+        .eq('email', email.trim())
+        .eq('is_active', true)
+        .maybeSingle();
+
+      console.log('Checking existing permission for email:', email, 'Result:', existingPermission);
+
+      // Create user account
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -80,16 +89,25 @@ const Auth = () => {
 
       console.log('User created successfully:', data.user?.id);
 
-      // If user was created and is confirmed, confirm email programmatically
-      if (data.user && !data.user.email_confirmed_at) {
-        const { error: confirmError } = await supabase.auth.admin.updateUserById(
-          data.user.id,
-          { email_confirm: true }
-        );
-        
-        if (confirmError) {
-          console.error('Error confirming email:', confirmError);
+      // Only add to subscriber_permissions if email doesn't already exist
+      if (!existingPermission) {
+        console.log('Adding new permission for:', email);
+        const { error: permissionError } = await supabase
+          .from('subscriber_permissions')
+          .insert([{
+            email: email.trim(),
+            granted_by: 'system',
+            is_active: true
+          }]);
+
+        if (permissionError) {
+          console.error('Error adding permission:', permissionError);
+          // Don't block signup if permission addition fails
+        } else {
+          console.log('Permission added successfully for:', email);
         }
+      } else {
+        console.log('Email already has permission, skipping permission creation');
       }
 
       toast({
