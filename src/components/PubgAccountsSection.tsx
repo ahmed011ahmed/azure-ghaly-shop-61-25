@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Gamepad2, Star, Trophy, Target } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -10,7 +9,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 const PubgAccountsSection = () => {
   const { accounts, loading } = usePubgAccounts();
-  const { addToCart } = useCart();
+  const { addItem } = useCart();
   const { language } = useLanguage();
 
   const availableAccounts = accounts.filter(account => account.isAvailable);
@@ -30,12 +29,10 @@ const PubgAccountsSection = () => {
   };
 
   const handleAddToCart = (account: any) => {
-    addToCart({
+    addItem({
       id: account.id,
       name: `حساب PUBG - ${account.playerName}`,
-      price: account.price,
-      description: account.description,
-      category: 'pubg-account',
+      price: `$${account.price}`,
       image: '/placeholder.svg'
     });
   };
@@ -94,7 +91,6 @@ const PubgAccountsSection = () => {
               </CardHeader>
               
               <CardContent className="bg-slate-950 space-y-4">
-                {/* إحصائيات الحساب */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-3 bg-gray-800/50 rounded-lg">
                     <Target className="w-5 h-5 text-red-400 mx-auto mb-1" />
@@ -108,7 +104,6 @@ const PubgAccountsSection = () => {
                   </div>
                 </div>
 
-                {/* معلومات إضافية */}
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-400">المباريات:</span>
@@ -127,12 +122,10 @@ const PubgAccountsSection = () => {
                   </div>
                 </div>
 
-                {/* الوصف */}
                 <p className="text-gray-300 text-sm leading-relaxed">
                   {account.description}
                 </p>
 
-                {/* السعر والشراء */}
                 <div className="pt-4 border-t border-gray-700">
                   <div className="flex items-center justify-between">
                     <div>
