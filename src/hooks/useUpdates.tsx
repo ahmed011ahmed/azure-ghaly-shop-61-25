@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '../integrations/supabase/client';
 
 interface Update {
   id?: number;
@@ -11,174 +10,35 @@ interface Update {
   created_at?: string;
 }
 
-interface UpdateFromDB {
-  id: number;
-  title: string;
-  description: string;
-  version: string;
-  created_at: string;
-}
-
 export const useUpdates = () => {
   const [updates, setUpdates] = useState<Update[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
-  // وظيفة لجلب التحديثات من Supabase
-  const fetchUpdates = async () => {
+  const loadUpdates = async () => {
     try {
       setLoading(true);
-      console.log('Fetching updates from Supabase');
-      
       const { data, error } = await supabase
         .from('updates')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching updates:', error);
-        throw error;
+        console.error('خطأ في تحميل التحديثات:', error);
+        return;
       }
 
-      console.log('Updates loaded from Supabase:', data);
       setUpdates(data || []);
     } catch (error) {
-      console.error('Error in fetchUpdates:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في تحميل التحديثات",
-        variant: "destructive"
-      });
+      console.error('خطأ في تحميل البيانات:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // وظيفة لإضافة تحديث جديد
-  const addUpdate = async (newUpdate: Omit<Update, 'id'>) => {
-    try {
-      console.log('Adding new update:', newUpdate);
-      
-      const updateData = {
-        title: newUpdate.title,
-        description: newUpdate.description,
-        version: newUpdate.version
-      };
-
-      console.log('Update data to insert:', updateData);
-
-      const { data, error } = await supabase
-        .from('updates')
-        .insert([updateData])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Supabase error details:', error);
-        toast({
-          title: "خطأ في قاعدة البيانات",
-          description: `فشل في إضافة التحديث: ${error.message}`,
-          variant: "destructive"
-        });
-        return;
-      }
-
-      console.log('Update added successfully:', data);
-      
-      toast({
-        title: "نجح",
-        description: "تم إضافة التحديث بنجاح"
-      });
-    } catch (error) {
-      console.error('Error adding update:', error);
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ غير متوقع في إضافة التحديث",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // وظيفة لتحديث تحديث موجود
-  const updateUpdate = async (id: number, updatedData: Omit<Update, 'id'>) => {
-    try {
-      console.log('Updating update:', id, updatedData);
-      
-      const updatePayload = {
-        title: updatedData.title,
-        description: updatedData.description,
-        version: updatedData.version
-      };
-
-      const { data, error } = await supabase
-        .from('updates')
-        .update(updatePayload)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error updating update:', error);
-        toast({
-          title: "خطأ في قاعدة البيانات",
-          description: `فشل في تحديث الإصدار: ${error.message}`,
-          variant: "destructive"
-        });
-        return;
-      }
-
-      toast({
-        title: "نجح",
-        description: "تم تحديث الإصدار بنجاح"
-      });
-    } catch (error) {
-      console.error('Error updating update:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في تحديث الإصدار",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // وظيفة لحذف تحديث
-  const deleteUpdate = async (id: number) => {
-    try {
-      console.log('Deleting update:', id);
-      
-      const { error } = await supabase
-        .from('updates')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error deleting update:', error);
-        toast({
-          title: "خطأ في قاعدة البيانات",
-          description: `فشل في حذف التحديث: ${error.message}`,
-          variant: "destructive"
-        });
-        return;
-      }
-
-      toast({
-        title: "نجح",
-        description: "تم حذف التحديث بنجاح"
-      });
-    } catch (error) {
-      console.error('Error deleting update:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في حذف التحديث",
-        variant: "destructive"
-      });
-    }
-  };
-
   useEffect(() => {
-    fetchUpdates();
+    loadUpdates();
 
-    // إعداد التحديثات الفورية للتحديثات
+    // إعداد Real-time subscription
     const channel = supabase
       .channel('updates_changes')
       .on(
@@ -188,18 +48,9 @@ export const useUpdates = () => {
           schema: 'public',
           table: 'updates'
         },
-        (payload) => {
-          console.log('Real-time update:', payload);
-          
-          if (payload.eventType === 'INSERT') {
-            setUpdates(prev => [payload.new as Update, ...prev]);
-          } else if (payload.eventType === 'UPDATE') {
-            setUpdates(prev => prev.map(update => 
-              update.id === payload.new.id ? payload.new as Update : update
-            ));
-          } else if (payload.eventType === 'DELETE') {
-            setUpdates(prev => prev.filter(update => update.id !== payload.old.id));
-          }
+        () => {
+          console.log('تم تحديث بيانات التحديثات');
+          loadUpdates();
         }
       )
       .subscribe();
@@ -209,12 +60,67 @@ export const useUpdates = () => {
     };
   }, []);
 
+  const addUpdate = async (update: Omit<Update, 'id' | 'created_at'>): Promise<void> => {
+    try {
+      const { error } = await supabase
+        .from('updates')
+        .insert(update);
+
+      if (error) {
+        console.error('خطأ في إضافة التحديث:', error);
+        throw error;
+      }
+
+      console.log('تم إضافة تحديث جديد بنجاح');
+    } catch (error) {
+      console.error('خطأ في إضافة التحديث:', error);
+      throw error;
+    }
+  };
+
+  const updateUpdate = async (id: number, update: Omit<Update, 'id' | 'created_at'>): Promise<void> => {
+    try {
+      const { error } = await supabase
+        .from('updates')
+        .update(update)
+        .eq('id', id);
+
+      if (error) {
+        console.error('خطأ في تحديث التحديث:', error);
+        throw error;
+      }
+
+      console.log('تم تحديث التحديث بنجاح');
+    } catch (error) {
+      console.error('خطأ في تحديث التحديث:', error);
+      throw error;
+    }
+  };
+
+  const deleteUpdate = async (id: number): Promise<void> => {
+    try {
+      const { error } = await supabase
+        .from('updates')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('خطأ في حذف التحديث:', error);
+        throw error;
+      }
+
+      console.log('تم حذف التحديث بنجاح');
+    } catch (error) {
+      console.error('خطأ في حذف التحديث:', error);
+      throw error;
+    }
+  };
+
   return {
     updates,
     loading,
     addUpdate,
     updateUpdate,
-    deleteUpdate,
-    refetch: fetchUpdates
+    deleteUpdate
   };
 };

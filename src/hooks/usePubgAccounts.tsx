@@ -1,87 +1,140 @@
 
 import { useState, useEffect } from 'react';
+import { supabase } from '../integrations/supabase/client';
 import { PubgAccount, NewPubgAccount } from '../types/pubgAccount';
 
 export const usePubgAccounts = () => {
   const [accounts, setAccounts] = useState<PubgAccount[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // بيانات وهمية للاختبار
-  const mockAccounts: PubgAccount[] = [
-    {
-      id: '1',
-      image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop',
-      description: 'حساب محترف مع إحصائيات ممتازة - جاهز للاستخدام الفوري',
-      isAvailable: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    },
-    {
-      id: '2',
-      image: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=400&h=300&fit=crop',
-      description: 'حساب سيرف أوروبي بإحصائيات قوية - مناسب للاعبين المتقدمين',
-      isAvailable: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+  // تحميل البيانات من Supabase
+  const loadAccounts = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('pubg_accounts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('خطأ في تحميل حسابات PUBG:', error);
+        return;
+      }
+
+      // تحويل البيانات للتوافق مع النوع المطلوب
+      const formattedAccounts: PubgAccount[] = data.map(account => ({
+        id: account.id,
+        image: account.image,
+        description: account.description,
+        isAvailable: account.is_available,
+        createdAt: account.created_at,
+        updatedAt: account.updated_at
+      }));
+
+      setAccounts(formattedAccounts);
+    } catch (error) {
+      console.error('خطأ في تحميل البيانات:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   useEffect(() => {
-    // محاكاة تحميل البيانات
-    const loadAccounts = () => {
-      setLoading(true);
-      setTimeout(() => {
-        const savedAccounts = localStorage.getItem('pubgAccounts');
-        if (savedAccounts) {
-          setAccounts(JSON.parse(savedAccounts));
-        } else {
-          setAccounts(mockAccounts);
-          localStorage.setItem('pubgAccounts', JSON.stringify(mockAccounts));
-        }
-        setLoading(false);
-      }, 1000);
-    };
-
     loadAccounts();
+
+    // إعداد Real-time subscription
+    const channel = supabase
+      .channel('pubg_accounts_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'pubg_accounts'
+        },
+        () => {
+          console.log('تم تحديث بيانات حسابات PUBG');
+          loadAccounts(); // إعادة تحميل البيانات عند حدوث تغيير
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
-  const addAccount = (newAccount: NewPubgAccount): void => {
-    const account: PubgAccount = {
-      ...newAccount,
-      id: Date.now().toString(),
-      isAvailable: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+  const addAccount = async (newAccount: NewPubgAccount): Promise<void> => {
+    try {
+      const { error } = await supabase
+        .from('pubg_accounts')
+        .insert({
+          image: newAccount.image,
+          description: newAccount.description,
+          is_available: true
+        });
 
-    const updatedAccounts = [...accounts, account];
-    setAccounts(updatedAccounts);
-    localStorage.setItem('pubgAccounts', JSON.stringify(updatedAccounts));
-    console.log('تم إضافة حساب PUBG جديد:', account);
+      if (error) {
+        console.error('خطأ في إضافة حساب PUBG:', error);
+        throw error;
+      }
+
+      console.log('تم إضافة حساب PUBG جديد بنجاح');
+    } catch (error) {
+      console.error('خطأ في إضافة الحساب:', error);
+      throw error;
+    }
   };
 
-  const updateAccount = (id: string, updates: Partial<PubgAccount>): void => {
-    const updatedAccounts = accounts.map(account =>
-      account.id === id
-        ? { ...account, ...updates, updatedAt: new Date().toISOString() }
-        : account
-    );
-    setAccounts(updatedAccounts);
-    localStorage.setItem('pubgAccounts', JSON.stringify(updatedAccounts));
-    console.log('تم تحديث حساب PUBG:', id);
+  const updateAccount = async (id: string, updates: Partial<PubgAccount>): Promise<void> => {
+    try {
+      // تحويل البيانات للتوافق مع قاعدة البيانات
+      const dbUpdates: any = {};
+      if (updates.image !== undefined) dbUpdates.image = updates.image;
+      if (updates.description !== undefined) dbUpdates.description = updates.description;
+      if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
+      dbUpdates.updated_at = new Date().toISOString();
+
+      const { error } = await supabase
+        .from('pubg_accounts')
+        .update(dbUpdates)
+        .eq('id', id);
+
+      if (error) {
+        console.error('خطأ في تحديث حساب PUBG:', error);
+        throw error;
+      }
+
+      console.log('تم تحديث حساب PUBG:', id);
+    } catch (error) {
+      console.error('خطأ في تحديث الحساب:', error);
+      throw error;
+    }
   };
 
-  const deleteAccount = (id: string): void => {
-    const updatedAccounts = accounts.filter(account => account.id !== id);
-    setAccounts(updatedAccounts);
-    localStorage.setItem('pubgAccounts', JSON.stringify(updatedAccounts));
-    console.log('تم حذف حساب PUBG:', id);
+  const deleteAccount = async (id: string): Promise<void> => {
+    try {
+      const { error } = await supabase
+        .from('pubg_accounts')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('خطأ في حذف حساب PUBG:', error);
+        throw error;
+      }
+
+      console.log('تم حذف حساب PUBG:', id);
+    } catch (error) {
+      console.error('خطأ في حذف الحساب:', error);
+      throw error;
+    }
   };
 
-  const toggleAvailability = (id: string): void => {
+  const toggleAvailability = async (id: string): Promise<void> => {
     const account = accounts.find(acc => acc.id === id);
     if (account) {
-      updateAccount(id, { isAvailable: !account.isAvailable });
+      await updateAccount(id, { isAvailable: !account.isAvailable });
     }
   };
 

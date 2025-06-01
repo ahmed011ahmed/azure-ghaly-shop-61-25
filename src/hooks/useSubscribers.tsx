@@ -1,12 +1,11 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { supabase } from '../integrations/supabase/client';
 
 interface Subscriber {
   id?: string;
   email: string;
-  nickname?: string;
+  nickname: string;
   subscription_status: 'active' | 'inactive' | 'pending';
   subscription_date?: string;
   last_login?: string;
@@ -15,178 +14,57 @@ interface Subscriber {
 export const useSubscribers = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
-  // جلب المشتركين من جدول profiles
-  const fetchSubscribers = async () => {
+  const loadSubscribers = async () => {
     try {
       setLoading(true);
-      console.log('Fetching subscribers');
       
+      // جلب البيانات من جدول profiles
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('*');
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (profilesError) {
-        console.error('Profiles error:', profilesError);
-        throw profilesError;
+        console.error('خطأ في تحميل المشتركين:', profilesError);
+        return;
       }
 
-      const subscribersData = profilesData?.map(profile => ({
-        id: profile.id,
-        email: profile.id,
-        nickname: profile.nickname,
-        subscription_status: 'active' as const,
-        subscription_date: profile.created_at,
-        last_login: profile.updated_at
-      })) || [];
+      // جلب البيانات من جدول subscriber_permissions
+      const { data: permissionsData, error: permissionsError } = await supabase
+        .from('subscriber_permissions')
+        .select('*');
 
-      console.log('Subscribers loaded:', subscribersData);
-      setSubscribers(subscribersData);
-    } catch (error) {
-      console.error('Error fetching subscribers:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في تحميل قائمة المشتركين",
-        variant: "destructive"
+      if (permissionsError) {
+        console.error('خطأ في تحميل أذونات المشتركين:', permissionsError);
+      }
+
+      // دمج البيانات
+      const formattedSubscribers: Subscriber[] = (profilesData || []).map(profile => {
+        const permission = (permissionsData || []).find(p => p.email === profile.id);
+        return {
+          id: profile.id,
+          email: profile.id, // استخدام ID كإيميل مؤقتاً
+          nickname: profile.nickname,
+          subscription_status: permission?.is_active ? 'active' : 'inactive',
+          subscription_date: profile.created_at,
+          last_login: profile.updated_at
+        };
       });
-      
-      // بيانات تجريبية في حالة الفشل
-      const mockData: Subscriber[] = [
-        {
-          id: '1',
-          email: 'subscriber1@example.com',
-          nickname: 'مشترك 1',
-          subscription_status: 'active',
-          subscription_date: new Date().toISOString(),
-          last_login: new Date().toISOString()
-        },
-        {
-          id: '2',
-          email: 'subscriber2@example.com',
-          nickname: 'مشترك 2',
-          subscription_status: 'inactive',
-          subscription_date: new Date(Date.now() - 86400000).toISOString(),
-          last_login: new Date(Date.now() - 86400000).toISOString()
-        }
-      ];
-      
-      setSubscribers(mockData);
+
+      setSubscribers(formattedSubscribers);
+    } catch (error) {
+      console.error('خطأ في تحميل البيانات:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // إضافة مشترك جديد
-  const addSubscriber = async (newSubscriber: {
-    email: string;
-    nickname: string;
-  }) => {
-    try {
-      console.log('Adding new subscriber:', newSubscriber);
-      
-      const { data, error } = await supabase
-        .from('profiles')
-        .insert([{
-          id: newSubscriber.email,
-          nickname: newSubscriber.nickname,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error adding subscriber:', error);
-        throw error;
-      }
-
-      toast({
-        title: "تم بنجاح",
-        description: `تم إضافة المشترك ${newSubscriber.nickname} بنجاح`
-      });
-
-    } catch (error) {
-      console.error('Error adding subscriber:', error);
-      throw error;
-    }
-  };
-
-  // تحديث حالة الاشتراك
-  const updateSubscriptionStatus = async (id: string, status: 'active' | 'inactive' | 'pending') => {
-    try {
-      console.log(`Updating subscriber ${id} status to ${status}`);
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update({ 
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id);
-
-      if (error) {
-        console.error('Update error:', error);
-        throw error;
-      }
-
-      setSubscribers(prev => 
-        prev.map(sub => 
-          sub.id === id 
-            ? { ...sub, subscription_status: status, last_login: new Date().toISOString() }
-            : sub
-        )
-      );
-
-      toast({
-        title: "تم التحديث بنجاح",
-        description: `تم تحديث حالة المشترك إلى ${status === 'active' ? 'نشط' : status === 'inactive' ? 'غير نشط' : 'في الانتظار'}`
-      });
-
-    } catch (error) {
-      console.error('Error updating subscription status:', error);
-      toast({
-        title: "خطأ في التحديث",
-        description: "فشل في تحديث حالة المشترك",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // حذف مشترك
-  const deleteSubscriber = async (id: string) => {
-    try {
-      console.log(`Deleting subscriber ${id}`);
-      
-      const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Delete error:', error);
-        throw error;
-      }
-
-      toast({
-        title: "تم الحذف بنجاح",
-        description: "تم حذف المشترك بنجاح"
-      });
-
-    } catch (error) {
-      console.error('Error deleting subscriber:', error);
-      toast({
-        title: "خطأ في الحذف",
-        description: "فشل في حذف المشترك",
-        variant: "destructive"
-      });
-    }
-  };
-
   useEffect(() => {
-    fetchSubscribers();
+    loadSubscribers();
 
-    // إعداد التحديثات الفورية للمشتركين
-    const channel = supabase
+    // إعداد Real-time subscription للمشتركين
+    const profilesChannel = supabase
       .channel('profiles_changes')
       .on(
         'postgres_changes',
@@ -195,47 +73,126 @@ export const useSubscribers = () => {
           schema: 'public',
           table: 'profiles'
         },
-        (payload) => {
-          console.log('Real-time subscriber update:', payload);
-          
-          if (payload.eventType === 'INSERT') {
-            const newSubscriber: Subscriber = {
-              id: payload.new.id,
-              email: payload.new.id,
-              nickname: payload.new.nickname,
-              subscription_status: 'active',
-              subscription_date: payload.new.created_at,
-              last_login: payload.new.updated_at
-            };
-            setSubscribers(prev => [newSubscriber, ...prev]);
-          } else if (payload.eventType === 'UPDATE') {
-            setSubscribers(prev => prev.map(sub => 
-              sub.id === payload.new.id 
-                ? { 
-                    ...sub, 
-                    nickname: payload.new.nickname,
-                    last_login: payload.new.updated_at
-                  }
-                : sub
-            ));
-          } else if (payload.eventType === 'DELETE') {
-            setSubscribers(prev => prev.filter(sub => sub.id !== payload.old.id));
-          }
+        () => {
+          console.log('تم تحديث بيانات المشتركين');
+          loadSubscribers();
+        }
+      )
+      .subscribe();
+
+    // إعداد Real-time subscription للأذونات
+    const permissionsChannel = supabase
+      .channel('permissions_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'subscriber_permissions'
+        },
+        () => {
+          console.log('تم تحديث بيانات أذونات المشتركين');
+          loadSubscribers();
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(profilesChannel);
+      supabase.removeChannel(permissionsChannel);
     };
   }, []);
+
+  const addSubscriber = async (subscriber: { email: string; nickname: string }): Promise<void> => {
+    try {
+      // إضافة إلى جدول profiles
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: crypto.randomUUID(),
+          nickname: subscriber.nickname
+        });
+
+      if (profileError) {
+        console.error('خطأ في إضافة المشترك:', profileError);
+        throw profileError;
+      }
+
+      // إضافة إلى جدول أذونات المشتركين
+      const { error: permissionError } = await supabase
+        .from('subscriber_permissions')
+        .insert({
+          email: subscriber.email,
+          is_active: true
+        });
+
+      if (permissionError) {
+        console.error('خطأ في إضافة أذونات المشترك:', permissionError);
+        // لا نرمي خطأ هنا لأن المشترك تم إضافته بالفعل
+      }
+
+      console.log('تم إضافة مشترك جديد بنجاح');
+    } catch (error) {
+      console.error('خطأ في إضافة المشترك:', error);
+      throw error;
+    }
+  };
+
+  const updateSubscriptionStatus = async (id: string, status: 'active' | 'inactive' | 'pending'): Promise<void> => {
+    try {
+      const { error } = await supabase
+        .from('subscriber_permissions')
+        .update({ is_active: status === 'active' })
+        .eq('email', id);
+
+      if (error) {
+        console.error('خطأ في تحديث حالة الاشتراك:', error);
+        throw error;
+      }
+
+      console.log('تم تحديث حالة الاشتراك بنجاح');
+    } catch (error) {
+      console.error('خطأ في تحديث حالة الاشتراك:', error);
+      throw error;
+    }
+  };
+
+  const deleteSubscriber = async (id: string): Promise<void> => {
+    try {
+      // حذف من جدول profiles
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', id);
+
+      if (profileError) {
+        console.error('خطأ في حذف المشترك:', profileError);
+        throw profileError;
+      }
+
+      // حذف من جدول أذونات المشتركين
+      const { error: permissionError } = await supabase
+        .from('subscriber_permissions')
+        .delete()
+        .eq('email', id);
+
+      if (permissionError) {
+        console.error('خطأ في حذف أذونات المشترك:', permissionError);
+        // لا نرمي خطأ هنا لأن المشترك تم حذفه بالفعل
+      }
+
+      console.log('تم حذف المشترك بنجاح');
+    } catch (error) {
+      console.error('خطأ في حذف المشترك:', error);
+      throw error;
+    }
+  };
 
   return {
     subscribers,
     loading,
     addSubscriber,
     updateSubscriptionStatus,
-    deleteSubscriber,
-    refetch: fetchSubscribers
+    deleteSubscriber
   };
 };

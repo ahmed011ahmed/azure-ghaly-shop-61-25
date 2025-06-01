@@ -147,6 +147,33 @@ export type Database = {
         }
         Relationships: []
       }
+      pubg_accounts: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          image: string
+          is_available: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          image: string
+          is_available?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          image?: string
+          is_available?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscriber_permissions: {
         Row: {
           email: string
