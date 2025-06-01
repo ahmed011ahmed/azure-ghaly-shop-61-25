@@ -7,8 +7,11 @@ import CustomerChat from '../components/CustomerChat';
 import Cart from '../components/Cart';
 import Footer from '../components/Footer';
 import { CartProvider } from '../contexts/CartContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const Index = () => {
+  const { t } = useLanguage();
+
   return (
     <CartProvider>
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900">
@@ -22,10 +25,10 @@ const Index = () => {
             <div className="container mx-auto px-4">
               <div className="text-center mb-12">
                 <h2 className="text-4xl font-bold bg-gaming-gradient bg-clip-text text-transparent mb-4">
-                  تواصل معنا
+                  {t('chat.title')}
                 </h2>
                 <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-                  فريق الدعم متاح للإجابة على جميع استفساراتك
+                  {t('chat.subtitle')}
                 </p>
               </div>
               

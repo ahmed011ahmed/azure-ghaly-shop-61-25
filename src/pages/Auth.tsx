@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
@@ -7,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
@@ -17,6 +17,7 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
 
   // التحقق من حالة تسجيل الدخول عند تحميل الصفحة
@@ -36,8 +37,8 @@ const Auth = () => {
 
     if (!nickname.trim()) {
       toast({
-        title: 'خطأ',
-        description: 'يرجى إدخال النكنيم',
+        title: t('error.signup'),
+        description: t('error.nickname.required'),
         variant: 'destructive',
       });
       setIsLoading(false);
@@ -63,13 +64,13 @@ const Auth = () => {
         console.error('Signup error:', error);
         if (error.message.includes('User already registered')) {
           toast({
-            title: 'خطأ',
-            description: 'هذا الإيميل مسجل بالفعل. جرب تسجيل الدخول بدلاً من ذلك.',
+            title: t('error.signup'),
+            description: t('error.email.exists'),
             variant: 'destructive',
           });
         } else {
           toast({
-            title: 'خطأ في التسجيل',
+            title: t('error.signup'),
             description: error.message,
             variant: 'destructive',
           });
@@ -81,8 +82,8 @@ const Auth = () => {
       console.log('User created successfully:', data.user?.id);
 
       toast({
-        title: 'تم إنشاء الحساب بنجاح!',
-        description: 'تم إنشاء حسابك بنجاح، يمكنك الآن تسجيل الدخول. يرجى ملاحظة أن الوصول لمنطقة المشتركين يتطلب موافقة الإدارة.',
+        title: t('success.accountCreated'),
+        description: t('success.accountCreated.desc'),
       });
 
       // Switch to login form
@@ -93,8 +94,8 @@ const Auth = () => {
     } catch (error: any) {
       console.error('Unexpected signup error:', error);
       toast({
-        title: 'خطأ في التسجيل',
-        description: error.message || 'حدث خطأ غير متوقع',
+        title: t('error.signup'),
+        description: error.message || t('error.unexpected'),
         variant: 'destructive',
       });
     } finally {
@@ -118,13 +119,13 @@ const Auth = () => {
         console.error('Signin error:', error);
         if (error.message.includes('Invalid login credentials')) {
           toast({
-            title: 'خطأ في تسجيل الدخول',
-            description: 'الإيميل أو كلمة المرور غير صحيحة',
+            title: t('error.login'),
+            description: t('error.credentials'),
             variant: 'destructive',
           });
         } else {
           toast({
-            title: 'خطأ في تسجيل الدخول',
+            title: t('error.login'),
             description: error.message,
             variant: 'destructive',
           });
@@ -132,16 +133,16 @@ const Auth = () => {
       } else {
         console.log('Signin successful');
         toast({
-          title: 'مرحباً بك!',
-          description: 'تم تسجيل الدخول بنجاح',
+          title: t('success.welcome'),
+          description: t('success.loginSuccess'),
         });
         navigate('/');
       }
     } catch (error: any) {
       console.error('Unexpected signin error:', error);
       toast({
-        title: 'خطأ في تسجيل الدخول',
-        description: error.message || 'حدث خطأ غير متوقع',
+        title: t('error.login'),
+        description: error.message || t('error.unexpected'),
         variant: 'destructive',
       });
     } finally {
@@ -150,27 +151,27 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center px-4">
+    <div className={`min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center px-4 ${language === 'en' ? 'ltr' : ''}`}>
       <div className="w-full max-w-md">
         {/* Header with back button */}
         <div className="flex items-center mb-6">
           <Link to="/" className="text-gray-300 hover:text-purple-400 transition-colors">
             <ArrowLeft className="w-6 h-6" />
           </Link>
-          <h1 className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent mr-4">
-            {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
+          <h1 className={`text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent ${language === 'ar' ? 'mr-4' : 'ml-4'}`}>
+            {isLogin ? t('auth.login.title') : t('auth.signup.title')}
           </h1>
         </div>
 
         <Card className="gaming-card">
           <CardHeader className="text-center bg-slate-900">
             <CardTitle className="text-2xl font-bold text-white">
-              {isLogin ? 'مرحباً بعودتك!' : 'انضم إلينا الآن'}
+              {isLogin ? t('auth.login.welcome') : t('auth.signup.welcome')}
             </CardTitle>
             <CardDescription className="text-gray-300">
               {isLogin 
-                ? 'سجل دخولك للوصول إلى حسابك' 
-                : 'أنشئ حساباً جديداً للبدء في التسوق'
+                ? t('auth.login.subtitle') 
+                : t('auth.signup.subtitle')
               }
             </CardDescription>
           </CardHeader>
@@ -181,12 +182,12 @@ const Auth = () => {
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-300 flex items-center space-x-2">
                   <Mail className="w-4 h-4" />
-                  <span>البريد الإلكتروني</span>
+                  <span>{t('auth.email')}</span>
                 </Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="أدخل بريدك الإلكتروني"
+                  placeholder={t('auth.email.placeholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="bg-gray-800/50 border-gray-600 text-white"
@@ -199,12 +200,12 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="nickname" className="text-gray-300 flex items-center space-x-2">
                     <User className="w-4 h-4" />
-                    <span>النكنيم</span>
+                    <span>{t('auth.nickname')}</span>
                   </Label>
                   <Input
                     id="nickname"
                     type="text"
-                    placeholder="أدخل النكنيم الخاص بك"
+                    placeholder={t('auth.nickname.placeholder')}
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
                     className="bg-gray-800/50 border-gray-600 text-white"
@@ -217,22 +218,22 @@ const Auth = () => {
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-gray-300 flex items-center space-x-2">
                   <Lock className="w-4 h-4" />
-                  <span>كلمة المرور</span>
+                  <span>{t('auth.password')}</span>
                 </Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="أدخل كلمة المرور"
+                    placeholder={t('auth.password.placeholder')}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="bg-gray-800/50 border-gray-600 text-white pr-12"
+                    className={`bg-gray-800/50 border-gray-600 text-white ${language === 'ar' ? 'pr-12' : 'pl-12'}`}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                    className={`absolute ${language === 'ar' ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-200`}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -246,8 +247,8 @@ const Auth = () => {
                 disabled={isLoading}
               >
                 {isLoading 
-                  ? (isLogin ? 'جاري تسجيل الدخول...' : 'جاري إنشاء الحساب...') 
-                  : (isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد')
+                  ? (isLogin ? t('auth.login.loading') : t('auth.signup.loading')) 
+                  : (isLogin ? t('auth.login.button') : t('auth.signup.button'))
                 }
               </Button>
             </form>
@@ -255,7 +256,7 @@ const Auth = () => {
             {/* Toggle between login and signup */}
             <div className="mt-6 pt-6 border-t border-gray-700 text-center">
               <p className="text-gray-400 text-sm">
-                {isLogin ? 'ليس لديك حساب؟' : 'لديك حساب بالفعل؟'}
+                {isLogin ? t('auth.noAccount') : t('auth.hasAccount')}
                 <button
                   type="button"
                   onClick={() => {
@@ -264,9 +265,9 @@ const Auth = () => {
                     setPassword('');
                     setNickname('');
                   }}
-                  className="text-purple-400 hover:text-purple-300 font-medium mr-2"
+                  className={`text-purple-400 hover:text-purple-300 font-medium ${language === 'ar' ? 'mr-2' : 'ml-2'}`}
                 >
-                  {isLogin ? 'إنشاء حساب جديد' : 'تسجيل الدخول'}
+                  {isLogin ? t('auth.createAccount') : t('auth.loginInstead')}
                 </button>
               </p>
             </div>

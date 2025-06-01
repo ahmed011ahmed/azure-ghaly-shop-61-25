@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { ScrollArea } from './ui/scroll-area';
 import { useChat } from '../contexts/ChatContext';
 import { useAuth } from '../hooks/useAuth';
+import { useLanguage } from '../contexts/LanguageContext';
+
 const CustomerChat = () => {
   const {
     messages,
@@ -16,6 +18,7 @@ const CustomerChat = () => {
     user,
     profile
   } = useAuth();
+  const { t, language } = useLanguage();
   const [newMessage, setNewMessage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -76,20 +79,20 @@ const CustomerChat = () => {
       const reader = new FileReader();
       reader.onload = event => {
         const imageData = event.target?.result as string;
-        addMessage(`[صورة]: ${imageData}`, 'user', profile?.nickname);
+        addMessage(`${t('chat.image')} ${imageData}`, 'user', profile?.nickname);
       };
       reader.readAsDataURL(file);
     }
   };
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('ar-SA', {
+    return date.toLocaleTimeString(language === 'ar' ? 'ar-SA' : 'en-US', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
     });
   };
   const isImageMessage = (text: string) => {
-    return text.startsWith('[صورة]: ');
+    return text.startsWith(t('chat.image'));
   };
   const isLinkMessage = (text: string) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -97,7 +100,7 @@ const CustomerChat = () => {
   };
   const renderMessageContent = (text: string) => {
     if (isImageMessage(text)) {
-      const imageData = text.replace('[صورة]: ', '');
+      const imageData = text.replace(`${t('chat.image')} `, '');
       return <div className="mt-2">
           <img src={imageData} alt="صورة مرسلة" className="max-w-xs max-h-48 rounded-lg object-cover cursor-pointer" onClick={() => window.open(imageData, '_blank')} />
         </div>;
@@ -132,7 +135,7 @@ const CustomerChat = () => {
     return <Card className="gaming-card w-full max-w-4xl">
         <CardContent className="bg-slate-950 text-center py-8">
           <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-300 mb-4">يجب تسجيل الدخول أولاً للتواصل مع فريق الدعم</p>
+          <p className="text-gray-300 mb-4">{t('chat.loginRequired')}</p>
           
         </CardContent>
       </Card>;
@@ -142,9 +145,9 @@ const CustomerChat = () => {
         <div className="flex items-center space-x-3">
           <MessageSquare className="w-5 h-5 text-purple-400" />
           <div>
-            <CardTitle className="text-white text-sm">دعم العملاء</CardTitle>
+            <CardTitle className="text-white text-sm">{t('chat.support')}</CardTitle>
             <CardDescription className="text-gray-300 text-xs">
-              مرحباً {profile?.nickname}
+              {t('chat.hello')} {profile?.nickname}
             </CardDescription>
           </div>
         </div>
@@ -155,24 +158,24 @@ const CustomerChat = () => {
         <ScrollArea className="flex-1 p-3 h-64">
           {loading ? <div className="flex items-center justify-center h-full">
               <Loader2 className="w-4 h-4 text-purple-400 animate-spin" />
-              <span className="text-gray-300 mr-2 text-xs">جاري تحميل الرسائل...</span>
+              <span className="text-gray-300 mr-2 text-xs">{t('chat.loadingMessages')}</span>
             </div> : customerMessages.length === 0 ? <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <MessageSquare className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-300 text-xs">لا توجد رسائل بعد</p>
+                <p className="text-gray-300 text-xs">{t('chat.noMessages')}</p>
               </div>
             </div> : <div className="space-y-2">
               {customerMessages.map(message => <div key={message.id} className={`flex ${message.sender === 'admin' ? 'justify-start' : 'justify-end'}`}>
                   <div className={`max-w-[75%] rounded-lg p-2 ${message.sender === 'admin' ? 'bg-purple-600/20 border border-purple-500/30' : 'bg-blue-600/20 border border-blue-500/30'}`}>
                     <div className="flex items-center space-x-1 mb-1">
                       <span className={`text-xs font-medium ${message.sender === 'admin' ? 'text-purple-300' : 'text-blue-300'}`}>
-                        {message.sender === 'admin' ? 'الدعم' : 'أنت'}
+                        {message.sender === 'admin' ? t('chat.supportTeam') : t('chat.you')}
                       </span>
                       <span className="text-xs text-gray-400">
                         {formatTime(message.timestamp)}
                       </span>
                       {message.sender === 'admin' && message.targetUser && <span className="text-xs bg-purple-700/30 px-1 rounded text-purple-200">
-                          خاص
+                          {t('chat.private')}
                         </span>}
                     </div>
                     <div className="text-white text-xs leading-relaxed">
@@ -187,7 +190,13 @@ const CustomerChat = () => {
         {/* Message Input - Fixed Height */}
         <div className="border-t border-gray-700 p-2 flex-shrink-0">
           <form onSubmit={handleSendMessage} className="flex space-x-1">
-            <Input value={newMessage} onChange={e => setNewMessage(e.target.value)} placeholder="اكتب رسالتك..." className="flex-1 bg-gray-800/50 border-gray-600 text-white text-xs h-8" disabled={loading} />
+            <Input 
+              value={newMessage} 
+              onChange={e => setNewMessage(e.target.value)} 
+              placeholder={t('chat.placeholder')} 
+              className="flex-1 bg-gray-800/50 border-gray-600 text-white text-xs h-8" 
+              disabled={loading} 
+            />
             
             <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
             
@@ -200,10 +209,11 @@ const CustomerChat = () => {
             </Button>
           </form>
           <p className="text-xs text-gray-400 mt-1">
-            النصوص والصور والروابط
+            {t('chat.textImagesLinks')}
           </p>
         </div>
       </CardContent>
     </Card>;
 };
+
 export default CustomerChat;
