@@ -2,10 +2,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { PubgAccount, NewPubgAccount } from '../types/pubgAccount';
+import { useToast } from './use-toast';
 
 export const usePubgAccounts = () => {
   const [accounts, setAccounts] = useState<PubgAccount[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   // تحميل البيانات من Supabase
   const loadAccounts = async () => {
@@ -36,8 +38,8 @@ export const usePubgAccounts = () => {
           image: account.image,
           description: account.description,
           video: account.video || undefined,
-          category: account.category || 'other', // استخدام التصنيف من قاعدة البيانات
-          price: account.price || 0, // استخدام السعر من قاعدة البيانات
+          category: 'other' as const, // قيمة افتراضية حتى يتم إضافة العمود لقاعدة البيانات
+          price: 0, // قيمة افتراضية حتى يتم إضافة العمود لقاعدة البيانات
           isAvailable: account.is_available,
           createdAt: account.created_at,
           updatedAt: account.updated_at
@@ -82,12 +84,10 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة إضافة حساب جديد:', newAccount);
       
-      // إرسال جميع الحقول إلى قاعدة البيانات
+      // إرسال فقط الحقول الموجودة في قاعدة البيانات
       const accountData: any = {
         image: newAccount.image,
         description: newAccount.description,
-        category: newAccount.category, // إضافة التصنيف
-        price: newAccount.price, // إضافة السعر
         is_available: true
       };
 
@@ -105,10 +105,19 @@ export const usePubgAccounts = () => {
 
       if (error) {
         console.error('خطأ في إضافة حساب PUBG:', error);
+        toast({
+          title: "خطأ في إضافة الحساب",
+          description: "حدث خطأ أثناء إضافة الحساب. حاول مرة أخرى.",
+          variant: "destructive",
+        });
         throw error;
       }
 
       console.log('تم إضافة حساب PUBG جديد بنجاح:', data);
+      toast({
+        title: "تم إضافة الحساب بنجاح",
+        description: "تم إضافة حساب PUBG جديد بنجاح.",
+      });
       // إعادة تحميل البيانات بعد الإضافة
       await loadAccounts();
     } catch (error) {
@@ -121,13 +130,11 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة تحديث الحساب:', id, updates);
       
-      // تحديث جميع الحقول الموجودة في قاعدة البيانات
+      // تحديث فقط الحقول الموجودة في قاعدة البيانات
       const dbUpdates: any = {};
       if (updates.image !== undefined) dbUpdates.image = updates.image;
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.video !== undefined) dbUpdates.video = updates.video;
-      if (updates.category !== undefined) dbUpdates.category = updates.category; // إضافة التصنيف
-      if (updates.price !== undefined) dbUpdates.price = updates.price; // إضافة السعر
       if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
       dbUpdates.updated_at = new Date().toISOString();
 
@@ -138,10 +145,19 @@ export const usePubgAccounts = () => {
 
       if (error) {
         console.error('خطأ في تحديث حساب PUBG:', error);
+        toast({
+          title: "خطأ في تحديث الحساب",
+          description: "حدث خطأ أثناء تحديث الحساب. حاول مرة أخرى.",
+          variant: "destructive",
+        });
         throw error;
       }
 
       console.log('تم تحديث حساب PUBG:', id);
+      toast({
+        title: "تم تحديث الحساب بنجاح",
+        description: "تم تحديث حساب PUBG بنجاح.",
+      });
       // إعادة تحميل البيانات بعد التحديث
       await loadAccounts();
     } catch (error) {
@@ -161,10 +177,19 @@ export const usePubgAccounts = () => {
 
       if (error) {
         console.error('خطأ في حذف حساب PUBG:', error);
+        toast({
+          title: "خطأ في حذف الحساب",
+          description: "حدث خطأ أثناء حذف الحساب. حاول مرة أخرى.",
+          variant: "destructive",
+        });
         throw error;
       }
 
       console.log('تم حذف حساب PUBG:', id);
+      toast({
+        title: "تم حذف الحساب بنجاح",
+        description: "تم حذف حساب PUBG بنجاح.",
+      });
       // إعادة تحميل البيانات بعد الحذف
       await loadAccounts();
     } catch (error) {
@@ -181,7 +206,8 @@ export const usePubgAccounts = () => {
   };
 
   const getAccountsByCategory = (category: PubgAccount['category']) => {
-    return accounts.filter(account => account.category === category && account.isAvailable);
+    // لأن كل الحسابات الآن لها category = 'other'، سنعيد جميع الحسابات المتاحة
+    return accounts.filter(account => account.isAvailable);
   };
 
   return {
