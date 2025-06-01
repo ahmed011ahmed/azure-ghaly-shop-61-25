@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
@@ -104,11 +103,6 @@ const Auth = () => {
           title: 'تم إنشاء الحساب',
           description: 'تم إنشاء حسابك، لكن حدث خطأ في إرسال كود التأكيد. يمكنك المحاولة مرة أخرى.',
           variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: 'تم إنشاء الحساب!',
-          description: 'تم إرسال كود التأكيد إلى بريدك الإلكتروني',
         });
       }
 
