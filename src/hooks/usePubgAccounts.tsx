@@ -27,8 +27,8 @@ export const usePubgAccounts = () => {
         image: account.image,
         description: account.description,
         video: account.video || undefined,
-        category: account.category || 'other',
-        price: account.price || 0,
+        category: account.category || 'other', // قيمة افتراضية
+        price: account.price || 0, // قيمة افتراضية
         isAvailable: account.is_available,
         createdAt: account.created_at,
         updatedAt: account.updated_at
