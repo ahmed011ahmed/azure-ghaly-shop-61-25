@@ -1,6 +1,7 @@
 
 export interface PubgAccount {
   id: string;
+  randomId: string; // الـ ID العشوائي الذي سيظهر للمستخدمين
   image: string;
   description: string;
   video?: string; // رابط فيديو اختياري

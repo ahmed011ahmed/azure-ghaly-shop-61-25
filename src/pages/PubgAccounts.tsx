@@ -112,10 +112,10 @@ const PubgAccounts = () => {
                     </Badge>
                   </div>
 
-                  {/* السعر */}
+                  {/* عرض الـ Random ID */}
                   <div className="absolute top-4 right-4">
-                    <div className="bg-yellow-600 text-white px-3 py-1 rounded-lg font-bold">
-                      ${account.price}
+                    <div className="bg-black/70 text-yellow-400 px-3 py-1 rounded-lg font-bold text-sm">
+                      ID: {account.randomId}
                     </div>
                   </div>
 
@@ -149,6 +149,13 @@ const PubgAccounts = () => {
                 </div>
 
                 <CardContent className="bg-slate-950 p-6">
+                  {/* عرض ID الحساب */}
+                  <div className="text-center mb-4">
+                    <div className="inline-block bg-yellow-600 text-black px-4 py-2 rounded-lg font-bold text-lg">
+                      ID: {account.randomId}
+                    </div>
+                  </div>
+
                   {/* الوصف */}
                   <p className="text-gray-300 text-base leading-relaxed text-center mb-6">
                     {account.description}

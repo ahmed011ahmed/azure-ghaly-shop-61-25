@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
@@ -24,10 +25,10 @@ const PubgAccountsManagement = () => {
     }
   };
 
-  // فلترة الحسابات حسب التصنيف والبحث بالـ ID
+  // فلترة الحسابات حسب التصنيف والبحث بالـ random ID
   const filteredAccounts = accounts.filter(account => {
     const matchesCategory = filterCategory === 'all' || account.category === filterCategory;
-    const matchesSearch = searchId === '' || account.id.toLowerCase().includes(searchId.toLowerCase());
+    const matchesSearch = searchId === '' || account.randomId.toLowerCase().includes(searchId.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -170,7 +171,7 @@ const PubgAccountsManagement = () => {
             
             <div className="flex items-center space-x-4">
               <Search className="w-5 h-5 text-gray-400" />
-              <Label className="text-gray-300">البحث بـ ID:</Label>
+              <Label className="text-gray-300">البحث بـ ID الحساب:</Label>
               <Input
                 type="text"
                 placeholder="أدخل ID الحساب..."
@@ -210,8 +211,8 @@ const PubgAccountsManagement = () => {
                 {filteredAccounts.map((account) => (
                   <TableRow key={account.id} className="border-gray-700">
                     <TableCell>
-                      <div className="font-mono text-xs text-purple-400 bg-gray-800 p-2 rounded max-w-32 overflow-hidden">
-                        {account.id}
+                      <div className="font-mono text-sm font-bold text-yellow-400 bg-gray-800 p-3 rounded-lg max-w-32 text-center">
+                        {account.randomId}
                       </div>
                     </TableCell>
                     <TableCell>
