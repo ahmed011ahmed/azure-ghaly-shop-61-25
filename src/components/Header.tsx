@@ -37,6 +37,9 @@ const Header = () => {
             <a href="#home" className={`text-gray-300 hover:text-purple-400 font-medium transition-colors ${language === 'ar' ? 'px-[24px] mx-[82px]' : ''}`}>
               {t('header.home')}
             </a>
+            <a href="#giveaways" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
+              المسابقات
+            </a>
             <a href="#products" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
               {t('header.tools')}
             </a>
