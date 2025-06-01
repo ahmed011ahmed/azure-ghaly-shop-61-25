@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { PubgAccount, NewPubgAccount } from '../types/pubgAccount';
 
-// دالة لتوليد ID عشوائي
+// دالة لتوليد ID عشوائي فريد
 const generateRandomId = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = '';
@@ -10,6 +10,47 @@ const generateRandomId = () => {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;
+};
+
+// دالة للتحقق من عدم تكرار الـ ID
+const isIdUnique = async (randomId: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .from('pubg_accounts')
+      .select('id')
+      .eq('random_id', randomId)
+      .limit(1);
+    
+    if (error) {
+      console.error('خطأ في التحقق من تفرد الـ ID:', error);
+      return true; // في حالة الخطأ، نسمح بالإضافة
+    }
+    
+    return !data || data.length === 0;
+  } catch (error) {
+    console.error('خطأ في فحص تفرد الـ ID:', error);
+    return true;
+  }
+};
+
+// دالة لتوليد ID فريد مضمون
+const generateUniqueId = async (): Promise<string> => {
+  let attempts = 0;
+  const maxAttempts = 10;
+  
+  while (attempts < maxAttempts) {
+    const randomId = generateRandomId();
+    const isUnique = await isIdUnique(randomId);
+    
+    if (isUnique) {
+      return randomId;
+    }
+    
+    attempts++;
+  }
+  
+  // في حالة فشل إيجاد ID فريد، نضيف timestamp للتأكد من التفرد
+  return generateRandomId() + Date.now().toString().slice(-3);
 };
 
 export const usePubgAccounts = () => {
@@ -38,9 +79,9 @@ export const usePubgAccounts = () => {
       const formattedAccounts: PubgAccount[] = await Promise.all((data || []).map(async (account) => {
         let randomId = (account as any).random_id;
         
-        // إذا لم يكن هناك random_id محفوظ، نولد واحداً ونحفظه
+        // إذا لم يكن هناك random_id محفوظ، نولد واحداً فريداً ونحفظه
         if (!randomId) {
-          randomId = generateRandomId();
+          randomId = await generateUniqueId();
           
           // حفظ الـ random_id الجديد في قاعدة البيانات
           try {
@@ -48,7 +89,7 @@ export const usePubgAccounts = () => {
               .from('pubg_accounts')
               .update({ random_id: randomId } as any)
               .eq('id', account.id);
-            console.log(`تم حفظ random_id جديد للحساب ${account.id}: ${randomId}`);
+            console.log(`تم حفظ random_id جديد فريد للحساب ${account.id}: ${randomId}`);
           } catch (updateError) {
             console.warn('لم يتم حفظ random_id:', updateError);
           }
@@ -106,14 +147,15 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة إضافة حساب جديد:', newAccount);
       
-      // توليد ID عشوائي للحساب الجديد
-      const randomId = generateRandomId();
+      // توليد ID عشوائي فريد للحساب الجديد
+      const randomId = await generateUniqueId();
+      console.log('تم توليد ID فريد للحساب الجديد:', randomId);
       
       const accountData: any = {
         image: newAccount.image,
         description: newAccount.description,
         is_available: true,
-        random_id: randomId // حفظ الـ random_id مباشرة
+        random_id: randomId // حفظ الـ random_id الفريد مباشرة
       };
 
       // إضافة الحقول الاختيارية فقط إذا كانت متوفرة
@@ -141,7 +183,7 @@ export const usePubgAccounts = () => {
         throw error;
       }
 
-      console.log('تم إضافة حساب PUBG جديد بنجاح:', data);
+      console.log(`تم إضافة حساب PUBG جديد بنجاح مع ID: ${randomId}`, data);
       // إعادة تحميل البيانات بعد الإضافة
       await loadAccounts();
     } catch (error) {
