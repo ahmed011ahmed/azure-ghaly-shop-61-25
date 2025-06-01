@@ -17,8 +17,8 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
-        <ProductsSection />
         <GiveawaySection />
+        <ProductsSection />
         
         {/* قسم شات العملاء */}
         <section id="chat" className="py-16">
