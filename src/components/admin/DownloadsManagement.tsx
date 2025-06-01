@@ -16,7 +16,7 @@ interface DownloadLink {
   description: string;
   download_url: string;
   version: string;
-  file_size: string;
+  file_size?: string;
   target_level?: number;
   created_at?: string;
 }
@@ -62,7 +62,7 @@ const DownloadsManagement = () => {
       description: download.description,
       download_url: download.download_url,
       version: download.version,
-      file_size: download.file_size
+      file_size: download.file_size || ''
     });
     setShowForm(true);
   };
