@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Download, Loader2 } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -17,7 +16,6 @@ interface DownloadLink {
   download_url: string;
   version: string;
   file_size?: string;
-  target_level?: number;
   created_at?: string;
 }
 
