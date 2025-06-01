@@ -91,19 +91,23 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="price" className="text-white">السعر ($)</Label>
-            <Input
-              id="price"
-              name="price"
-              type="number"
-              min="0"
-              step="0.01"
-              value={formData.price}
-              onChange={handleChange}
-              className="bg-gray-800 border-gray-600 text-white"
-              placeholder="0.00"
-              required
-            />
+            <Label htmlFor="price" className="text-white">السعر</Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-yellow-400 font-bold text-lg">
+                $
+              </span>
+              <Input
+                id="price"
+                name="price"
+                type="text"
+                value={formData.price}
+                onChange={handleChange}
+                className="bg-gray-800 border-gray-600 text-white pl-8"
+                placeholder="0.00"
+                required
+              />
+            </div>
+            <p className="text-sm text-gray-400">أدخل السعر كنص مثل: 15.99 أو 25</p>
           </div>
 
           <div className="flex space-x-3 justify-end pt-4">

@@ -5,7 +5,7 @@ export interface PubgAccount {
   image: string;
   description: string;
   video?: string; // رابط فيديو اختياري
-  price: number; // السعر
+  price: number | string; // السعر يمكن أن يكون رقم أو نص
   isAvailable: boolean;
   createdAt: string;
   updatedAt: string;
@@ -15,5 +15,5 @@ export interface NewPubgAccount {
   image: string;
   description: string;
   video?: string; // رابط فيديو اختياري
-  price: number; // السعر
+  price: number | string; // السعر يمكن أن يكون رقم أو نص
 }

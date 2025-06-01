@@ -37,7 +37,7 @@ export const usePubgAccounts = () => {
           image: account.image,
           description: account.description,
           video: account.video || undefined,
-          price: account.price || 0, // استخدام السعر من قاعدة البيانات أو 0 كقيمة افتراضية
+          price: account.price || 0, // السعر يمكن أن يكون نص أو رقم
           isAvailable: account.is_available,
           createdAt: account.created_at,
           updatedAt: account.updated_at
@@ -82,7 +82,7 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة إضافة حساب جديد:', newAccount);
       
-      // إرسال البيانات الأساسية فقط (بدون السعر للآن)
+      // إرسال البيانات الأساسية
       const accountData: any = {
         image: newAccount.image,
         description: newAccount.description,
@@ -94,9 +94,11 @@ export const usePubgAccounts = () => {
         accountData.video = newAccount.video;
       }
 
-      // محاولة إضافة السعر إذا كان العمود موجود
+      // إضافة السعر
       if (newAccount.price !== undefined) {
-        accountData.price = newAccount.price;
+        // تحويل النص إلى رقم إذا أمكن، وإلا نحفظه كنص
+        const priceAsNumber = typeof newAccount.price === 'string' ? parseFloat(newAccount.price) : newAccount.price;
+        accountData.price = isNaN(priceAsNumber) ? newAccount.price : priceAsNumber;
       }
 
       console.log('البيانات التي سيتم إرسالها:', accountData);
@@ -164,7 +166,11 @@ export const usePubgAccounts = () => {
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.video !== undefined) dbUpdates.video = updates.video;
       if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
-      if (updates.price !== undefined) dbUpdates.price = updates.price;
+      if (updates.price !== undefined) {
+        // تحويل النص إلى رقم إذا أمكن، وإلا نحفظه كنص
+        const priceAsNumber = typeof updates.price === 'string' ? parseFloat(updates.price) : updates.price;
+        dbUpdates.price = isNaN(priceAsNumber) ? updates.price : priceAsNumber;
+      }
       dbUpdates.updated_at = new Date().toISOString();
 
       const { error } = await supabase
