@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import AdminDashboard from "./pages/AdminDashboard";
 import Auth from "./pages/Auth";
 import Subscribers from "./pages/Subscribers";
+import PubgAccounts from "./pages/PubgAccounts";
 import NotFound from "./pages/NotFound";
 import { ProductsProvider } from "./contexts/ProductsContext";
 import { ChatProvider } from "./contexts/ChatContext";
@@ -30,6 +31,7 @@ const App = () => (
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/subscribers" element={<Subscribers />} />
+                  <Route path="/pubg-accounts" element={<PubgAccounts />} />
                   <Route path="/admin" element={<AdminDashboard />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
