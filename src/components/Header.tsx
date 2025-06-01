@@ -40,6 +40,9 @@ const Header = () => {
             <a href="#products" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
               {t('header.tools')}
             </a>
+            <a href="#pubg-accounts" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
+              حسابات PUBG
+            </a>
             <Link to="/subscribers" className={`text-gray-300 hover:text-purple-400 font-medium transition-colors ${language === 'ar' ? 'px-[25px] mx-[14px]' : ''}`}>
               {t('header.subscribers')}
             </Link>
