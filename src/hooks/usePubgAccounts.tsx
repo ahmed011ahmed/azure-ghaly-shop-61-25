@@ -11,6 +11,8 @@ export const usePubgAccounts = () => {
   const loadAccounts = async () => {
     try {
       setLoading(true);
+      console.log('جاري تحميل حسابات PUBG...');
+      
       const { data, error } = await supabase
         .from('pubg_accounts')
         .select('*')
@@ -21,19 +23,22 @@ export const usePubgAccounts = () => {
         return;
       }
 
+      console.log('البيانات المحملة من قاعدة البيانات:', data);
+
       // تحويل البيانات للتوافق مع النوع المطلوب
-      const formattedAccounts: PubgAccount[] = data.map(account => ({
+      const formattedAccounts: PubgAccount[] = (data || []).map(account => ({
         id: account.id,
         image: account.image,
         description: account.description,
         video: account.video || undefined,
-        category: account.category || 'other', // قيمة افتراضية
-        price: account.price || 0, // قيمة افتراضية
+        category: (account as any).category || 'other', // قيمة افتراضية
+        price: (account as any).price || 0, // قيمة افتراضية
         isAvailable: account.is_available,
         createdAt: account.created_at,
         updatedAt: account.updated_at
       }));
 
+      console.log('الحسابات بعد التنسيق:', formattedAccounts);
       setAccounts(formattedAccounts);
     } catch (error) {
       console.error('خطأ في تحميل البيانات:', error);
@@ -55,8 +60,8 @@ export const usePubgAccounts = () => {
           schema: 'public',
           table: 'pubg_accounts'
         },
-        () => {
-          console.log('تم تحديث بيانات حسابات PUBG');
+        (payload) => {
+          console.log('تم تحديث بيانات حسابات PUBG:', payload);
           loadAccounts(); // إعادة تحميل البيانات عند حدوث تغيير
         }
       )
@@ -69,29 +74,42 @@ export const usePubgAccounts = () => {
 
   const addAccount = async (newAccount: NewPubgAccount): Promise<void> => {
     try {
+      console.log('محاولة إضافة حساب جديد:', newAccount);
+      
       const accountData: any = {
         image: newAccount.image,
         description: newAccount.description,
-        category: newAccount.category,
-        price: newAccount.price,
         is_available: true
       };
+
+      // إضافة التصنيف والسعر إذا كانت الأعمدة موجودة
+      if (newAccount.category) {
+        accountData.category = newAccount.category;
+      }
+      if (newAccount.price !== undefined) {
+        accountData.price = newAccount.price;
+      }
 
       // إضافة الفيديو فقط إذا كان متوفراً
       if (newAccount.video && newAccount.video.trim()) {
         accountData.video = newAccount.video;
       }
 
-      const { error } = await supabase
+      console.log('البيانات التي سيتم إرسالها:', accountData);
+
+      const { data, error } = await supabase
         .from('pubg_accounts')
-        .insert(accountData);
+        .insert(accountData)
+        .select();
 
       if (error) {
         console.error('خطأ في إضافة حساب PUBG:', error);
         throw error;
       }
 
-      console.log('تم إضافة حساب PUBG جديد بنجاح');
+      console.log('تم إضافة حساب PUBG جديد بنجاح:', data);
+      // إعادة تحميل البيانات بعد الإضافة
+      await loadAccounts();
     } catch (error) {
       console.error('خطأ في إضافة الحساب:', error);
       throw error;
@@ -100,6 +118,8 @@ export const usePubgAccounts = () => {
 
   const updateAccount = async (id: string, updates: Partial<PubgAccount>): Promise<void> => {
     try {
+      console.log('محاولة تحديث الحساب:', id, updates);
+      
       // تحويل البيانات للتوافق مع قاعدة البيانات
       const dbUpdates: any = {};
       if (updates.image !== undefined) dbUpdates.image = updates.image;
@@ -121,6 +141,8 @@ export const usePubgAccounts = () => {
       }
 
       console.log('تم تحديث حساب PUBG:', id);
+      // إعادة تحميل البيانات بعد التحديث
+      await loadAccounts();
     } catch (error) {
       console.error('خطأ في تحديث الحساب:', error);
       throw error;
@@ -129,6 +151,8 @@ export const usePubgAccounts = () => {
 
   const deleteAccount = async (id: string): Promise<void> => {
     try {
+      console.log('محاولة حذف الحساب:', id);
+      
       const { error } = await supabase
         .from('pubg_accounts')
         .delete()
@@ -140,6 +164,8 @@ export const usePubgAccounts = () => {
       }
 
       console.log('تم حذف حساب PUBG:', id);
+      // إعادة تحميل البيانات بعد الحذف
+      await loadAccounts();
     } catch (error) {
       console.error('خطأ في حذف الحساب:', error);
       throw error;
