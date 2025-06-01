@@ -155,6 +155,7 @@ export type Database = {
           image: string
           is_available: boolean
           updated_at: string
+          video: string | null
         }
         Insert: {
           created_at?: string
@@ -163,6 +164,7 @@ export type Database = {
           image: string
           is_available?: boolean
           updated_at?: string
+          video?: string | null
         }
         Update: {
           created_at?: string
@@ -171,6 +173,7 @@ export type Database = {
           image?: string
           is_available?: boolean
           updated_at?: string
+          video?: string | null
         }
         Relationships: []
       }
