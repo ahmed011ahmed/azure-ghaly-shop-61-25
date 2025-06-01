@@ -43,7 +43,7 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'price' || name === 'rating' ? Number(value) : value
+      [name]: name === 'rating' ? Number(value) : value
     }));
   };
 
@@ -81,23 +81,6 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
               placeholder="مثال: Bypass GHALY + HAK RNG ❤️"
               required
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="price" className="text-white">السعر</Label>
-            <Input
-              id="price"
-              name="price"
-              type="number"
-              min="0"
-              step="0.01"
-              value={formData.price}
-              onChange={handleChange}
-              className="bg-gray-800 border-gray-600 text-white"
-              placeholder="مثال: 60"
-              required
-            />
-            <p className="text-sm text-gray-400">السعر يجب أن يبدأ بحديقة 5</p>
           </div>
 
           <div className="space-y-2">
@@ -143,19 +126,6 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
             <p className="text-sm text-gray-400">
               {formData.description.length}/200 حرف (الحد الأدنى 20 حرف)
             </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="notes" className="text-white">ملاحظات إضافية (اختياري)</Label>
-            <Input
-              id="notes"
-              name="notes"
-              type="text"
-              value={formData.notes}
-              onChange={handleChange}
-              className="bg-gray-800 border-gray-600 text-white"
-              placeholder="أدخل أي ملاحظات إضافية..."
-            />
           </div>
 
           <div className="space-y-2">
