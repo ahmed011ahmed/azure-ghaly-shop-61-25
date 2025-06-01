@@ -26,6 +26,7 @@ export const usePubgAccounts = () => {
         id: account.id,
         image: account.image,
         description: account.description,
+        video: account.video || undefined, // إضافة دعم للفيديو
         isAvailable: account.is_available,
         createdAt: account.created_at,
         updatedAt: account.updated_at
@@ -66,13 +67,20 @@ export const usePubgAccounts = () => {
 
   const addAccount = async (newAccount: NewPubgAccount): Promise<void> => {
     try {
+      const accountData: any = {
+        image: newAccount.image,
+        description: newAccount.description,
+        is_available: true
+      };
+
+      // إضافة الفيديو فقط إذا كان متوفراً
+      if (newAccount.video && newAccount.video.trim()) {
+        accountData.video = newAccount.video;
+      }
+
       const { error } = await supabase
         .from('pubg_accounts')
-        .insert({
-          image: newAccount.image,
-          description: newAccount.description,
-          is_available: true
-        });
+        .insert(accountData);
 
       if (error) {
         console.error('خطأ في إضافة حساب PUBG:', error);
@@ -92,6 +100,7 @@ export const usePubgAccounts = () => {
       const dbUpdates: any = {};
       if (updates.image !== undefined) dbUpdates.image = updates.image;
       if (updates.description !== undefined) dbUpdates.description = updates.description;
+      if (updates.video !== undefined) dbUpdates.video = updates.video;
       if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
       dbUpdates.updated_at = new Date().toISOString();
 

@@ -14,7 +14,8 @@ interface PubgAccountFormProps {
 const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel }) => {
   const [formData, setFormData] = useState<NewPubgAccount>({
     image: '',
-    description: ''
+    description: '',
+    video: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -23,7 +24,8 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
     // إعادة تعيين النموذج
     setFormData({
       image: '',
-      description: ''
+      description: '',
+      video: ''
     });
   };
 
@@ -40,7 +42,7 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
       <CardHeader className="bg-slate-950">
         <CardTitle className="text-white text-xl">إضافة حساب PUBG جديد</CardTitle>
         <CardDescription className="text-gray-300">
-          أدخل صورة ووصف حساب PUBG الجديد
+          أدخل صورة ووصف وفيديو حساب PUBG الجديد
         </CardDescription>
       </CardHeader>
       <CardContent className="bg-slate-950 p-6">
@@ -57,6 +59,20 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
               placeholder="https://example.com/image.jpg"
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="video" className="text-white">رابط الفيديو (اختياري)</Label>
+            <Input
+              id="video"
+              name="video"
+              type="url"
+              value={formData.video}
+              onChange={handleChange}
+              className="bg-gray-800 border-gray-600 text-white"
+              placeholder="https://example.com/video.mp4"
+            />
+            <p className="text-sm text-gray-400">يمكنك ترك هذا الحقل فارغاً إذا لم تكن تريد إضافة فيديو</p>
           </div>
 
           <div className="space-y-2">

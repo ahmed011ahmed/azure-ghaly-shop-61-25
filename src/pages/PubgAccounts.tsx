@@ -1,8 +1,10 @@
 
 import React from 'react';
-import { ArrowLeft, Gamepad2 } from 'lucide-react';
+import { ArrowLeft, Gamepad2, Play } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
+import { Dialog, DialogContent, DialogTrigger } from '../components/ui/dialog';
 import { usePubgAccounts } from '../hooks/usePubgAccounts';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
@@ -74,6 +76,34 @@ const PubgAccounts = () => {
                       متاح الآن
                     </Badge>
                   </div>
+
+                  {/* زر تشغيل الفيديو إذا كان متوفراً */}
+                  {account.video && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            size="lg"
+                            className="bg-purple-600/80 hover:bg-purple-600 text-white rounded-full p-4 backdrop-blur-sm"
+                          >
+                            <Play className="w-8 h-8" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl w-full bg-black border-gray-800">
+                          <div className="aspect-video">
+                            <video
+                              controls
+                              autoPlay
+                              className="w-full h-full rounded-lg"
+                              src={account.video}
+                            >
+                              متصفحك لا يدعم تشغيل الفيديو
+                            </video>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  )}
                 </div>
 
                 <CardContent className="bg-slate-950 p-6">

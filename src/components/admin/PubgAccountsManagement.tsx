@@ -4,7 +4,8 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
-import { Plus, Edit, Trash2, Eye, EyeOff, Gamepad2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Gamepad2, Play } from 'lucide-react';
+import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
 import { usePubgAccounts } from '../../hooks/usePubgAccounts';
 import PubgAccountForm from './PubgAccountForm';
 import { PubgAccount } from '../../types/pubgAccount';
@@ -117,6 +118,7 @@ const PubgAccountsManagement = () => {
                 <TableRow className="border-gray-700">
                   <TableHead className="text-gray-300">الصورة</TableHead>
                   <TableHead className="text-gray-300">الوصف</TableHead>
+                  <TableHead className="text-gray-300">الفيديو</TableHead>
                   <TableHead className="text-gray-300">الحالة</TableHead>
                   <TableHead className="text-gray-300">الإجراءات</TableHead>
                 </TableRow>
@@ -135,6 +137,35 @@ const PubgAccountsManagement = () => {
                     </TableCell>
                     <TableCell className="text-gray-300 max-w-md">
                       <p className="line-clamp-3">{account.description}</p>
+                    </TableCell>
+                    <TableCell>
+                      {account.video ? (
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-purple-500 text-purple-400 hover:bg-purple-500/10"
+                            >
+                              <Play className="w-4 h-4 mr-2" />
+                              مشاهدة
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl w-full bg-black border-gray-800">
+                            <div className="aspect-video">
+                              <video
+                                controls
+                                className="w-full h-full rounded-lg"
+                                src={account.video}
+                              >
+                                متصفحك لا يدعم تشغيل الفيديو
+                              </video>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      ) : (
+                        <span className="text-gray-500 text-sm">لا يوجد فيديو</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Badge className={account.isAvailable ? 'bg-green-900 text-green-200' : 'bg-red-900 text-red-200'}>
