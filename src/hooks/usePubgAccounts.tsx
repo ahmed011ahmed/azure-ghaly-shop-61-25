@@ -10,33 +10,17 @@ export const usePubgAccounts = () => {
   const mockAccounts: PubgAccount[] = [
     {
       id: '1',
-      playerName: 'ProGamer123',
-      playerId: 'PG123456',
-      tier: 'Conqueror',
-      kd: 4.2,
-      winRate: 85,
-      matches: 1250,
-      price: 150,
-      serverRegion: 'Middle East',
-      accountType: 'main',
+      image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop',
+      description: 'حساب محترف مع إحصائيات ممتازة - جاهز للاستخدام الفوري',
       isAvailable: true,
-      description: 'حساب محترف مع إحصائيات ممتازة',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     },
     {
       id: '2',
-      playerName: 'SkillMaster',
-      playerId: 'SM789012',
-      tier: 'Ace',
-      kd: 3.8,
-      winRate: 78,
-      matches: 980,
-      price: 120,
-      serverRegion: 'Europe',
-      accountType: 'smurf',
+      image: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=400&h=300&fit=crop',
+      description: 'حساب سيرف أوروبي بإحصائيات قوية - مناسب للاعبين المتقدمين',
       isAvailable: true,
-      description: 'حساب سيرف أوروبي بإحصائيات قوية',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }

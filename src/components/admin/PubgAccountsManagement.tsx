@@ -20,29 +20,6 @@ const PubgAccountsManagement = () => {
     }
   };
 
-  const getTierColor = (tier: string) => {
-    const colors: { [key: string]: string } = {
-      'Bronze': 'bg-orange-900 text-orange-200',
-      'Silver': 'bg-gray-600 text-gray-200',
-      'Gold': 'bg-yellow-600 text-yellow-200',
-      'Platinum': 'bg-teal-600 text-teal-200',
-      'Diamond': 'bg-blue-600 text-blue-200',
-      'Crown': 'bg-purple-600 text-purple-200',
-      'Ace': 'bg-red-600 text-red-200',
-      'Conqueror': 'bg-pink-600 text-pink-200'
-    };
-    return colors[tier] || 'bg-gray-600 text-gray-200';
-  };
-
-  const getAccountTypeColor = (type: string) => {
-    const colors: { [key: string]: string } = {
-      'main': 'bg-green-900 text-green-200',
-      'smurf': 'bg-blue-900 text-blue-200',
-      'guest': 'bg-gray-700 text-gray-300'
-    };
-    return colors[type] || 'bg-gray-700 text-gray-300';
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -72,7 +49,7 @@ const PubgAccountsManagement = () => {
       </div>
 
       {/* إحصائيات سريعة */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="gaming-card">
           <CardContent className="bg-slate-950 p-6">
             <div className="flex items-center justify-between">
@@ -112,20 +89,6 @@ const PubgAccountsManagement = () => {
             </div>
           </CardContent>
         </Card>
-
-        <Card className="gaming-card">
-          <CardContent className="bg-slate-950 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-300 text-sm">متوسط السعر</p>
-                <p className="text-2xl font-bold text-yellow-400">
-                  ${accounts.length > 0 ? Math.round(accounts.reduce((sum, acc) => sum + acc.price, 0) / accounts.length) : 0}
-                </p>
-              </div>
-              <span className="text-2xl">💰</span>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* نموذج إضافة/تعديل حساب */}
@@ -152,13 +115,8 @@ const PubgAccountsManagement = () => {
             <Table>
               <TableHeader>
                 <TableRow className="border-gray-700">
-                  <TableHead className="text-gray-300">اسم اللاعب</TableHead>
-                  <TableHead className="text-gray-300">معرف اللاعب</TableHead>
-                  <TableHead className="text-gray-300">الرتبة</TableHead>
-                  <TableHead className="text-gray-300">نوع الحساب</TableHead>
-                  <TableHead className="text-gray-300">K/D</TableHead>
-                  <TableHead className="text-gray-300">نسبة الفوز</TableHead>
-                  <TableHead className="text-gray-300">السعر</TableHead>
+                  <TableHead className="text-gray-300">الصورة</TableHead>
+                  <TableHead className="text-gray-300">الوصف</TableHead>
                   <TableHead className="text-gray-300">الحالة</TableHead>
                   <TableHead className="text-gray-300">الإجراءات</TableHead>
                 </TableRow>
@@ -166,31 +124,17 @@ const PubgAccountsManagement = () => {
               <TableBody>
                 {accounts.map((account) => (
                   <TableRow key={account.id} className="border-gray-700">
-                    <TableCell className="text-white font-medium">
-                      {account.playerName}
-                    </TableCell>
-                    <TableCell className="text-gray-300">
-                      {account.playerId}
-                    </TableCell>
                     <TableCell>
-                      <Badge className={getTierColor(account.tier)}>
-                        {account.tier}
-                      </Badge>
+                      <div className="w-20 h-20 rounded-lg overflow-hidden">
+                        <img 
+                          src={account.image}
+                          alt="حساب PUBG"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     </TableCell>
-                    <TableCell>
-                      <Badge className={getAccountTypeColor(account.accountType)}>
-                        {account.accountType === 'main' ? 'رئيسي' : 
-                         account.accountType === 'smurf' ? 'سمرف' : 'ضيف'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-gray-300">
-                      {account.kd.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-gray-300">
-                      {account.winRate}%
-                    </TableCell>
-                    <TableCell className="text-green-400 font-semibold">
-                      ${account.price}
+                    <TableCell className="text-gray-300 max-w-md">
+                      <p className="line-clamp-3">{account.description}</p>
                     </TableCell>
                     <TableCell>
                       <Badge className={account.isAvailable ? 'bg-green-900 text-green-200' : 'bg-red-900 text-red-200'}>
@@ -210,13 +154,6 @@ const PubgAccountsManagement = () => {
                           ) : (
                             <Eye className="w-4 h-4" />
                           )}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="border-gray-600 hover:bg-gray-700"
-                        >
-                          <Edit className="w-4 h-4" />
                         </Button>
                         <Button
                           size="sm"
