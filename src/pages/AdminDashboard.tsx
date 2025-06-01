@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield } from 'lucide-react';
+import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Gamepad2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductManagement from '../components/admin/ProductManagement';
 import AdminLogin from '../components/admin/AdminLogin';
@@ -11,6 +11,7 @@ import SubscribersManagement from '../components/admin/SubscribersManagement';
 import UserLookup from '../components/admin/UserLookup';
 import PermissionsManagement from '../components/admin/PermissionsManagement';
 import ContentViewer from '../components/admin/ContentViewer';
+import PubgAccountsManagement from '../components/admin/PubgAccountsManagement';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 
@@ -82,6 +83,11 @@ const AdminDashboard = () => {
       id: 'products',
       label: 'إدارة المنتجات',
       icon: Package
+    },
+    {
+      id: 'pubg-accounts',
+      label: 'حسابات PUBG',
+      icon: Gamepad2
     },
     {
       id: 'subscribers',
@@ -216,6 +222,15 @@ const AdminDashboard = () => {
                   </Button>
                   
                   <Button
+                    onClick={() => setActiveTab('pubg-accounts')}
+                    className="bg-orange-600 hover:bg-orange-700 text-white p-6 h-auto flex-col space-y-2"
+                  >
+                    <Gamepad2 className="w-8 h-8" />
+                    <span className="font-semibold">حسابات PUBG</span>
+                    <span className="text-sm opacity-80">إدارة حسابات اللعبة</span>
+                  </Button>
+                  
+                  <Button
                     onClick={() => setActiveTab('subscribers')}
                     className="bg-green-600 hover:bg-green-700 text-white p-6 h-auto flex-col space-y-2"
                   >
@@ -232,15 +247,6 @@ const AdminDashboard = () => {
                     <span className="font-semibold">شات العملاء</span>
                     <span className="text-sm opacity-80">التواصل مع العملاء</span>
                   </Button>
-                  
-                  <Button
-                    onClick={() => setActiveTab('updates')}
-                    className="bg-orange-600 hover:bg-orange-700 text-white p-6 h-auto flex-col space-y-2"
-                  >
-                    <Calendar className="w-8 h-8" />
-                    <span className="font-semibold">التحديثات</span>
-                    <span className="text-sm opacity-80">إدارة الإصدارات</span>
-                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -248,6 +254,8 @@ const AdminDashboard = () => {
         )}
 
         {activeTab === 'products' && <ProductManagement />}
+        
+        {activeTab === 'pubg-accounts' && <PubgAccountsManagement />}
         
         {activeTab === 'subscribers' && <SubscribersManagement />}
         
