@@ -4,7 +4,8 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Label } from '../ui/label';
-import { NewPubgAccount } from '../../types/pubgAccount';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { NewPubgAccount, CATEGORY_LABELS } from '../../types/pubgAccount';
 
 interface PubgAccountFormProps {
   onSubmit: (account: NewPubgAccount) => void;
@@ -15,7 +16,9 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
   const [formData, setFormData] = useState<NewPubgAccount>({
     image: '',
     description: '',
-    video: ''
+    video: '',
+    category: 'worldwide',
+    price: 0
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -25,7 +28,9 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
     setFormData({
       image: '',
       description: '',
-      video: ''
+      video: '',
+      category: 'worldwide',
+      price: 0
     });
   };
 
@@ -33,7 +38,14 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: name === 'price' ? parseFloat(value) || 0 : value
+    }));
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      category: value as NewPubgAccount['category']
     }));
   };
 
@@ -42,11 +54,45 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
       <CardHeader className="bg-slate-950">
         <CardTitle className="text-white text-xl">إضافة حساب PUBG جديد</CardTitle>
         <CardDescription className="text-gray-300">
-          أدخل صورة ووصف وفيديو حساب PUBG الجديد
+          أدخل تفاصيل حساب PUBG الجديد مع التصنيف والسعر
         </CardDescription>
       </CardHeader>
       <CardContent className="bg-slate-950 p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="category" className="text-white">التصنيف</Label>
+              <Select value={formData.category} onValueChange={handleCategoryChange}>
+                <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
+                  <SelectValue placeholder="اختر التصنيف" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-600">
+                  {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+                    <SelectItem key={key} value={key} className="text-white hover:bg-gray-700">
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="price" className="text-white">السعر ($)</Label>
+              <Input
+                id="price"
+                name="price"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.price}
+                onChange={handleChange}
+                className="bg-gray-800 border-gray-600 text-white"
+                placeholder="25.00"
+                required
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="image" className="text-white">رابط الصورة</Label>
             <Input

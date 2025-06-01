@@ -26,7 +26,9 @@ export const usePubgAccounts = () => {
         id: account.id,
         image: account.image,
         description: account.description,
-        video: account.video || undefined, // إضافة دعم للفيديو
+        video: account.video || undefined,
+        category: account.category || 'other',
+        price: account.price || 0,
         isAvailable: account.is_available,
         createdAt: account.created_at,
         updatedAt: account.updated_at
@@ -70,6 +72,8 @@ export const usePubgAccounts = () => {
       const accountData: any = {
         image: newAccount.image,
         description: newAccount.description,
+        category: newAccount.category,
+        price: newAccount.price,
         is_available: true
       };
 
@@ -101,6 +105,8 @@ export const usePubgAccounts = () => {
       if (updates.image !== undefined) dbUpdates.image = updates.image;
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.video !== undefined) dbUpdates.video = updates.video;
+      if (updates.category !== undefined) dbUpdates.category = updates.category;
+      if (updates.price !== undefined) dbUpdates.price = updates.price;
       if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
       dbUpdates.updated_at = new Date().toISOString();
 
@@ -147,12 +153,18 @@ export const usePubgAccounts = () => {
     }
   };
 
+  // فلترة الحسابات حسب التصنيف
+  const getAccountsByCategory = (category: PubgAccount['category']) => {
+    return accounts.filter(account => account.category === category && account.isAvailable);
+  };
+
   return {
     accounts,
     loading,
     addAccount,
     updateAccount,
     deleteAccount,
-    toggleAvailability
+    toggleAvailability,
+    getAccountsByCategory
   };
 };
