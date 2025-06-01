@@ -1,11 +1,11 @@
-
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
 import { Label } from '../ui/label';
-import { Plus, Edit, Trash2, Eye, EyeOff, Gamepad2, Play, Filter } from 'lucide-react';
+import { Input } from '../ui/input';
+import { Plus, Edit, Trash2, Eye, EyeOff, Gamepad2, Play, Filter, Search } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { usePubgAccounts } from '../../hooks/usePubgAccounts';
@@ -16,6 +16,7 @@ const PubgAccountsManagement = () => {
   const { accounts, loading, addAccount, updateAccount, deleteAccount, toggleAvailability } = usePubgAccounts();
   const [showForm, setShowForm] = useState(false);
   const [filterCategory, setFilterCategory] = useState<PubgAccount['category'] | 'all'>('all');
+  const [searchId, setSearchId] = useState('');
 
   const handleDelete = (id: string) => {
     if (window.confirm('هل أنت متأكد من حذف هذا الحساب؟')) {
@@ -23,9 +24,12 @@ const PubgAccountsManagement = () => {
     }
   };
 
-  const filteredAccounts = filterCategory === 'all' 
-    ? accounts 
-    : accounts.filter(account => account.category === filterCategory);
+  // فلترة الحسابات حسب التصنيف والبحث بالـ ID
+  const filteredAccounts = accounts.filter(account => {
+    const matchesCategory = filterCategory === 'all' || account.category === filterCategory;
+    const matchesSearch = searchId === '' || account.id.toLowerCase().includes(searchId.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   const getCategoryStats = () => {
     const stats = {
@@ -142,25 +146,39 @@ const PubgAccountsManagement = () => {
         />
       )}
 
-      {/* فلتر التصنيفات */}
+      {/* فلتر التصنيفات والبحث */}
       <Card className="gaming-card">
         <CardContent className="bg-slate-950 p-4">
-          <div className="flex items-center space-x-4">
-            <Filter className="w-5 h-5 text-gray-400" />
-            <Label className="text-gray-300">فلترة حسب التصنيف:</Label>
-            <Select value={filterCategory} onValueChange={(value) => setFilterCategory(value as any)}>
-              <SelectTrigger className="w-48 bg-gray-800 border-gray-600 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-600">
-                <SelectItem value="all" className="text-white hover:bg-gray-700">جميع التصنيفات</SelectItem>
-                {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                  <SelectItem key={key} value={key} className="text-white hover:bg-gray-700">
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center space-x-4">
+              <Filter className="w-5 h-5 text-gray-400" />
+              <Label className="text-gray-300">فلترة حسب التصنيف:</Label>
+              <Select value={filterCategory} onValueChange={(value) => setFilterCategory(value as any)}>
+                <SelectTrigger className="w-48 bg-gray-800 border-gray-600 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-600">
+                  <SelectItem value="all" className="text-white hover:bg-gray-700">جميع التصنيفات</SelectItem>
+                  {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+                    <SelectItem key={key} value={key} className="text-white hover:bg-gray-700">
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <Search className="w-5 h-5 text-gray-400" />
+              <Label className="text-gray-300">البحث بـ ID:</Label>
+              <Input
+                type="text"
+                placeholder="أدخل ID الحساب..."
+                value={searchId}
+                onChange={(e) => setSearchId(e.target.value)}
+                className="w-64 bg-gray-800 border-gray-600 text-white"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -178,6 +196,7 @@ const PubgAccountsManagement = () => {
             <Table>
               <TableHeader>
                 <TableRow className="border-gray-700">
+                  <TableHead className="text-gray-300">ID الحساب</TableHead>
                   <TableHead className="text-gray-300">الصورة</TableHead>
                   <TableHead className="text-gray-300">التصنيف</TableHead>
                   <TableHead className="text-gray-300">السعر</TableHead>
@@ -190,6 +209,11 @@ const PubgAccountsManagement = () => {
               <TableBody>
                 {filteredAccounts.map((account) => (
                   <TableRow key={account.id} className="border-gray-700">
+                    <TableCell>
+                      <div className="font-mono text-xs text-purple-400 bg-gray-800 p-2 rounded max-w-32 overflow-hidden">
+                        {account.id}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <div className="w-20 h-20 rounded-lg overflow-hidden">
                         <img 
@@ -284,9 +308,11 @@ const PubgAccountsManagement = () => {
             <div className="text-center py-12">
               <Gamepad2 className="w-16 h-16 text-gray-600 mx-auto mb-4" />
               <p className="text-gray-400 text-lg">
-                {filterCategory === 'all' ? 'لا توجد حسابات PUBG حالياً' : `لا توجد حسابات ${CATEGORY_LABELS[filterCategory as keyof typeof CATEGORY_LABELS]} حالياً`}
+                {searchId ? `لم يتم العثور على حساب بـ ID: ${searchId}` :
+                filterCategory === 'all' ? 'لا توجد حسابات PUBG حالياً' : 
+                `لا توجد حسابات ${CATEGORY_LABELS[filterCategory as keyof typeof CATEGORY_LABELS]} حالياً`}
               </p>
-              <p className="text-gray-500">ابدأ بإضافة حساب جديد</p>
+              {!searchId && <p className="text-gray-500">ابدأ بإضافة حساب جديد</p>}
             </div>
           )}
         </CardContent>
