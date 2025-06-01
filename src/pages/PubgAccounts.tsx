@@ -127,9 +127,6 @@ const PubgAccounts = () => {
                   <div className="bg-purple-900/20 rounded-lg p-4 text-center">
                     <p className="text-purple-300 text-sm mb-2">للاستفسار والشراء</p>
                     <p className="text-white font-medium">تواصل معنا عبر الشات</p>
-                    <div className="mt-2 text-yellow-400 font-bold text-lg">
-                      السعر: ${account.price}
-                    </div>
                   </div>
                 </CardContent>
               </Card>
