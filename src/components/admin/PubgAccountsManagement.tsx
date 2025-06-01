@@ -150,7 +150,6 @@ const PubgAccountsManagement = () => {
                   <TableHead className="text-gray-300">الصورة</TableHead>
                   <TableHead className="text-gray-300">الوصف</TableHead>
                   <TableHead className="text-gray-300">الفيديو</TableHead>
-                  <TableHead className="text-gray-300">السعر</TableHead>
                   <TableHead className="text-gray-300">الحالة</TableHead>
                   <TableHead className="text-gray-300">الإجراءات</TableHead>
                 </TableRow>
@@ -203,11 +202,6 @@ const PubgAccountsManagement = () => {
                       ) : (
                         <span className="text-gray-500 text-sm">لا يوجد فيديو</span>
                       )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-yellow-400 font-bold">
-                        ${account.price}
-                      </div>
                     </TableCell>
                     <TableCell>
                       <Badge className={account.isAvailable ? 'bg-green-900 text-green-200' : 'bg-red-900 text-red-200'}>

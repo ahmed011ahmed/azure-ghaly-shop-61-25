@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { PubgAccount, NewPubgAccount } from '../types/pubgAccount';
@@ -38,7 +37,6 @@ export const usePubgAccounts = () => {
           image: account.image,
           description: account.description,
           video: account.video || undefined,
-          price: account.price || 0, // عرض السعر الفعلي أو 0 إذا لم يكن محدد
           isAvailable: account.is_available,
           createdAt: account.created_at,
           updatedAt: account.updated_at
@@ -95,13 +93,6 @@ export const usePubgAccounts = () => {
         accountData.video = newAccount.video;
       }
 
-      // إضافة السعر
-      if (newAccount.price !== undefined) {
-        // تحويل النص إلى رقم إذا أمكن، وإلا نحفظه كنص
-        const priceAsNumber = typeof newAccount.price === 'string' ? parseFloat(newAccount.price) : newAccount.price;
-        accountData.price = isNaN(priceAsNumber) ? newAccount.price : priceAsNumber;
-      }
-
       console.log('البيانات التي سيتم إرسالها:', accountData);
 
       const { data, error } = await supabase
@@ -111,31 +102,6 @@ export const usePubgAccounts = () => {
 
       if (error) {
         console.error('خطأ في إضافة حساب PUBG:', error);
-        
-        // إذا كان الخطأ متعلق بعمود غير موجود، نحاول بدون السعر
-        if (error.message?.includes('price') || error.code === '42703') {
-          console.log('محاولة الإضافة بدون حقل السعر...');
-          const accountDataWithoutPrice = { ...accountData };
-          delete accountDataWithoutPrice.price;
-          
-          const { data: retryData, error: retryError } = await supabase
-            .from('pubg_accounts')
-            .insert(accountDataWithoutPrice)
-            .select();
-            
-          if (retryError) {
-            throw retryError;
-          }
-          
-          toast({
-            title: "تم إضافة الحساب بنجاح",
-            description: "تم إضافة حساب PUBG جديد (بدون حفظ السعر).",
-          });
-          
-          await loadAccounts();
-          return;
-        }
-        
         toast({
           title: "خطأ في إضافة الحساب",
           description: "حدث خطأ أثناء إضافة الحساب. حاول مرة أخرى.",
@@ -167,11 +133,6 @@ export const usePubgAccounts = () => {
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.video !== undefined) dbUpdates.video = updates.video;
       if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
-      if (updates.price !== undefined) {
-        // تحويل النص إلى رقم إذا أمكن، وإلا نحفظه كنص
-        const priceAsNumber = typeof updates.price === 'string' ? parseFloat(updates.price) : updates.price;
-        dbUpdates.price = isNaN(priceAsNumber) ? updates.price : priceAsNumber;
-      }
       dbUpdates.updated_at = new Date().toISOString();
 
       const { error } = await supabase

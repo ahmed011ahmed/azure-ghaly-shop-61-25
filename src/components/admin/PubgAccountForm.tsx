@@ -15,8 +15,7 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
   const [formData, setFormData] = useState<NewPubgAccount>({
     image: '',
     description: '',
-    video: '',
-    price: 0
+    video: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -26,8 +25,7 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
     setFormData({
       image: '',
       description: '',
-      video: '',
-      price: 0
+      video: ''
     });
   };
 
@@ -35,7 +33,7 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'price' ? parseFloat(value) || 0 : value
+      [name]: value
     }));
   };
 
@@ -88,26 +86,6 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
               placeholder="اكتب وصف مفصل عن الحساب..."
               required
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="price" className="text-white">السعر</Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-yellow-400 font-bold text-lg">
-                $
-              </span>
-              <Input
-                id="price"
-                name="price"
-                type="text"
-                value={formData.price}
-                onChange={handleChange}
-                className="bg-gray-800 border-gray-600 text-white pl-8"
-                placeholder="0.00"
-                required
-              />
-            </div>
-            <p className="text-sm text-gray-400">أدخل السعر كنص مثل: 15.99 أو 25</p>
           </div>
 
           <div className="flex space-x-3 justify-end pt-4">
