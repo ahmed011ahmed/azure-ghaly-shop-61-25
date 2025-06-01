@@ -19,6 +19,26 @@ export const useAdminUsers = () => {
   // حفظ البيانات في localStorage مؤقتاً حتى يتم إنشاء جدول admin_users
   const STORAGE_KEY = 'admin_users_data';
 
+  // تنظيف البيانات القديمة وتحويلها للتنسيق الجديد
+  const cleanAndMigrateData = (rawData: any[]) => {
+    return rawData
+      .filter(user => user.is_active) // فقط المستخدمين النشطين
+      .map(user => {
+        // إذا كان المستخدم يحتوي على username و password فهو بالتنسيق الصحيح
+        if (user.username && user.password) {
+          return user;
+        }
+        
+        // إذا كان يحتوي على email فقط، تجاهله (بيانات قديمة غير مكتملة)
+        if (user.email && !user.username) {
+          return null;
+        }
+        
+        return user;
+      })
+      .filter(user => user !== null); // إزالة القيم الفارغة
+  };
+
   // جلب قائمة مستخدمي الإدارة من localStorage
   const fetchAdminUsers = async () => {
     try {
@@ -26,10 +46,16 @@ export const useAdminUsers = () => {
       console.log('Loading admin users from localStorage');
       
       const storedData = localStorage.getItem(STORAGE_KEY);
-      const users = storedData ? JSON.parse(storedData) : [];
+      const rawUsers = storedData ? JSON.parse(storedData) : [];
       
-      console.log('Admin users loaded from localStorage:', users);
-      setAdminUsers(users);
+      // تنظيف وتنسيق البيانات
+      const cleanedUsers = cleanAndMigrateData(rawUsers);
+      
+      // حفظ البيانات المنظفة
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedUsers));
+      
+      console.log('Admin users loaded and cleaned:', cleanedUsers);
+      setAdminUsers(cleanedUsers);
     } catch (error) {
       console.error('Error in fetchAdminUsers:', error);
       toast({

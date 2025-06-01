@@ -37,17 +37,30 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
       const storedData = localStorage.getItem('admin_users_data');
       const adminUsers = storedData ? JSON.parse(storedData) : [];
       
-      const validUser = adminUsers.find((user: any) => 
-        user.username === username && 
-        user.password === password && 
-        user.is_active
-      );
+      console.log('Checking login for:', username);
+      console.log('Available users:', adminUsers);
+      
+      const validUser = adminUsers.find((user: any) => {
+        // التحقق من البيانات الجديدة التي تحتوي على username و password
+        if (user.username && user.password) {
+          return user.username === username && 
+                 user.password === password && 
+                 user.is_active;
+        }
+        // التحقق من البيانات القديمة التي تحتوي على email فقط
+        if (user.email && !user.username) {
+          return user.email === username && user.is_active;
+        }
+        return false;
+      });
+
+      console.log('Found valid user:', validUser);
 
       if (validUser) {
         // حفظ معلومات المستخدم المسجل للدخول
         localStorage.setItem('current_admin_user', JSON.stringify({
           id: validUser.id,
-          username: validUser.username,
+          username: validUser.username || validUser.email,
           permissions: validUser.permissions
         }));
         onLogin();
