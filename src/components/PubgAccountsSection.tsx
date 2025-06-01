@@ -16,7 +16,16 @@ const PubgAccountsSection = () => {
   const categories = [
     { key: 'worldwide' as const, label: 'عالمية', color: 'bg-blue-600 hover:bg-blue-700' },
     { key: 'glitch' as const, label: 'جلتش', color: 'bg-purple-600 hover:bg-purple-700' },
-    { key: 'other' as const, label: 'إصدارات أخرى', color: 'bg-green-600 hover:bg-green-700' }
+    { key: 'arabic' as const, label: 'عربية', color: 'bg-green-600 hover:bg-green-700' },
+    { key: 'turkey' as const, label: 'تركية', color: 'bg-red-600 hover:bg-red-700' },
+    { key: 'korea' as const, label: 'كورية', color: 'bg-yellow-600 hover:bg-yellow-700' },
+    { key: 'vietnam' as const, label: 'فيتنامية', color: 'bg-orange-600 hover:bg-orange-700' },
+    { key: 'metro' as const, label: 'مترو رويال', color: 'bg-pink-600 hover:bg-pink-700' },
+    { key: 'conqueror' as const, label: 'كونكرور', color: 'bg-indigo-600 hover:bg-indigo-700' },
+    { key: 'ace' as const, label: 'ايس', color: 'bg-cyan-600 hover:bg-cyan-700' },
+    { key: 'crown' as const, label: 'كراون', color: 'bg-amber-600 hover:bg-amber-700' },
+    { key: 'diamond' as const, label: 'دايموند', color: 'bg-emerald-600 hover:bg-emerald-700' },
+    { key: 'other' as const, label: 'إصدارات أخرى', color: 'bg-gray-600 hover:bg-gray-700' }
   ];
 
   const currentAccounts = getAccountsByCategory(activeCategory).slice(0, 6); // عرض أول 6 حسابات فقط
@@ -53,7 +62,7 @@ const PubgAccountsSection = () => {
 
         {/* تصنيفات الحسابات */}
         <div className="flex justify-center mb-8">
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-2 flex space-x-2">
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-2 flex flex-wrap gap-2 max-w-6xl">
             {categories.map((category) => (
               <Button
                 key={category.key}
@@ -62,7 +71,7 @@ const PubgAccountsSection = () => {
                   activeCategory === category.key 
                     ? category.color + ' text-white shadow-lg' 
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                } transition-all duration-200 font-medium px-4 py-2`}
+                } transition-all duration-200 font-medium px-3 py-2 text-sm`}
               >
                 {category.label}
                 <span className="ml-2 bg-white/20 px-2 py-1 rounded-full text-xs">
