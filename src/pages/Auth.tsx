@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
@@ -46,12 +47,11 @@ const Auth = () => {
     try {
       console.log('Starting signup process for:', email);
       
-      // Check if email already exists in subscriber_permissions
+      // Check if email already exists in subscriber_permissions (regardless of is_active status)
       const { data: existingPermission } = await supabase
         .from('subscriber_permissions')
-        .select('email')
+        .select('email, is_active')
         .eq('email', email.trim())
-        .eq('is_active', true)
         .maybeSingle();
 
       console.log('Checking existing permission for email:', email, 'Result:', existingPermission);
@@ -89,8 +89,9 @@ const Auth = () => {
 
       console.log('User created successfully:', data.user?.id);
 
-      // Only add to subscriber_permissions if email doesn't already exist
+      // Handle subscriber permissions
       if (!existingPermission) {
+        // Email doesn't exist, create new permission
         console.log('Adding new permission for:', email);
         const { error: permissionError } = await supabase
           .from('subscriber_permissions')
@@ -102,12 +103,32 @@ const Auth = () => {
 
         if (permissionError) {
           console.error('Error adding permission:', permissionError);
-          // Don't block signup if permission addition fails
+          // Don't block signup if permission addition fails due to constraint
+          if (!permissionError.message.includes('duplicate key')) {
+            toast({
+              title: 'تحذير',
+              description: 'تم إنشاء الحساب لكن حدث خطأ في إعداد الصلاحيات',
+              variant: 'destructive',
+            });
+          }
         } else {
           console.log('Permission added successfully for:', email);
         }
+      } else if (!existingPermission.is_active) {
+        // Email exists but is inactive, reactivate it
+        console.log('Reactivating permission for:', email);
+        const { error: updateError } = await supabase
+          .from('subscriber_permissions')
+          .update({ is_active: true, granted_at: new Date().toISOString() })
+          .eq('email', email.trim());
+
+        if (updateError) {
+          console.error('Error updating permission:', updateError);
+        } else {
+          console.log('Permission reactivated successfully for:', email);
+        }
       } else {
-        console.log('Email already has permission, skipping permission creation');
+        console.log('Email already has active permission, no action needed');
       }
 
       toast({
