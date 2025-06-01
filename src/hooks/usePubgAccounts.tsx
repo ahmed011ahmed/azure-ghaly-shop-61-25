@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { PubgAccount, NewPubgAccount } from '../types/pubgAccount';
@@ -37,7 +38,7 @@ export const usePubgAccounts = () => {
           image: account.image,
           description: account.description,
           video: account.video || undefined,
-          price: account.price || 0, // السعر يمكن أن يكون نص أو رقم
+          price: account.price || "غير محدد", // عرض "غير محدد" إذا لم يكن هناك سعر
           isAvailable: account.is_available,
           createdAt: account.created_at,
           updatedAt: account.updated_at
