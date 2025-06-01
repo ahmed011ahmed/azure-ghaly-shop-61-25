@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Gamepad2 } from 'lucide-react';
+import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Gamepad2, Gift } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductManagement from '../components/admin/ProductManagement';
 import AdminLogin from '../components/admin/AdminLogin';
@@ -12,6 +11,7 @@ import UserLookup from '../components/admin/UserLookup';
 import PermissionsManagement from '../components/admin/PermissionsManagement';
 import ContentViewer from '../components/admin/ContentViewer';
 import PubgAccountsManagement from '../components/admin/PubgAccountsManagement';
+import GiveawaysManagement from '../components/admin/GiveawaysManagement';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 
@@ -88,6 +88,11 @@ const AdminDashboard = () => {
       id: 'pubg-accounts',
       label: 'حسابات PUBG',
       icon: Gamepad2
+    },
+    {
+      id: 'giveaways',
+      label: 'المسابقات والجوائز',
+      icon: Gift
     },
     {
       id: 'subscribers',
@@ -231,21 +236,21 @@ const AdminDashboard = () => {
                   </Button>
                   
                   <Button
+                    onClick={() => setActiveTab('giveaways')}
+                    className="bg-pink-600 hover:bg-pink-700 text-white p-6 h-auto flex-col space-y-2"
+                  >
+                    <Gift className="w-8 h-8" />
+                    <span className="font-semibold">المسابقات والجوائز</span>
+                    <span className="text-sm opacity-80">إدارة الـ Giveaways</span>
+                  </Button>
+                  
+                  <Button
                     onClick={() => setActiveTab('subscribers')}
                     className="bg-green-600 hover:bg-green-700 text-white p-6 h-auto flex-col space-y-2"
                   >
                     <Users className="w-8 h-8" />
                     <span className="font-semibold">إدارة المشتركين</span>
                     <span className="text-sm opacity-80">إدارة العضويات</span>
-                  </Button>
-                  
-                  <Button
-                    onClick={() => setActiveTab('chat')}
-                    className="bg-blue-600 hover:bg-blue-700 text-white p-6 h-auto flex-col space-y-2"
-                  >
-                    <MessageSquare className="w-8 h-8" />
-                    <span className="font-semibold">شات العملاء</span>
-                    <span className="text-sm opacity-80">التواصل مع العملاء</span>
                   </Button>
                 </div>
               </CardContent>
@@ -256,6 +261,8 @@ const AdminDashboard = () => {
         {activeTab === 'products' && <ProductManagement />}
         
         {activeTab === 'pubg-accounts' && <PubgAccountsManagement />}
+        
+        {activeTab === 'giveaways' && <GiveawaysManagement />}
         
         {activeTab === 'subscribers' && <SubscribersManagement />}
         
