@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Label } from '../ui/label';
+import { Star } from 'lucide-react';
 import { NewPubgAccount } from '../../types/pubgAccount';
 
 interface PubgAccountFormProps {
@@ -13,9 +14,12 @@ interface PubgAccountFormProps {
 
 const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel }) => {
   const [formData, setFormData] = useState<NewPubgAccount>({
+    productName: '',
+    price: 0,
     image: '',
     description: '',
-    video: ''
+    video: '',
+    rating: 5
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -23,9 +27,12 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
     onSubmit(formData);
     // إعادة تعيين النموذج
     setFormData({
+      productName: '',
+      price: 0,
       image: '',
       description: '',
-      video: ''
+      video: '',
+      rating: 5
     });
   };
 
@@ -33,8 +40,20 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: name === 'price' || name === 'rating' ? Number(value) : value
     }));
+  };
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, index) => (
+      <Star
+        key={index}
+        className={`w-6 h-6 cursor-pointer ${
+          index < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'
+        }`}
+        onClick={() => setFormData(prev => ({ ...prev, rating: index + 1 }))}
+      />
+    ));
   };
 
   return (
@@ -42,11 +61,42 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
       <CardHeader className="bg-slate-950">
         <CardTitle className="text-white text-xl">إضافة حساب PUBG جديد</CardTitle>
         <CardDescription className="text-gray-300">
-          أدخل تفاصيل حساب PUBG الجديد
+          أدخل بيانات المنتج الجديد
         </CardDescription>
       </CardHeader>
       <CardContent className="bg-slate-950 p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="productName" className="text-white">اسم المنتج</Label>
+            <Input
+              id="productName"
+              name="productName"
+              type="text"
+              value={formData.productName}
+              onChange={handleChange}
+              className="bg-gray-800 border-gray-600 text-white"
+              placeholder="مثال: Bypass GHALY + HAK RNG ❤️"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="price" className="text-white">السعر</Label>
+            <Input
+              id="price"
+              name="price"
+              type="number"
+              min="0"
+              step="0.01"
+              value={formData.price}
+              onChange={handleChange}
+              className="bg-gray-800 border-gray-600 text-white"
+              placeholder="مثال: 60"
+              required
+            />
+            <p className="text-sm text-gray-400">السعر يجب أن يبدأ بحديقة 5</p>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="image" className="text-white">رابط الصورة</Label>
             <Input
@@ -76,16 +126,28 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-white">الوصف</Label>
+            <Label htmlFor="description" className="text-white">وصف المنتج</Label>
             <textarea
               id="description"
               name="description"
               value={formData.description}
               onChange={handleChange}
               className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white resize-none"
-              placeholder="اكتب وصف مفصل عن الحساب..."
+              placeholder="أدخل وصف تفصيلي للمنتج..."
+              maxLength={200}
               required
             />
+            <p className="text-sm text-gray-400">
+              {formData.description.length}/200 حرف (الحد الأدنى 20 حرف)
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-white">التقييم</Label>
+            <div className="flex items-center space-x-1">
+              {renderStars(formData.rating)}
+              <span className="text-white ml-2">({formData.rating}/5)</span>
+            </div>
           </div>
 
           <div className="flex space-x-3 justify-end pt-4">
@@ -101,7 +163,7 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
               type="submit"
               className="bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25"
             >
-              إضافة الحساب
+              إضافة المنتج
             </Button>
           </div>
         </form>
