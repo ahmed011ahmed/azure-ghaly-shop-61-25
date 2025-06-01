@@ -55,7 +55,7 @@ const PubgAccountsManagement = () => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold text-white mb-2">إدارة حسابات PUBG</h2>
-          <p className="text-gray-300">إدارة وتتبع جميع حسابات PUBG المتاحة مع الأسعار</p>
+          <p className="text-gray-300">إدارة وتتبع جميع حسابات PUBG المتاحة</p>
         </div>
         <Button
           onClick={() => setShowForm(!showForm)}
@@ -148,7 +148,6 @@ const PubgAccountsManagement = () => {
                 <TableRow className="border-gray-700">
                   <TableHead className="text-gray-300">ID الحساب</TableHead>
                   <TableHead className="text-gray-300">الصورة</TableHead>
-                  <TableHead className="text-gray-300">السعر</TableHead>
                   <TableHead className="text-gray-300">الوصف</TableHead>
                   <TableHead className="text-gray-300">الفيديو</TableHead>
                   <TableHead className="text-gray-300">الحالة</TableHead>
@@ -170,11 +169,6 @@ const PubgAccountsManagement = () => {
                           alt="حساب PUBG"
                           className="w-full h-full object-cover"
                         />
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-bold text-yellow-400 text-lg">
-                        ${account.price}
                       </div>
                     </TableCell>
                     <TableCell className="text-gray-300 max-w-md">

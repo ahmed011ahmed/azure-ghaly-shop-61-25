@@ -37,7 +37,7 @@ export const usePubgAccounts = () => {
           image: account.image,
           description: account.description,
           video: account.video || undefined,
-          price: account.price || 0, // استخدام السعر من قاعدة البيانات
+          price: 0, // قيمة افتراضية حتى يتم إضافة العمود لقاعدة البيانات
           isAvailable: account.is_available,
           createdAt: account.created_at,
           updatedAt: account.updated_at
@@ -82,11 +82,10 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة إضافة حساب جديد:', newAccount);
       
-      // إرسال جميع الحقول بما في ذلك السعر
+      // إرسال فقط الحقول الموجودة في قاعدة البيانات
       const accountData: any = {
         image: newAccount.image,
         description: newAccount.description,
-        price: newAccount.price, // إضافة السعر
         is_available: true
       };
 
@@ -129,12 +128,11 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة تحديث الحساب:', id, updates);
       
-      // تحديث جميع الحقول بما في ذلك السعر
+      // تحديث فقط الحقول الموجودة في قاعدة البيانات
       const dbUpdates: any = {};
       if (updates.image !== undefined) dbUpdates.image = updates.image;
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.video !== undefined) dbUpdates.video = updates.video;
-      if (updates.price !== undefined) dbUpdates.price = updates.price; // إضافة السعر
       if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
       dbUpdates.updated_at = new Date().toISOString();
 

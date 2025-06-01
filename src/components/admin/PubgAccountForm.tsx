@@ -44,27 +44,11 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
       <CardHeader className="bg-slate-950">
         <CardTitle className="text-white text-xl">إضافة حساب PUBG جديد</CardTitle>
         <CardDescription className="text-gray-300">
-          أدخل تفاصيل حساب PUBG الجديد مع السعر
+          أدخل تفاصيل حساب PUBG الجديد
         </CardDescription>
       </CardHeader>
       <CardContent className="bg-slate-950 p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="price" className="text-white">السعر ($)</Label>
-            <Input
-              id="price"
-              name="price"
-              type="number"
-              min="0"
-              step="0.01"
-              value={formData.price}
-              onChange={handleChange}
-              className="bg-gray-800 border-gray-600 text-white"
-              placeholder="25.00"
-              required
-            />
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="image" className="text-white">رابط الصورة</Label>
             <Input
