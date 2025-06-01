@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Gamepad2, Gift } from 'lucide-react';
+import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Gamepad2, Gift, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductManagement from '../components/admin/ProductManagement';
 import AdminLogin from '../components/admin/AdminLogin';
@@ -12,6 +12,7 @@ import PermissionsManagement from '../components/admin/PermissionsManagement';
 import ContentViewer from '../components/admin/ContentViewer';
 import PubgAccountsManagement from '../components/admin/PubgAccountsManagement';
 import GiveawaysManagement from '../components/admin/GiveawaysManagement';
+import AdminUsersManagement from '../components/admin/AdminUsersManagement';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 
@@ -108,6 +109,11 @@ const AdminDashboard = () => {
       id: 'permissions',
       label: 'أذونات المشتركين',
       icon: Shield
+    },
+    {
+      id: 'admin-users',
+      label: 'مستخدمي الإدارة',
+      icon: Settings
     },
     {
       id: 'downloads',
@@ -277,6 +283,8 @@ const AdminDashboard = () => {
         {activeTab === 'content' && <ContentViewer />}
         
         {activeTab === 'chat' && <AdminChat />}
+        
+        {activeTab === 'admin-users' && <AdminUsersManagement />}
       </div>
     </div>
   );
