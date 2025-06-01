@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { PubgAccount, NewPubgAccount } from '../types/pubgAccount';
@@ -36,17 +35,37 @@ export const usePubgAccounts = () => {
       console.log('البيانات المحملة من قاعدة البيانات:', data);
 
       // تحويل البيانات للتوافق مع النوع المطلوب
-      const formattedAccounts: PubgAccount[] = (data || []).map(account => ({
-        id: account.id,
-        randomId: (account as any).random_id || generateRandomId(), // استخدام الـ random_id من قاعدة البيانات أو توليد واحد جديد
-        image: account.image,
-        description: account.description,
-        video: account.video || undefined,
-        category: ((account as any).category as PubgAccount['category']) || 'other',
-        price: (account as any).price || 0,
-        isAvailable: account.is_available,
-        createdAt: account.created_at,
-        updatedAt: account.updated_at
+      const formattedAccounts: PubgAccount[] = await Promise.all((data || []).map(async (account) => {
+        let randomId = (account as any).random_id;
+        
+        // إذا لم يكن هناك random_id محفوظ، نولد واحداً ونحفظه
+        if (!randomId) {
+          randomId = generateRandomId();
+          
+          // حفظ الـ random_id الجديد في قاعدة البيانات
+          try {
+            await supabase
+              .from('pubg_accounts')
+              .update({ random_id: randomId } as any)
+              .eq('id', account.id);
+            console.log(`تم حفظ random_id جديد للحساب ${account.id}: ${randomId}`);
+          } catch (updateError) {
+            console.warn('لم يتم حفظ random_id:', updateError);
+          }
+        }
+
+        return {
+          id: account.id,
+          randomId: randomId,
+          image: account.image,
+          description: account.description,
+          video: account.video || undefined,
+          category: ((account as any).category as PubgAccount['category']) || 'other',
+          price: (account as any).price || 0,
+          isAvailable: account.is_available,
+          createdAt: account.created_at,
+          updatedAt: account.updated_at
+        };
       }));
 
       console.log('الحسابات بعد التنسيق:', formattedAccounts);
@@ -93,7 +112,8 @@ export const usePubgAccounts = () => {
       const accountData: any = {
         image: newAccount.image,
         description: newAccount.description,
-        is_available: true
+        is_available: true,
+        random_id: randomId // حفظ الـ random_id مباشرة
       };
 
       // إضافة الحقول الاختيارية فقط إذا كانت متوفرة
@@ -103,7 +123,6 @@ export const usePubgAccounts = () => {
 
       // محاولة إضافة الحقول الجديدة (قد تكون غير موجودة في قاعدة البيانات)
       try {
-        accountData.random_id = randomId;
         accountData.category = newAccount.category;
         accountData.price = newAccount.price;
       } catch (e) {
