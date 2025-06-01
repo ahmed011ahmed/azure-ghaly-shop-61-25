@@ -38,7 +38,7 @@ export const usePubgAccounts = () => {
           image: account.image,
           description: account.description,
           video: account.video || undefined,
-          price: account.price || "غير محدد", // عرض "غير محدد" إذا لم يكن هناك سعر
+          price: account.price || 0, // عرض السعر الفعلي أو 0 إذا لم يكن محدد
           isAvailable: account.is_available,
           createdAt: account.created_at,
           updatedAt: account.updated_at
