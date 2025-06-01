@@ -24,6 +24,12 @@ const translations = {
     'header.brand': 'GHALY HAX',
     
     // Hero Section
+    'hero.gaming.tools': 'أدوات الجيمنج المتقدمة',
+    'hero.welcome': 'مرحباً بك في',
+    'hero.brand': 'GHALY HAX',
+    'hero.description': 'اكتشف أقوى أدوات الهاكينج والبايباس للألعاب - منتجات حصرية لتجربة جيمنج استثنائية',
+    'hero.start.playing': '🎮 ابدأ اللعب الآن',
+    'hero.join.community': '🏆 انضم للمجتمع',
     'hero.title': 'أدوات الجيمنج المتقدمة',
     'hero.subtitle': 'اكتشف مجموعتنا المتميزة من أدوات الجيمنج الاحترافية',
     'hero.cta': 'تصفح المنتجات',
@@ -33,6 +39,11 @@ const translations = {
     'products.subtitle': 'مجموعة شاملة من الأدوات المصممة خصيصاً للاعبين المحترفين',
     'products.addToCart': 'أضف للسلة',
     'products.price': 'السعر:',
+    'products.advanced.tools': 'أدوات الجيمنج المتقدمة',
+    'products.exclusive.collection': 'مجموعة حصرية من أقوى أدوات الهاكينج والبايباس للجيمرز المحترفين',
+    'products.monthly.subscription': '⚡ جميع الأسعار للاشتراك الشهري - ضمان الجودة والأمان',
+    'products.loading': 'جاري تحميل المنتجات...',
+    'products.get.it': 'احصل عليه',
     
     // Chat Section
     'chat.title': 'تواصل معنا',
@@ -88,6 +99,15 @@ const translations = {
     // Footer
     'footer.rights': 'جميع الحقوق محفوظة',
     'footer.company': 'GHALY',
+    'footer.brand': 'GHALY HAX',
+    'footer.description': 'متجرك المتخصص في أدوات الجيمنج المتقدمة. نوفر أقوى الحلول للجيمرز المحترفين مع ضمان الأمان والجودة.',
+    'footer.quickLinks': 'روابط سريعة',
+    'footer.home': '🏠 الرئيسية',
+    'footer.tools': '🎮 الأدوات',
+    'footer.contact': 'تواصل معنا',
+    'footer.phone': '01010673596',
+    'footer.location': 'القاهرة، مصر',
+    'footer.copyright': '🎮 جميع الحقوق محفوظة © 2024 GHALY HAX. صُمم للجيمرز المحترفين 🏆',
     
     // Admin
     'admin.login.title': 'تسجيل دخول الإدارة',
@@ -112,6 +132,12 @@ const translations = {
     'header.brand': 'GHALY HAX',
     
     // Hero Section
+    'hero.gaming.tools': 'Advanced Gaming Tools',
+    'hero.welcome': 'Welcome to',
+    'hero.brand': 'GHALY HAX',
+    'hero.description': 'Discover the most powerful hacking and bypass tools for games - exclusive products for an exceptional gaming experience',
+    'hero.start.playing': '🎮 Start Playing Now',
+    'hero.join.community': '🏆 Join the Community',
     'hero.title': 'Advanced Gaming Tools',
     'hero.subtitle': 'Discover our premium collection of professional gaming tools',
     'hero.cta': 'Browse Products',
@@ -121,6 +147,11 @@ const translations = {
     'products.subtitle': 'A comprehensive collection of tools designed specifically for professional gamers',
     'products.addToCart': 'Add to Cart',
     'products.price': 'Price:',
+    'products.advanced.tools': 'Advanced Gaming Tools',
+    'products.exclusive.collection': 'Exclusive collection of the most powerful hacking and bypass tools for professional gamers',
+    'products.monthly.subscription': '⚡ All prices are for monthly subscription - Quality and security guaranteed',
+    'products.loading': 'Loading products...',
+    'products.get.it': 'Get It',
     
     // Chat Section
     'chat.title': 'Contact Us',
@@ -176,6 +207,15 @@ const translations = {
     // Footer
     'footer.rights': 'All rights reserved',
     'footer.company': 'GHALY',
+    'footer.brand': 'GHALY HAX',
+    'footer.description': 'Your specialized store for advanced gaming tools. We provide the most powerful solutions for professional gamers with security and quality guarantee.',
+    'footer.quickLinks': 'Quick Links',
+    'footer.home': '🏠 Home',
+    'footer.tools': '🎮 Tools',
+    'footer.contact': 'Contact Us',
+    'footer.phone': '01010673596',
+    'footer.location': 'Cairo, Egypt',
+    'footer.copyright': '🎮 All rights reserved © 2024 GHALY HAX. Designed for professional gamers 🏆',
     
     // Admin
     'admin.login.title': 'Admin Login',

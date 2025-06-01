@@ -1,6 +1,7 @@
 
 import { ShoppingCart, Heart } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface ProductCardProps {
   id: number;
@@ -13,6 +14,7 @@ interface ProductCardProps {
 
 const ProductCard = ({ id, name, price, image, description, rating }: ProductCardProps) => {
   const { addItem } = useCart();
+  const { t } = useLanguage();
 
   const handleAddToCart = () => {
     addItem({ id, name, price, image });
@@ -67,7 +69,7 @@ const ProductCard = ({ id, name, price, image, description, rating }: ProductCar
             className="btn-gaming flex items-center space-x-2 hover:scale-105 active:scale-95"
           >
             <ShoppingCart className="w-5 h-5" />
-            <span>احصل عليه</span>
+            <span>{t('products.get.it')}</span>
           </button>
         </div>
       </div>
