@@ -38,7 +38,6 @@ export const usePubgAccounts = () => {
           image: account.image,
           description: account.description,
           video: account.video || undefined,
-          category: 'other' as const, // قيمة افتراضية حتى يتم إضافة العمود لقاعدة البيانات
           price: 0, // قيمة افتراضية حتى يتم إضافة العمود لقاعدة البيانات
           isAvailable: account.is_available,
           createdAt: account.created_at,
@@ -205,18 +204,12 @@ export const usePubgAccounts = () => {
     }
   };
 
-  const getAccountsByCategory = (category: PubgAccount['category']) => {
-    // لأن كل الحسابات الآن لها category = 'other'، سنعيد جميع الحسابات المتاحة
-    return accounts.filter(account => account.isAvailable);
-  };
-
   return {
     accounts,
     loading,
     addAccount,
     updateAccount,
     deleteAccount,
-    toggleAvailability,
-    getAccountsByCategory
+    toggleAvailability
   };
 };

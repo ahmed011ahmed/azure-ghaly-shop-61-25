@@ -1,36 +1,19 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { ArrowLeft, Gamepad2, Play } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '../components/ui/dialog';
 import { usePubgAccounts } from '../hooks/usePubgAccounts';
-import { CATEGORY_LABELS, PubgAccount } from '../types/pubgAccount';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const PubgAccounts = () => {
-  const { accounts, loading, getAccountsByCategory } = usePubgAccounts();
-  const [activeCategory, setActiveCategory] = useState<PubgAccount['category']>('worldwide');
+  const { accounts, loading } = usePubgAccounts();
 
-  const categories = [
-    { key: 'worldwide' as const, label: 'عالمية', color: 'bg-blue-600 hover:bg-blue-700' },
-    { key: 'glitch' as const, label: 'جلتش', color: 'bg-purple-600 hover:bg-purple-700' },
-    { key: 'arabic' as const, label: 'عربية', color: 'bg-green-600 hover:bg-green-700' },
-    { key: 'turkey' as const, label: 'تركية', color: 'bg-red-600 hover:bg-red-700' },
-    { key: 'korea' as const, label: 'كورية', color: 'bg-yellow-600 hover:bg-yellow-700' },
-    { key: 'vietnam' as const, label: 'فيتنامية', color: 'bg-orange-600 hover:bg-orange-700' },
-    { key: 'metro' as const, label: 'مترو رويال', color: 'bg-pink-600 hover:bg-pink-700' },
-    { key: 'conqueror' as const, label: 'كونكرور', color: 'bg-indigo-600 hover:bg-indigo-700' },
-    { key: 'ace' as const, label: 'ايس', color: 'bg-cyan-600 hover:bg-cyan-700' },
-    { key: 'crown' as const, label: 'كراون', color: 'bg-amber-600 hover:bg-amber-700' },
-    { key: 'diamond' as const, label: 'دايموند', color: 'bg-emerald-600 hover:bg-emerald-700' },
-    { key: 'other' as const, label: 'إصدارات أخرى', color: 'bg-gray-600 hover:bg-gray-700' }
-  ];
-
-  const currentAccounts = getAccountsByCategory(activeCategory);
+  const availableAccounts = accounts.filter(account => account.isAvailable);
 
   if (loading) {
     return (
@@ -68,40 +51,18 @@ const PubgAccounts = () => {
           </p>
         </div>
 
-        {/* تصنيفات الحسابات */}
-        <div className="flex justify-center mb-12">
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-2 flex flex-wrap gap-2 max-w-6xl">
-            {categories.map((category) => (
-              <Button
-                key={category.key}
-                onClick={() => setActiveCategory(category.key)}
-                className={`${
-                  activeCategory === category.key 
-                    ? category.color + ' text-white shadow-lg' 
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                } transition-all duration-200 font-medium px-3 py-2 text-sm`}
-              >
-                {category.label}
-                <span className="ml-2 bg-white/20 px-2 py-1 rounded-full text-xs">
-                  {getAccountsByCategory(category.key).length}
-                </span>
-              </Button>
-            ))}
-          </div>
-        </div>
-
         {/* قائمة الحسابات */}
-        {currentAccounts.length === 0 ? (
+        {availableAccounts.length === 0 ? (
           <div className="text-center py-16">
             <Gamepad2 className="w-16 h-16 text-gray-600 mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-gray-400 mb-2">
-              لا توجد حسابات {CATEGORY_LABELS[activeCategory]} متاحة حالياً
+              لا توجد حسابات متاحة حالياً
             </h3>
             <p className="text-gray-500">سيتم إضافة حسابات جديدة قريباً</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {currentAccounts.map((account) => (
+            {availableAccounts.map((account) => (
               <Card key={account.id} className="gaming-card group hover:scale-105 transition-all duration-300 overflow-hidden">
                 {/* صورة الحساب */}
                 <div className="relative h-64 overflow-hidden">
@@ -112,12 +73,9 @@ const PubgAccounts = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                   
-                  <div className="absolute top-4 left-4 flex space-x-2">
+                  <div className="absolute top-4 left-4">
                     <Badge className="bg-green-900 text-green-200">
                       متاح الآن
-                    </Badge>
-                    <Badge className="bg-purple-900 text-purple-200">
-                      {CATEGORY_LABELS[account.category]}
                     </Badge>
                   </div>
 

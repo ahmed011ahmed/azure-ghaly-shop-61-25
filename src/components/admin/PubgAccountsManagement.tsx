@@ -6,17 +6,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Badge } from '../ui/badge';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
-import { Plus, Edit, Trash2, Eye, EyeOff, Gamepad2, Play, Filter, Search } from 'lucide-react';
+import { Plus, Trash2, Eye, EyeOff, Gamepad2, Play, Search } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { usePubgAccounts } from '../../hooks/usePubgAccounts';
-import { CATEGORY_LABELS, PubgAccount } from '../../types/pubgAccount';
 import PubgAccountForm from './PubgAccountForm';
 
 const PubgAccountsManagement = () => {
-  const { accounts, loading, addAccount, updateAccount, deleteAccount, toggleAvailability } = usePubgAccounts();
+  const { accounts, loading, addAccount, deleteAccount, toggleAvailability } = usePubgAccounts();
   const [showForm, setShowForm] = useState(false);
-  const [filterCategory, setFilterCategory] = useState<PubgAccount['category'] | 'all'>('all');
   const [searchId, setSearchId] = useState('');
 
   const handleDelete = (id: string) => {
@@ -25,25 +22,21 @@ const PubgAccountsManagement = () => {
     }
   };
 
-  // فلترة الحسابات حسب التصنيف والبحث بالـ random ID
+  // فلترة الحسابات حسب البحث بالـ random ID
   const filteredAccounts = accounts.filter(account => {
-    const matchesCategory = filterCategory === 'all' || account.category === filterCategory;
     const matchesSearch = searchId === '' || account.randomId.toLowerCase().includes(searchId.toLowerCase());
-    return matchesCategory && matchesSearch;
+    return matchesSearch;
   });
 
-  const getCategoryStats = () => {
+  const getAccountStats = () => {
     const stats = {
-      worldwide: accounts.filter(acc => acc.category === 'worldwide').length,
-      glitch: accounts.filter(acc => acc.category === 'glitch').length,
-      other: accounts.filter(acc => acc.category === 'other').length,
       total: accounts.length,
       available: accounts.filter(acc => acc.isAvailable).length
     };
     return stats;
   };
 
-  const stats = getCategoryStats();
+  const stats = getAccountStats();
 
   if (loading) {
     return (
@@ -62,7 +55,7 @@ const PubgAccountsManagement = () => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold text-white mb-2">إدارة حسابات PUBG</h2>
-          <p className="text-gray-300">إدارة وتتبع جميع حسابات PUBG المتاحة مع التصنيفات والأسعار</p>
+          <p className="text-gray-300">إدارة وتتبع جميع حسابات PUBG المتاحة مع الأسعار</p>
         </div>
         <Button
           onClick={() => setShowForm(!showForm)}
@@ -74,7 +67,7 @@ const PubgAccountsManagement = () => {
       </div>
 
       {/* إحصائيات سريعة */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="gaming-card">
           <CardContent className="bg-slate-950 p-6">
             <div className="flex items-center justify-between">
@@ -91,46 +84,22 @@ const PubgAccountsManagement = () => {
           <CardContent className="bg-slate-950 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-300 text-sm">عالمية</p>
-                <p className="text-2xl font-bold text-blue-400">{stats.worldwide}</p>
-              </div>
-              <Badge className="bg-blue-900 text-blue-200">عالمية</Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="gaming-card">
-          <CardContent className="bg-slate-950 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-300 text-sm">جلتش</p>
-                <p className="text-2xl font-bold text-purple-400">{stats.glitch}</p>
-              </div>
-              <Badge className="bg-purple-900 text-purple-200">جلتش</Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="gaming-card">
-          <CardContent className="bg-slate-950 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-300 text-sm">إصدارات أخرى</p>
-                <p className="text-2xl font-bold text-green-400">{stats.other}</p>
-              </div>
-              <Badge className="bg-green-900 text-green-200">أخرى</Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="gaming-card">
-          <CardContent className="bg-slate-950 p-6">
-            <div className="flex items-center justify-between">
-              <div>
                 <p className="text-gray-300 text-sm">متاح للبيع</p>
                 <p className="text-2xl font-bold text-green-400">{stats.available}</p>
               </div>
               <Eye className="w-8 h-8 text-green-400" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="gaming-card">
+          <CardContent className="bg-slate-950 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-300 text-sm">غير متاح</p>
+                <p className="text-2xl font-bold text-red-400">{stats.total - stats.available}</p>
+              </div>
+              <EyeOff className="w-8 h-8 text-red-400" />
             </div>
           </CardContent>
         </Card>
@@ -147,39 +116,19 @@ const PubgAccountsManagement = () => {
         />
       )}
 
-      {/* فلتر التصنيفات والبحث */}
+      {/* البحث */}
       <Card className="gaming-card">
         <CardContent className="bg-slate-950 p-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              <Filter className="w-5 h-5 text-gray-400" />
-              <Label className="text-gray-300">فلترة حسب التصنيف:</Label>
-              <Select value={filterCategory} onValueChange={(value) => setFilterCategory(value as any)}>
-                <SelectTrigger className="w-48 bg-gray-800 border-gray-600 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-600">
-                  <SelectItem value="all" className="text-white hover:bg-gray-700">جميع التصنيفات</SelectItem>
-                  {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                    <SelectItem key={key} value={key} className="text-white hover:bg-gray-700">
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <Search className="w-5 h-5 text-gray-400" />
-              <Label className="text-gray-300">البحث بـ ID الحساب:</Label>
-              <Input
-                type="text"
-                placeholder="أدخل ID الحساب..."
-                value={searchId}
-                onChange={(e) => setSearchId(e.target.value)}
-                className="w-64 bg-gray-800 border-gray-600 text-white"
-              />
-            </div>
+          <div className="flex items-center space-x-4">
+            <Search className="w-5 h-5 text-gray-400" />
+            <Label className="text-gray-300">البحث بـ ID الحساب:</Label>
+            <Input
+              type="text"
+              placeholder="أدخل ID الحساب..."
+              value={searchId}
+              onChange={(e) => setSearchId(e.target.value)}
+              className="w-64 bg-gray-800 border-gray-600 text-white"
+            />
           </div>
         </CardContent>
       </Card>
@@ -199,7 +148,6 @@ const PubgAccountsManagement = () => {
                 <TableRow className="border-gray-700">
                   <TableHead className="text-gray-300">ID الحساب</TableHead>
                   <TableHead className="text-gray-300">الصورة</TableHead>
-                  <TableHead className="text-gray-300">التصنيف</TableHead>
                   <TableHead className="text-gray-300">السعر</TableHead>
                   <TableHead className="text-gray-300">الوصف</TableHead>
                   <TableHead className="text-gray-300">الفيديو</TableHead>
@@ -223,15 +171,6 @@ const PubgAccountsManagement = () => {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={
-                        account.category === 'worldwide' ? 'bg-blue-900 text-blue-200' :
-                        account.category === 'glitch' ? 'bg-purple-900 text-purple-200' :
-                        'bg-green-900 text-green-200'
-                      }>
-                        {CATEGORY_LABELS[account.category]}
-                      </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="font-bold text-yellow-400 text-lg">
@@ -310,8 +249,7 @@ const PubgAccountsManagement = () => {
               <Gamepad2 className="w-16 h-16 text-gray-600 mx-auto mb-4" />
               <p className="text-gray-400 text-lg">
                 {searchId ? `لم يتم العثور على حساب بـ ID: ${searchId}` :
-                filterCategory === 'all' ? 'لا توجد حسابات PUBG حالياً' : 
-                `لا توجد حسابات ${CATEGORY_LABELS[filterCategory as keyof typeof CATEGORY_LABELS]} حالياً`}
+                'لا توجد حسابات PUBG حالياً'}
               </p>
               {!searchId && <p className="text-gray-500">ابدأ بإضافة حساب جديد</p>}
             </div>
