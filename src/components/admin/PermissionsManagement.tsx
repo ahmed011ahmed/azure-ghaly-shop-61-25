@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Shield, UserPlus, Trash2, Search, Users } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -8,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscriberPermissions } from '@/hooks/useSubscriberPermissions';
+import { supabase } from '@/integrations/supabase/client';
 
 const PermissionsManagement = () => {
   const [newEmail, setNewEmail] = useState('');
@@ -22,7 +22,7 @@ const PermissionsManagement = () => {
     removePermission 
   } = useSubscriberPermissions();
 
-  // إضافة إذن جديد
+  // إضافة إذن جديد مع التحقق المحسن
   const handleAddPermission = async () => {
     if (!newEmail.trim()) {
       toast({
@@ -44,22 +44,77 @@ const PermissionsManagement = () => {
       return;
     }
 
-    // التحقق من عدم وجود البريد مسبقاً
-    if (permissions.some(p => p.email === newEmail.trim() && p.is_active)) {
-      toast({
-        title: "خطأ",
-        description: "هذا البريد الإلكتروني موجود بالفعل في القائمة",
-        variant: "destructive"
-      });
-      return;
-    }
-
     try {
       setActionLoading('add');
+      console.log('Attempting to add permission for:', newEmail.trim());
+      
+      // التحقق من وجود الإذن في قاعدة البيانات (نشط أو غير نشط)
+      const { data: existingPermission, error: checkError } = await supabase
+        .from('subscriber_permissions')
+        .select('email, is_active')
+        .eq('email', newEmail.trim())
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('Error checking existing permission:', checkError);
+        toast({
+          title: "خطأ",
+          description: "فشل في التحقق من الإذن الموجود",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('Existing permission check result:', existingPermission);
+
+      if (existingPermission) {
+        if (existingPermission.is_active) {
+          toast({
+            title: "خطأ",
+            description: "هذا البريد الإلكتروني موجود بالفعل في القائمة النشطة",
+            variant: "destructive"
+          });
+          return;
+        } else {
+          // البريد موجود لكن غير نشط، قم بتفعيله
+          console.log('Reactivating existing permission for:', newEmail.trim());
+          const { error: reactivateError } = await supabase
+            .from('subscriber_permissions')
+            .update({ is_active: true, granted_at: new Date().toISOString() })
+            .eq('email', newEmail.trim());
+
+          if (reactivateError) {
+            console.error('Error reactivating permission:', reactivateError);
+            toast({
+              title: "خطأ",
+              description: "فشل في إعادة تفعيل الإذن",
+              variant: "destructive"
+            });
+            return;
+          }
+
+          toast({
+            title: "تم بنجاح",
+            description: `تم إعادة تفعيل إذن الوصول للبريد: ${newEmail.trim()}`
+          });
+          
+          setNewEmail('');
+          return;
+        }
+      }
+
+      // البريد غير موجود، أضف إذن جديد
       const success = await addPermission(newEmail.trim());
       if (success) {
         setNewEmail('');
       }
+    } catch (error) {
+      console.error('Unexpected error in handleAddPermission:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ غير متوقع",
+        variant: "destructive"
+      });
     } finally {
       setActionLoading(null);
     }
