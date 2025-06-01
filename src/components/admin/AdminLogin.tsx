@@ -29,7 +29,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
       if (username === 'GHALY' && password === 'Admin Team') {
         onLogin();
       } else {
-        setError(t('admin.error.credentials'));
+        setError('اسم المستخدم أو كلمة المرور غير صحيحة');
       }
       setIsLoading(false);
     }, 1000);
@@ -40,10 +40,10 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
       <Card className="w-full max-w-md gaming-card">
         <CardHeader className="text-center bg-slate-900">
           <CardTitle className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent">
-            {t('admin.login.title')}
+            تسجيل دخول الإدارة
           </CardTitle>
           <CardDescription className="text-gray-300">
-            {t('admin.login.subtitle')}
+            أدخل بيانات تسجيل الدخول للوصول إلى لوحة التحكم
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6 bg-slate-950">
@@ -52,12 +52,12 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
             <div className="space-y-2">
               <Label htmlFor="username" className="text-gray-300 flex items-center space-x-2">
                 <User className="w-4 h-4" />
-                <span>{t('admin.username')}</span>
+                <span>اسم المستخدم</span>
               </Label>
               <Input
                 id="username"
                 type="text"
-                placeholder={t('admin.username.placeholder')}
+                placeholder="أدخل اسم المستخدم..."
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="bg-gray-800/50 border-gray-600 text-white"
@@ -69,13 +69,13 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
             <div className="space-y-2">
               <Label htmlFor="password" className="text-gray-300 flex items-center space-x-2">
                 <Lock className="w-4 h-4" />
-                <span>{t('auth.password')}</span>
+                <span>كلمة المرور</span>
               </Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder={t('admin.password.placeholder')}
+                  placeholder="أدخل كلمة المرور..."
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className={`bg-gray-800/50 border-gray-600 text-white ${language === 'ar' ? 'pr-12' : 'pl-12'}`}
@@ -104,14 +104,14 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
               className="w-full bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25"
               disabled={isLoading}
             >
-              {isLoading ? t('admin.login.loading') : t('admin.login.button')}
+              {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
             </Button>
           </form>
 
           {/* Hint */}
           <div className="mt-6 pt-6 border-t border-gray-700">
             <p className="text-xs text-gray-500 text-center">
-              {t('admin.hint')}
+              اسم المستخدم: GHALY | كلمة المرور: Admin Team
             </p>
           </div>
         </CardContent>

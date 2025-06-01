@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface AdminUser {
   id: string;
-  email: string;
+  username: string;
   permissions: string[];
   created_at: string;
   is_active: boolean;
@@ -42,22 +42,22 @@ export const useAdminUsers = () => {
   };
 
   // إضافة مستخدم إدارة جديد
-  const addAdminUser = async (email: string, password: string, permissions: string[]) => {
+  const addAdminUser = async (username: string, password: string, permissions: string[]) => {
     try {
-      console.log('Adding admin user:', email, 'with permissions:', permissions);
+      console.log('Adding admin user:', username, 'with permissions:', permissions);
       
-      // التحقق من عدم وجود البريد الإلكتروني مسبقاً
+      // التحقق من عدم وجود اسم المستخدم مسبقاً
       const storedData = localStorage.getItem(STORAGE_KEY);
       const existingUsers = storedData ? JSON.parse(storedData) : [];
       
       const existingUser = existingUsers.find((user: AdminUser) => 
-        user.email === email && user.is_active
+        user.username === username && user.is_active
       );
 
       if (existingUser) {
         toast({
           title: "خطأ",
-          description: "هذا البريد الإلكتروني موجود بالفعل",
+          description: "اسم المستخدم موجود بالفعل",
           variant: "destructive"
         });
         return false;
@@ -65,7 +65,7 @@ export const useAdminUsers = () => {
 
       const newUser: AdminUser = {
         id: Date.now().toString(),
-        email: email,
+        username: username,
         permissions: permissions,
         created_at: new Date().toISOString(),
         is_active: true
@@ -78,7 +78,7 @@ export const useAdminUsers = () => {
       console.log('Admin user added successfully:', newUser);
       toast({
         title: "تم بنجاح",
-        description: `تم إضافة مستخدم الإدارة: ${email}`
+        description: `تم إضافة مستخدم الإدارة: ${username}`
       });
       
       return true;
@@ -126,9 +126,9 @@ export const useAdminUsers = () => {
   };
 
   // حذف مستخدم إدارة (تعطيله)
-  const removeAdminUser = async (userId: string, email: string) => {
+  const removeAdminUser = async (userId: string, username: string) => {
     try {
-      console.log('Removing admin user:', email);
+      console.log('Removing admin user:', username);
       
       const storedData = localStorage.getItem(STORAGE_KEY);
       const existingUsers = storedData ? JSON.parse(storedData) : [];
@@ -142,7 +142,7 @@ export const useAdminUsers = () => {
 
       toast({
         title: "تم الحذف",
-        description: `تم حذف مستخدم الإدارة: ${email}`
+        description: `تم حذف مستخدم الإدارة: ${username}`
       });
       
       return true;

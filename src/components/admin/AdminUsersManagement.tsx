@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { UserPlus, Users, Shield, Edit, Trash2, Eye, Settings } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -13,7 +12,7 @@ import { Checkbox } from '../ui/checkbox';
 import { useAdminUsers } from '@/hooks/useAdminUsers';
 
 const AdminUsersManagement = () => {
-  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUsername, setNewUsername] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [editingUser, setEditingUser] = useState<any>(null);
@@ -45,10 +44,10 @@ const AdminUsersManagement = () => {
 
   // إضافة مستخدم إدارة جديد
   const handleAddAdminUser = async () => {
-    if (!newUserEmail.trim() || !newUserPassword.trim()) {
+    if (!newUsername.trim() || !newUserPassword.trim()) {
       toast({
         title: "خطأ",
-        description: "يرجى إدخال البريد الإلكتروني وكلمة المرور",
+        description: "يرجى إدخال اسم المستخدم وكلمة المرور",
         variant: "destructive"
       });
       return;
@@ -65,9 +64,9 @@ const AdminUsersManagement = () => {
 
     try {
       setActionLoading('add');
-      const success = await addAdminUser(newUserEmail.trim(), newUserPassword, selectedPermissions);
+      const success = await addAdminUser(newUsername.trim(), newUserPassword, selectedPermissions);
       if (success) {
-        setNewUserEmail('');
+        setNewUsername('');
         setNewUserPassword('');
         setSelectedPermissions([]);
       }
@@ -100,14 +99,14 @@ const AdminUsersManagement = () => {
   };
 
   // حذف مستخدم إدارة
-  const handleRemoveUser = async (userId: string, email: string) => {
-    if (!window.confirm(`هل أنت متأكد من حذف مستخدم الإدارة: ${email}؟`)) {
+  const handleRemoveUser = async (userId: string, username: string) => {
+    if (!window.confirm(`هل أنت متأكد من حذف مستخدم الإدارة: ${username}؟`)) {
       return;
     }
 
     try {
       setActionLoading(userId);
-      await removeAdminUser(userId, email);
+      await removeAdminUser(userId, username);
     } finally {
       setActionLoading(null);
     }
@@ -151,13 +150,13 @@ const AdminUsersManagement = () => {
         <CardContent className="bg-slate-950 pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
-              <Label htmlFor="email" className="text-gray-300">البريد الإلكتروني</Label>
+              <Label htmlFor="username" className="text-gray-300">اسم المستخدم</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="أدخل البريد الإلكتروني..."
-                value={newUserEmail}
-                onChange={(e) => setNewUserEmail(e.target.value)}
+                id="username"
+                type="text"
+                placeholder="أدخل اسم المستخدم..."
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
                 className="bg-gray-800/50 border-gray-600 text-white"
               />
             </div>
@@ -236,7 +235,7 @@ const AdminUsersManagement = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-gray-300">البريد الإلكتروني</TableHead>
+                    <TableHead className="text-gray-300">اسم المستخدم</TableHead>
                     <TableHead className="text-gray-300">الصلاحيات</TableHead>
                     <TableHead className="text-gray-300">تاريخ الإنشاء</TableHead>
                     <TableHead className="text-gray-300">الإجراءات</TableHead>
@@ -246,7 +245,7 @@ const AdminUsersManagement = () => {
                   {adminUsers.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium text-white">
-                        {user.email}
+                        {user.username}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
@@ -282,7 +281,7 @@ const AdminUsersManagement = () => {
                               <DialogHeader>
                                 <DialogTitle className="text-white">تعديل صلاحيات المستخدم</DialogTitle>
                                 <DialogDescription className="text-gray-300">
-                                  تعديل صلاحيات المستخدم: {editingUser?.email}
+                                  تعديل صلاحيات المستخدم: {editingUser?.username}
                                 </DialogDescription>
                               </DialogHeader>
                               <div className="space-y-4">
@@ -327,7 +326,7 @@ const AdminUsersManagement = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleRemoveUser(user.id, user.email)}
+                            onClick={() => handleRemoveUser(user.id, user.username)}
                             className="border-red-500 text-red-600 bg-red-500/10"
                             disabled={actionLoading === user.id}
                           >
