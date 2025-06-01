@@ -38,8 +38,8 @@ export const usePubgAccounts = () => {
 
       // تحويل البيانات للتوافق مع النوع المطلوب
       const formattedAccounts: PubgAccount[] = (data || []).map((account) => {
-        // استخدام ID الحساب من قاعدة البيانات كـ randomId إذا لم يكن متوفراً
-        const randomId = (account as any).random_id || account.id.slice(0, 8).toUpperCase();
+        // توليد ID ثابت من معرف الحساب في قاعدة البيانات
+        const randomId = account.id.replace(/-/g, '').slice(0, 8).toUpperCase();
 
         return {
           id: account.id,
@@ -93,10 +93,6 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة إضافة حساب جديد:', newAccount);
       
-      // توليد ID عشوائي فريد للحساب الجديد
-      const randomId = generateUniqueId();
-      console.log('تم توليد ID فريد للحساب الجديد:', randomId);
-      
       const accountData: any = {
         image: newAccount.image,
         description: newAccount.description,
@@ -108,13 +104,12 @@ export const usePubgAccounts = () => {
         accountData.video = newAccount.video;
       }
 
-      // محاولة إضافة الحقول الجديدة (قد تكون غير موجودة في قاعدة البيانات)
-      try {
+      // إضافة الحقول الجديدة إذا كانت متوفرة في قاعدة البيانات
+      if (newAccount.category) {
         accountData.category = newAccount.category;
+      }
+      if (newAccount.price !== undefined) {
         accountData.price = newAccount.price;
-        accountData.random_id = randomId; // محاولة حفظ الـ random_id
-      } catch (e) {
-        console.warn('بعض الحقول قد لا تكون متوفرة في قاعدة البيانات:', e);
       }
 
       console.log('البيانات التي سيتم إرسالها:', accountData);
@@ -129,7 +124,7 @@ export const usePubgAccounts = () => {
         throw error;
       }
 
-      console.log(`تم إضافة حساب PUBG جديد بنجاح مع ID: ${randomId}`, data);
+      console.log('تم إضافة حساب PUBG جديد بنجاح:', data);
       // إعادة تحميل البيانات بعد الإضافة
       await loadAccounts();
     } catch (error) {
