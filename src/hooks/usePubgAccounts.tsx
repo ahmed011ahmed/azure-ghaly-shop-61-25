@@ -1,18 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { PubgAccount, NewPubgAccount } from '../types/pubgAccount';
-
-// دالة لتوليد ID عشوائي فريد باستخدام timestamp
-const generateUniqueId = (): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < 6; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  // إضافة جزء من الوقت الحالي لضمان التفرد
-  const timestamp = Date.now().toString().slice(-2);
-  return result + timestamp;
-};
 
 export const usePubgAccounts = () => {
   const [accounts, setAccounts] = useState<PubgAccount[]>([]);
@@ -47,8 +36,8 @@ export const usePubgAccounts = () => {
           image: account.image,
           description: account.description,
           video: account.video || undefined,
-          category: ((account as any).category as PubgAccount['category']) || 'other',
-          price: (account as any).price || 0,
+          category: 'other', // قيمة افتراضية لأن العمود غير موجود في قاعدة البيانات
+          price: 0, // قيمة افتراضية لأن العمود غير موجود في قاعدة البيانات
           isAvailable: account.is_available,
           createdAt: account.created_at,
           updatedAt: account.updated_at
@@ -93,23 +82,16 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة إضافة حساب جديد:', newAccount);
       
+      // إرسال الحقول الموجودة فقط في قاعدة البيانات
       const accountData: any = {
         image: newAccount.image,
         description: newAccount.description,
         is_available: true
       };
 
-      // إضافة الحقول الاختيارية فقط إذا كانت متوفرة
+      // إضافة الفيديو فقط إذا كان متوفراً
       if (newAccount.video && newAccount.video.trim()) {
         accountData.video = newAccount.video;
-      }
-
-      // إضافة الحقول الجديدة إذا كانت متوفرة في قاعدة البيانات
-      if (newAccount.category) {
-        accountData.category = newAccount.category;
-      }
-      if (newAccount.price !== undefined) {
-        accountData.price = newAccount.price;
       }
 
       console.log('البيانات التي سيتم إرسالها:', accountData);
@@ -137,20 +119,13 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة تحديث الحساب:', id, updates);
       
+      // تحديث الحقول الموجودة فقط في قاعدة البيانات
       const dbUpdates: any = {};
       if (updates.image !== undefined) dbUpdates.image = updates.image;
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.video !== undefined) dbUpdates.video = updates.video;
       if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
       dbUpdates.updated_at = new Date().toISOString();
-
-      // محاولة تحديث الحقول الجديدة (قد تكون غير موجودة في قاعدة البيانات)
-      try {
-        if (updates.category !== undefined) dbUpdates.category = updates.category;
-        if (updates.price !== undefined) dbUpdates.price = updates.price;
-      } catch (e) {
-        console.warn('بعض الحقول قد لا تكون متوفرة في قاعدة البيانات:', e);
-      }
 
       const { error } = await supabase
         .from('pubg_accounts')
