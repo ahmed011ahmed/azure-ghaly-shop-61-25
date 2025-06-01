@@ -1,9 +1,8 @@
 
 import React from 'react';
-import { ArrowLeft, Gamepad2, Star, Trophy, Target, Shield } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { ArrowLeft, Gamepad2 } from 'lucide-react';
+import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
-import { Button } from '../components/ui/button';
 import { usePubgAccounts } from '../hooks/usePubgAccounts';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
@@ -29,7 +28,6 @@ const PubgAccounts = () => {
   };
 
   const getTierImage = (tier: string) => {
-    // صور مختلفة حسب الرتبة
     const images: { [key: string]: string } = {
       'Bronze': 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop',
       'Silver': 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=400&h=300&fit=crop',
@@ -75,33 +73,8 @@ const PubgAccounts = () => {
             حسابات PUBG المتاحة
           </h1>
           <p className="text-gray-300 text-xl max-w-3xl mx-auto leading-relaxed">
-            مجموعة مختارة من أفضل حسابات PUBG Mobile مع إحصائيات محترفة ورتب عالية. 
-            جميع الحسابات محققة ومضمونة مع أمان كامل للعملية
+            مجموعة مختارة من أفضل حسابات PUBG Mobile. تواصل معنا للمزيد من التفاصيل
           </p>
-        </div>
-
-        {/* إحصائيات سريعة */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-          <div className="text-center p-6 bg-gray-800/50 rounded-lg backdrop-blur-sm">
-            <Shield className="w-8 h-8 text-green-400 mx-auto mb-2" />
-            <h3 className="text-white font-bold">أمان مضمون</h3>
-            <p className="text-gray-400 text-sm">حماية 100%</p>
-          </div>
-          <div className="text-center p-6 bg-gray-800/50 rounded-lg backdrop-blur-sm">
-            <Trophy className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
-            <h3 className="text-white font-bold">رتب عالية</h3>
-            <p className="text-gray-400 text-sm">من Crown إلى Conqueror</p>
-          </div>
-          <div className="text-center p-6 bg-gray-800/50 rounded-lg backdrop-blur-sm">
-            <Target className="w-8 h-8 text-red-400 mx-auto mb-2" />
-            <h3 className="text-white font-bold">إحصائيات قوية</h3>
-            <p className="text-gray-400 text-sm">K/D عالي ونسبة فوز ممتازة</p>
-          </div>
-          <div className="text-center p-6 bg-gray-800/50 rounded-lg backdrop-blur-sm">
-            <Gamepad2 className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-            <h3 className="text-white font-bold">جاهز للعب</h3>
-            <p className="text-gray-400 text-sm">تسليم فوري</p>
-          </div>
         </div>
 
         {/* قائمة الحسابات */}
@@ -116,7 +89,7 @@ const PubgAccounts = () => {
             {availableAccounts.map((account) => (
               <Card key={account.id} className="gaming-card group hover:scale-105 transition-all duration-300 overflow-hidden">
                 {/* صورة الحساب */}
-                <div className="relative h-48 overflow-hidden">
+                <div className="relative h-64 overflow-hidden">
                   <img 
                     src={getTierImage(account.tier)}
                     alt={`حساب ${account.playerName}`}
@@ -124,80 +97,35 @@ const PubgAccounts = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                   
-                  {/* شارات الرتبة والتوفر */}
-                  <div className="absolute top-4 right-4 flex gap-2">
+                  {/* شارة الرتبة */}
+                  <div className="absolute top-4 right-4">
                     <Badge className={getTierColor(account.tier)}>
-                      <Trophy className="w-3 h-3 mr-1" />
                       {account.tier}
                     </Badge>
                   </div>
+                  
                   <div className="absolute top-4 left-4">
                     <Badge className="bg-green-900 text-green-200">
                       متاح الآن
                     </Badge>
                   </div>
 
-                  {/* معلومات أساسية في أسفل الصورة */}
+                  {/* اسم اللاعب */}
                   <div className="absolute bottom-4 left-4 right-4">
-                    <h3 className="text-white text-xl font-bold mb-1">{account.playerName}</h3>
-                    <p className="text-gray-300 text-sm">معرف: {account.playerId}</p>
+                    <h3 className="text-white text-xl font-bold">{account.playerName}</h3>
                   </div>
                 </div>
 
                 <CardContent className="bg-slate-950 p-6">
-                  {/* الوصف الرئيسي */}
-                  <p className="text-gray-300 text-sm leading-relaxed mb-6">
+                  {/* الوصف */}
+                  <p className="text-gray-300 text-base leading-relaxed text-center">
                     {account.description}
                   </p>
-
-                  {/* إحصائيات مفصلة */}
-                  <div className="space-y-4 mb-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-gray-800/50 rounded-lg">
-                        <Target className="w-5 h-5 text-red-400 mx-auto mb-1" />
-                        <p className="text-gray-400 text-xs">نسبة K/D</p>
-                        <p className="text-white font-bold text-lg">{account.kd.toFixed(2)}</p>
-                      </div>
-                      <div className="text-center p-3 bg-gray-800/50 rounded-lg">
-                        <Star className="w-5 h-5 text-yellow-400 mx-auto mb-1" />
-                        <p className="text-gray-400 text-xs">نسبة الفوز</p>
-                        <p className="text-white font-bold text-lg">{account.winRate}%</p>
-                      </div>
-                    </div>
-
-                    {/* معلومات إضافية */}
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between items-center py-2 border-b border-gray-700/50">
-                        <span className="text-gray-400">المباريات المكتملة:</span>
-                        <span className="text-white font-medium">{account.matches.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between items-center py-2 border-b border-gray-700/50">
-                        <span className="text-gray-400">منطقة الخادم:</span>
-                        <span className="text-white font-medium">{account.serverRegion}</span>
-                      </div>
-                      <div className="flex justify-between items-center py-2">
-                        <span className="text-gray-400">نوع الحساب:</span>
-                        <span className="text-white font-medium">
-                          {account.accountType === 'main' ? 'حساب رئيسي' : 
-                           account.accountType === 'smurf' ? 'حساب سمرف' : 'حساب ضيف'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* السعر ومعلومات التواصل */}
-                  <div className="pt-4 border-t border-gray-700">
-                    <div className="text-center mb-4">
-                      <span className="text-3xl font-bold text-green-400 block">
-                        ${account.price}
-                      </span>
-                      <span className="text-gray-400 text-sm">شامل التسليم الآمن</span>
-                    </div>
-                    
-                    <div className="bg-purple-900/20 rounded-lg p-4 text-center">
-                      <p className="text-purple-300 text-sm mb-2">للشراء أو الاستفسار</p>
-                      <p className="text-white font-medium">تواصل معنا عبر الشات</p>
-                    </div>
+                  
+                  {/* دعوة للتواصل */}
+                  <div className="mt-6 bg-purple-900/20 rounded-lg p-4 text-center">
+                    <p className="text-purple-300 text-sm mb-2">للاستفسار والشراء</p>
+                    <p className="text-white font-medium">تواصل معنا عبر الشات</p>
                   </div>
                 </CardContent>
               </Card>
