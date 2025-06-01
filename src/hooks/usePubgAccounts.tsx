@@ -31,8 +31,8 @@ export const usePubgAccounts = () => {
         image: account.image,
         description: account.description,
         video: account.video || undefined,
-        category: (account as any).category || 'other', // قيمة افتراضية
-        price: (account as any).price || 0, // قيمة افتراضية
+        category: 'other' as const, // قيمة افتراضية مؤقتة
+        price: 0, // قيمة افتراضية مؤقتة
         isAvailable: account.is_available,
         createdAt: account.created_at,
         updatedAt: account.updated_at
@@ -76,19 +76,12 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة إضافة حساب جديد:', newAccount);
       
+      // إرسال البيانات الأساسية فقط (بدون category و price مؤقتاً)
       const accountData: any = {
         image: newAccount.image,
         description: newAccount.description,
         is_available: true
       };
-
-      // إضافة التصنيف والسعر إذا كانت الأعمدة موجودة
-      if (newAccount.category) {
-        accountData.category = newAccount.category;
-      }
-      if (newAccount.price !== undefined) {
-        accountData.price = newAccount.price;
-      }
 
       // إضافة الفيديو فقط إذا كان متوفراً
       if (newAccount.video && newAccount.video.trim()) {
@@ -120,13 +113,11 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة تحديث الحساب:', id, updates);
       
-      // تحويل البيانات للتوافق مع قاعدة البيانات
+      // تحويل البيانات للتوافق مع قاعدة البيانات (بدون category و price مؤقتاً)
       const dbUpdates: any = {};
       if (updates.image !== undefined) dbUpdates.image = updates.image;
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.video !== undefined) dbUpdates.video = updates.video;
-      if (updates.category !== undefined) dbUpdates.category = updates.category;
-      if (updates.price !== undefined) dbUpdates.price = updates.price;
       if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
       dbUpdates.updated_at = new Date().toISOString();
 
@@ -179,9 +170,9 @@ export const usePubgAccounts = () => {
     }
   };
 
-  // فلترة الحسابات حسب التصنيف
+  // فلترة الحسابات حسب التصنيف (مؤقتاً ترجع جميع الحسابات)
   const getAccountsByCategory = (category: PubgAccount['category']) => {
-    return accounts.filter(account => account.category === category && account.isAvailable);
+    return accounts.filter(account => account.isAvailable);
   };
 
   return {
