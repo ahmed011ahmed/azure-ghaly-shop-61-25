@@ -1,11 +1,10 @@
-
 import { ShoppingCart, Heart, Play } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useState } from 'react';
 
 interface ServiceCardProps {
-  id: number;
+  id: string; // تغيير من number إلى string
   name: string;
   price: string;
   image: string;
