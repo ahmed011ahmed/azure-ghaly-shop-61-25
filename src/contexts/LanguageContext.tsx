@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type Language = 'ar' | 'en';
@@ -15,7 +16,7 @@ const translations = {
     // Navigation
     'nav.home': 'الرئيسية',
     'nav.products': 'المنتجات',
-    'nav.services': 'الخدمات',
+    'nav.services': 'الحسابات',
     'nav.giveaways': 'المسابقات',
     'nav.chat': 'الدردشة',
     
@@ -130,7 +131,7 @@ const translations = {
     // Navigation
     'nav.home': 'Home',
     'nav.products': 'Products',
-    'nav.services': 'Services',
+    'nav.services': 'Accounts',
     'nav.giveaways': 'Giveaways',
     'nav.chat': 'Chat',
     
