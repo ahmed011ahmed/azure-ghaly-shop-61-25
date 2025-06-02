@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Gift, Settings, Wrench, Crown } from 'lucide-react';
+import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Gift, Settings, Wrench, Crown, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductManagement from '../components/admin/ProductManagement';
 import ServicesManagement from '../components/admin/ServicesManagement';
@@ -15,6 +14,7 @@ import PermissionsManagement from '../components/admin/PermissionsManagement';
 import ContentViewer from '../components/admin/ContentViewer';
 import GiveawaysManagement from '../components/admin/GiveawaysManagement';
 import AdminUsersManagement from '../components/admin/AdminUsersManagement';
+import ContentManagement from '../components/admin/ContentManagement';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 
@@ -89,6 +89,12 @@ const AdminDashboard = () => {
       label: 'المسابقات والجوائز',
       icon: Gift,
       permission: 'giveaways'
+    },
+    {
+      id: 'content-management',
+      label: 'إدارة المحتوى',
+      icon: FileText,
+      permission: 'content'
     },
     {
       id: 'subscribers',
@@ -311,14 +317,14 @@ const AdminDashboard = () => {
                     </Button>
                   )}
                   
-                  {(currentUser?.username === 'GHALY' || hasPermission('giveaways')) && (
+                  {(currentUser?.username === 'GHALY' || hasPermission('content')) && (
                     <Button
-                      onClick={() => setActiveTab('giveaways')}
-                      className="bg-pink-600 hover:bg-pink-700 text-white p-6 h-auto flex-col space-y-2"
+                      onClick={() => setActiveTab('content-management')}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white p-6 h-auto flex-col space-y-2"
                     >
-                      <Gift className="w-8 h-8" />
-                      <span className="font-semibold">المسابقات والجوائز</span>
-                      <span className="text-sm opacity-80">إدارة الـ Giveaways</span>
+                      <FileText className="w-8 h-8" />
+                      <span className="font-semibold">إدارة المحتوى</span>
+                      <span className="text-sm opacity-80">إدارة المحتوى بالمستويات</span>
                     </Button>
                   )}
                   
@@ -361,6 +367,8 @@ const AdminDashboard = () => {
         {activeTab === 'chat' && (currentUser?.username === 'GHALY' || hasPermission('chat')) && <AdminChat />}
         
         {activeTab === 'admin-users' && (currentUser?.username === 'GHALY' || hasPermission('admin-users')) && <AdminUsersManagement />}
+        
+        {activeTab === 'content-management' && (currentUser?.username === 'GHALY' || hasPermission('content')) && <ContentManagement />}
       </div>
     </div>
   );
