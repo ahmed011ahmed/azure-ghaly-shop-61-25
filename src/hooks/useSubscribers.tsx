@@ -18,7 +18,21 @@ export const useSubscribers = () => {
   const loadSubscribers = async () => {
     try {
       setLoading(true);
+      console.log('Loading subscribers from database...');
       
+      // جلب البيانات من جدول subscriber_permissions أولاً
+      const { data: permissionsData, error: permissionsError } = await supabase
+        .from('subscriber_permissions')
+        .select('*')
+        .order('granted_at', { ascending: false });
+
+      if (permissionsError) {
+        console.error('خطأ في تحميل أذونات المشتركين:', permissionsError);
+        // لا نرجع هنا، نحاول جلب المشتركين من مكان آخر
+      }
+
+      console.log('Permissions data:', permissionsData);
+
       // جلب البيانات من جدول profiles
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
@@ -26,32 +40,49 @@ export const useSubscribers = () => {
         .order('created_at', { ascending: false });
 
       if (profilesError) {
-        console.error('خطأ في تحميل المشتركين:', profilesError);
-        return;
+        console.error('خطأ في تحميل الملفات الشخصية:', profilesError);
       }
 
-      // جلب البيانات من جدول subscriber_permissions
-      const { data: permissionsData, error: permissionsError } = await supabase
-        .from('subscriber_permissions')
-        .select('*');
+      console.log('Profiles data:', profilesData);
 
-      if (permissionsError) {
-        console.error('خطأ في تحميل أذونات المشتركين:', permissionsError);
+      // دمج البيانات وإنشاء قائمة المشتركين
+      const formattedSubscribers: Subscriber[] = [];
+
+      // إضافة المشتركين من جدول الأذونات
+      if (permissionsData) {
+        permissionsData.forEach(permission => {
+          // البحث عن الملف الشخصي المطابق
+          const profile = (profilesData || []).find(p => p.id === permission.email);
+          
+          formattedSubscribers.push({
+            id: permission.id,
+            email: permission.email,
+            nickname: profile?.nickname || 'غير محدد',
+            subscription_status: permission.is_active ? 'active' : 'inactive',
+            subscription_date: permission.granted_at,
+            last_login: profile?.updated_at || null
+          });
+        });
       }
 
-      // دمج البيانات
-      const formattedSubscribers: Subscriber[] = (profilesData || []).map(profile => {
-        const permission = (permissionsData || []).find(p => p.email === profile.id);
-        return {
-          id: profile.id,
-          email: profile.id, // استخدام ID كإيميل مؤقتاً
-          nickname: profile.nickname,
-          subscription_status: permission?.is_active ? 'active' : 'inactive',
-          subscription_date: profile.created_at,
-          last_login: profile.updated_at
-        };
-      });
+      // إضافة المشتركين من جدول profiles الذين ليس لديهم أذونات
+      if (profilesData) {
+        profilesData.forEach(profile => {
+          const hasPermission = (permissionsData || []).some(p => p.email === profile.id);
+          if (!hasPermission) {
+            formattedSubscribers.push({
+              id: profile.id,
+              email: profile.id,
+              nickname: profile.nickname || 'غير محدد',
+              subscription_status: 'pending',
+              subscription_date: profile.created_at,
+              last_login: profile.updated_at
+            });
+          }
+        });
+      }
 
+      console.log('Formatted subscribers:', formattedSubscribers);
       setSubscribers(formattedSubscribers);
     } catch (error) {
       console.error('خطأ في تحميل البيانات:', error);
@@ -105,30 +136,41 @@ export const useSubscribers = () => {
 
   const addSubscriber = async (subscriber: { email: string; nickname: string }): Promise<void> => {
     try {
+      console.log('Adding new subscriber:', subscriber);
+      
       // إضافة إلى جدول profiles
-      const { error: profileError } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .insert({
-          id: crypto.randomUUID(),
+          id: subscriber.email, // استخدام الإيميل كـ ID
           nickname: subscriber.nickname
-        });
+        })
+        .select()
+        .single();
 
       if (profileError) {
-        console.error('خطأ في إضافة المشترك:', profileError);
+        console.error('خطأ في إضافة المشترك إلى الملفات الشخصية:', profileError);
         throw profileError;
       }
 
+      console.log('Profile added successfully:', profileData);
+
       // إضافة إلى جدول أذونات المشتركين
-      const { error: permissionError } = await supabase
+      const { data: permissionData, error: permissionError } = await supabase
         .from('subscriber_permissions')
         .insert({
           email: subscriber.email,
-          is_active: true
-        });
+          is_active: true,
+          granted_by: 'admin'
+        })
+        .select()
+        .single();
 
       if (permissionError) {
         console.error('خطأ في إضافة أذونات المشترك:', permissionError);
         // لا نرمي خطأ هنا لأن المشترك تم إضافته بالفعل
+      } else {
+        console.log('Permission added successfully:', permissionData);
       }
 
       console.log('تم إضافة مشترك جديد بنجاح');
@@ -140,6 +182,8 @@ export const useSubscribers = () => {
 
   const updateSubscriptionStatus = async (id: string, status: 'active' | 'inactive' | 'pending'): Promise<void> => {
     try {
+      console.log('Updating subscription status:', { id, status });
+      
       const { error } = await supabase
         .from('subscriber_permissions')
         .update({ is_active: status === 'active' })
@@ -159,6 +203,8 @@ export const useSubscribers = () => {
 
   const deleteSubscriber = async (id: string): Promise<void> => {
     try {
+      console.log('Deleting subscriber:', id);
+      
       // حذف من جدول profiles
       const { error: profileError } = await supabase
         .from('profiles')
@@ -166,8 +212,7 @@ export const useSubscribers = () => {
         .eq('id', id);
 
       if (profileError) {
-        console.error('خطأ في حذف المشترك:', profileError);
-        throw profileError;
+        console.error('خطأ في حذف المشترك من الملفات الشخصية:', profileError);
       }
 
       // حذف من جدول أذونات المشتركين
@@ -178,7 +223,6 @@ export const useSubscribers = () => {
 
       if (permissionError) {
         console.error('خطأ في حذف أذونات المشترك:', permissionError);
-        // لا نرمي خطأ هنا لأن المشترك تم حذفه بالفعل
       }
 
       console.log('تم حذف المشترك بنجاح');
