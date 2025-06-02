@@ -9,6 +9,7 @@ import Services from "./pages/Services";
 import AdminDashboard from "./pages/AdminDashboard";
 import Auth from "./pages/Auth";
 import Subscribers from "./pages/Subscribers";
+import Giveaways from "./pages/Giveaways";
 import NotFound from "./pages/NotFound";
 import { ProductsProvider } from "./contexts/ProductsContext";
 import { ServicesProvider } from "./contexts/ServicesContext";
@@ -36,6 +37,7 @@ const App = () => (
                       <Route path="/services" element={<Services />} />
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/subscribers" element={<Subscribers />} />
+                      <Route path="/giveaways" element={<Giveaways />} />
                       <Route path="/admin" element={<AdminDashboard />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />

@@ -22,7 +22,7 @@ const Header = () => {
     { name: t('nav.products'), href: '/', section: 'products' },
     { name: t('nav.services'), href: '/services', section: 'services' },
     { name: t('header.subscribers'), href: '/subscribers', section: 'subscribers' },
-    { name: t('nav.giveaways'), href: '/', section: 'giveaways' },
+    { name: t('nav.giveaways'), href: '/giveaways', section: 'giveaways' },
     { name: t('nav.chat'), href: '/', section: 'chat' }
   ];
 
@@ -70,7 +70,7 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             {navItems.map(item => 
-              (item.href === '/services' || item.href === '/subscribers') ? (
+              (item.href === '/services' || item.href === '/subscribers' || item.href === '/giveaways') ? (
                 <Link 
                   key={item.name} 
                   to={item.href} 
@@ -149,7 +149,7 @@ const Header = () => {
           <div className="md:hidden py-4 border-t border-purple-800/30">
             <nav className="flex flex-col space-y-4">
               {navItems.map(item => 
-                (item.href === '/services' || item.href === '/subscribers') ? (
+                (item.href === '/services' || item.href === '/subscribers' || item.href === '/giveaways') ? (
                   <Link 
                     key={item.name} 
                     to={item.href} 
