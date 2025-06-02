@@ -16,7 +16,7 @@ const Header = () => {
   const navItems = [
     { name: t('nav.home'), href: '/', section: 'home' },
     { name: t('nav.products'), href: '/', section: 'products' },
-    { name: 'الخدمات', href: '/services', section: 'services' },
+    { name: t('nav.services'), href: '/services', section: 'services' },
     { name: t('nav.giveaways'), href: '/', section: 'giveaways' },
     { name: t('nav.chat'), href: '/', section: 'chat' }
   ];

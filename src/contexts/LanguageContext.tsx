@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type Language = 'ar' | 'en';
@@ -13,6 +12,13 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 const translations = {
   ar: {
+    // Navigation
+    'nav.home': 'الرئيسية',
+    'nav.products': 'المنتجات',
+    'nav.services': 'الخدمات',
+    'nav.giveaways': 'المسابقات',
+    'nav.chat': 'الدردشة',
+    
     // Header
     'header.home': 'الرئيسية',
     'header.tools': 'الأدوات',
@@ -121,6 +127,13 @@ const translations = {
     'admin.hint': 'للمطورين فقط - استخدم بيانات الاعتماد المقدمة',
   },
   en: {
+    // Navigation
+    'nav.home': 'Home',
+    'nav.products': 'Products',
+    'nav.services': 'Services',
+    'nav.giveaways': 'Giveaways',
+    'nav.chat': 'Chat',
+    
     // Header
     'header.home': 'Home',
     'header.tools': 'Tools',
