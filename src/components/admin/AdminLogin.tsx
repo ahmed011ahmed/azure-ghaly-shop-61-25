@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface AdminLoginProps {
-  onLogin: () => void;
+  onLogin: (user: any) => void;
 }
 
 const AdminLogin = ({ onLogin }: AdminLoginProps) => {
@@ -28,7 +28,12 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
     setTimeout(() => {
       // التحقق من اليوزر الافتراضي
       if (username === 'GHALY' && password === 'Admin Team') {
-        onLogin();
+        const defaultUser = {
+          id: 'default',
+          username: 'GHALY',
+          permissions: [] // صلاحيات كاملة (فارغة تعني الكل)
+        };
+        onLogin(defaultUser);
         setIsLoading(false);
         return;
       }
@@ -57,13 +62,13 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
       console.log('Found valid user:', validUser);
 
       if (validUser) {
-        // حفظ معلومات المستخدم المسجل للدخول
-        localStorage.setItem('current_admin_user', JSON.stringify({
+        // إنشاء كائن المستخدم المسجل للدخول
+        const loggedInUser = {
           id: validUser.id,
           username: validUser.username || validUser.email,
-          permissions: validUser.permissions
-        }));
-        onLogin();
+          permissions: validUser.permissions || []
+        };
+        onLogin(loggedInUser);
       } else {
         setError('اسم المستخدم أو كلمة المرور غير صحيحة');
       }

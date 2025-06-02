@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Gamepad2, Gift, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -19,26 +20,47 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 const AdminDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   // التحقق من حالة تسجيل الدخول عند تحميل الصفحة
   useEffect(() => {
     const adminAuth = localStorage.getItem('adminAuthenticated');
+    const userData = localStorage.getItem('current_admin_user');
+    
     if (adminAuth === 'true') {
       setIsAuthenticated(true);
+      if (userData) {
+        setCurrentUser(JSON.parse(userData));
+      }
     }
   }, []);
 
-  const handleLogin = () => {
+  const handleLogin = (user: any) => {
     setIsAuthenticated(true);
+    setCurrentUser(user);
     localStorage.setItem('adminAuthenticated', 'true');
-    console.log('Admin logged in successfully');
+    localStorage.setItem('current_admin_user', JSON.stringify(user));
+    console.log('Admin logged in successfully', user);
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setCurrentUser(null);
     localStorage.removeItem('adminAuthenticated');
+    localStorage.removeItem('current_admin_user');
     setActiveTab('overview');
     console.log('Admin logged out');
+  };
+
+  // التحقق من الصلاحيات
+  const hasPermission = (permission: string) => {
+    // المستخدم الأساسي GHALY له صلاحيات كاملة
+    if (currentUser?.username === 'GHALY') {
+      return true;
+    }
+    
+    // للمستخدمين الآخرين، التحقق من الصلاحيات المحددة
+    return currentUser?.permissions?.includes(permission) || false;
   };
 
   // إذا لم يكن مسجل الدخول، اظهر صفحة تسجيل الدخول
@@ -74,68 +96,94 @@ const AdminDashboard = () => {
     }
   ];
 
-  const tabs = [
+  // قائمة جميع الأقسام مع شروط الصلاحيات
+  const allTabs = [
     {
       id: 'overview',
       label: 'نظرة عامة',
-      icon: Eye
+      icon: Eye,
+      permission: null // متاح للجميع
     },
     {
       id: 'products',
       label: 'إدارة المنتجات',
-      icon: Package
+      icon: Package,
+      permission: 'products'
     },
     {
       id: 'pubg-accounts',
       label: 'حسابات PUBG',
-      icon: Gamepad2
+      icon: Gamepad2,
+      permission: 'pubg-accounts'
     },
     {
       id: 'giveaways',
       label: 'المسابقات والجوائز',
-      icon: Gift
+      icon: Gift,
+      permission: 'giveaways'
     },
     {
       id: 'subscribers',
       label: 'إدارة المشتركين',
-      icon: Users
+      icon: Users,
+      permission: 'subscribers'
     },
     {
       id: 'user-lookup',
       label: 'البحث عن مشترك',
-      icon: UserSearch
+      icon: UserSearch,
+      permission: 'user-lookup'
     },
     {
       id: 'permissions',
       label: 'أذونات المشتركين',
-      icon: Shield
+      icon: Shield,
+      permission: 'permissions'
     },
     {
       id: 'admin-users',
       label: 'مستخدمي الإدارة',
-      icon: Settings
+      icon: Settings,
+      permission: 'admin-users'
     },
     {
       id: 'downloads',
       label: 'روابط التحميل',
-      icon: Download
+      icon: Download,
+      permission: 'downloads'
     },
     {
       id: 'updates',
       label: 'التحديثات',
-      icon: Calendar
+      icon: Calendar,
+      permission: 'updates'
     },
     {
       id: 'content',
       label: 'عرض المحتوى',
-      icon: Eye
+      icon: Eye,
+      permission: 'content'
     },
     {
       id: 'chat',
       label: 'شات العملاء',
-      icon: MessageSquare
+      icon: MessageSquare,
+      permission: 'chat'
     }
   ];
+
+  // فلترة الأقسام حسب الصلاحيات
+  const availableTabs = allTabs.filter(tab => 
+    tab.permission === null || hasPermission(tab.permission)
+  );
+
+  // التحقق من أن التاب النشط متاح للمستخدم
+  useEffect(() => {
+    const currentTabAvailable = availableTabs.find(tab => tab.id === activeTab);
+    if (!currentTabAvailable) {
+      setActiveTab('overview');
+    }
+  }, [currentUser, activeTab]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900">
@@ -150,16 +198,23 @@ const AdminDashboard = () => {
               <h1 className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent mx-[13px]">
                 لوحة تحكم الإدارة
               </h1>
+              {currentUser && (
+                <span className="text-sm text-gray-400">
+                  مرحباً، {currentUser.username}
+                </span>
+              )}
             </div>
             
             <div className="flex items-center space-x-3">
-              <Button
-                onClick={() => setActiveTab('products')}
-                className="bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25 py-[16px] my-[9px] mx-[17px]"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                إضافة منتج جديد
-              </Button>
+              {hasPermission('products') && (
+                <Button
+                  onClick={() => setActiveTab('products')}
+                  className="bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25 py-[16px] my-[9px] mx-[17px]"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  إضافة منتج جديد
+                </Button>
+              )}
               
               <Button
                 onClick={handleLogout}
@@ -177,7 +232,7 @@ const AdminDashboard = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Navigation Tabs */}
         <div className="flex space-x-1 mb-8 bg-gray-800/50 backdrop-blur-sm rounded-lg p-1 overflow-x-auto">
-          {tabs.map(tab => (
+          {availableTabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -223,68 +278,76 @@ const AdminDashboard = () => {
               </CardHeader>
               <CardContent className="bg-slate-950">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <Button
-                    onClick={() => setActiveTab('products')}
-                    className="bg-purple-600 hover:bg-purple-700 text-white p-6 h-auto flex-col space-y-2"
-                  >
-                    <Package className="w-8 h-8" />
-                    <span className="font-semibold">إدارة المنتجات</span>
-                    <span className="text-sm opacity-80">إضافة وتعديل المنتجات</span>
-                  </Button>
+                  {hasPermission('products') && (
+                    <Button
+                      onClick={() => setActiveTab('products')}
+                      className="bg-purple-600 hover:bg-purple-700 text-white p-6 h-auto flex-col space-y-2"
+                    >
+                      <Package className="w-8 h-8" />
+                      <span className="font-semibold">إدارة المنتجات</span>
+                      <span className="text-sm opacity-80">إضافة وتعديل المنتجات</span>
+                    </Button>
+                  )}
                   
-                  <Button
-                    onClick={() => setActiveTab('pubg-accounts')}
-                    className="bg-orange-600 hover:bg-orange-700 text-white p-6 h-auto flex-col space-y-2"
-                  >
-                    <Gamepad2 className="w-8 h-8" />
-                    <span className="font-semibold">حسابات PUBG</span>
-                    <span className="text-sm opacity-80">إدارة حسابات اللعبة</span>
-                  </Button>
+                  {hasPermission('pubg-accounts') && (
+                    <Button
+                      onClick={() => setActiveTab('pubg-accounts')}
+                      className="bg-orange-600 hover:bg-orange-700 text-white p-6 h-auto flex-col space-y-2"
+                    >
+                      <Gamepad2 className="w-8 h-8" />
+                      <span className="font-semibold">حسابات PUBG</span>
+                      <span className="text-sm opacity-80">إدارة حسابات اللعبة</span>
+                    </Button>
+                  )}
                   
-                  <Button
-                    onClick={() => setActiveTab('giveaways')}
-                    className="bg-pink-600 hover:bg-pink-700 text-white p-6 h-auto flex-col space-y-2"
-                  >
-                    <Gift className="w-8 h-8" />
-                    <span className="font-semibold">المسابقات والجوائز</span>
-                    <span className="text-sm opacity-80">إدارة الـ Giveaways</span>
-                  </Button>
+                  {hasPermission('giveaways') && (
+                    <Button
+                      onClick={() => setActiveTab('giveaways')}
+                      className="bg-pink-600 hover:bg-pink-700 text-white p-6 h-auto flex-col space-y-2"
+                    >
+                      <Gift className="w-8 h-8" />
+                      <span className="font-semibold">المسابقات والجوائز</span>
+                      <span className="text-sm opacity-80">إدارة الـ Giveaways</span>
+                    </Button>
+                  )}
                   
-                  <Button
-                    onClick={() => setActiveTab('subscribers')}
-                    className="bg-green-600 hover:bg-green-700 text-white p-6 h-auto flex-col space-y-2"
-                  >
-                    <Users className="w-8 h-8" />
-                    <span className="font-semibold">إدارة المشتركين</span>
-                    <span className="text-sm opacity-80">إدارة العضويات</span>
-                  </Button>
+                  {hasPermission('subscribers') && (
+                    <Button
+                      onClick={() => setActiveTab('subscribers')}
+                      className="bg-green-600 hover:bg-green-700 text-white p-6 h-auto flex-col space-y-2"
+                    >
+                      <Users className="w-8 h-8" />
+                      <span className="font-semibold">إدارة المشتركين</span>
+                      <span className="text-sm opacity-80">إدارة العضويات</span>
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
           </div>
         )}
 
-        {activeTab === 'products' && <ProductManagement />}
+        {activeTab === 'products' && hasPermission('products') && <ProductManagement />}
         
-        {activeTab === 'pubg-accounts' && <PubgAccountsManagement />}
+        {activeTab === 'pubg-accounts' && hasPermission('pubg-accounts') && <PubgAccountsManagement />}
         
-        {activeTab === 'giveaways' && <GiveawaysManagement />}
+        {activeTab === 'giveaways' && hasPermission('giveaways') && <GiveawaysManagement />}
         
-        {activeTab === 'subscribers' && <SubscribersManagement />}
+        {activeTab === 'subscribers' && hasPermission('subscribers') && <SubscribersManagement />}
         
-        {activeTab === 'user-lookup' && <UserLookup />}
+        {activeTab === 'user-lookup' && hasPermission('user-lookup') && <UserLookup />}
         
-        {activeTab === 'permissions' && <PermissionsManagement />}
+        {activeTab === 'permissions' && hasPermission('permissions') && <PermissionsManagement />}
         
-        {activeTab === 'downloads' && <DownloadsManagement />}
+        {activeTab === 'downloads' && hasPermission('downloads') && <DownloadsManagement />}
         
-        {activeTab === 'updates' && <UpdatesManagement />}
+        {activeTab === 'updates' && hasPermission('updates') && <UpdatesManagement />}
         
-        {activeTab === 'content' && <ContentViewer />}
+        {activeTab === 'content' && hasPermission('content') && <ContentViewer />}
         
-        {activeTab === 'chat' && <AdminChat />}
+        {activeTab === 'chat' && hasPermission('chat') && <AdminChat />}
         
-        {activeTab === 'admin-users' && <AdminUsersManagement />}
+        {activeTab === 'admin-users' && hasPermission('admin-users') && <AdminUsersManagement />}
       </div>
     </div>
   );
