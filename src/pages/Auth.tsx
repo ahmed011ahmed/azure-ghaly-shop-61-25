@@ -9,7 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import EmailVerification from '@/components/EmailVerification';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,7 +17,7 @@ const Auth = () => {
   const [nickname, setNickname] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showEmailVerification, setShowEmailVerification] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
   const { toast } = useToast();
   const { t, language } = useLanguage();
@@ -85,36 +84,32 @@ const Auth = () => {
 
       console.log('User created successfully:', data.user?.id);
 
-      // Generate verification code (6 digits)
-      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-      
-      // Send verification code
-      const { data: codeData, error: codeError } = await supabase.functions.invoke('send-verification-code', {
+      // Send verification link
+      const { data: linkData, error: linkError } = await supabase.functions.invoke('send-verification-link', {
         body: { 
           email, 
-          code: verificationCode,
           user_id: data.user?.id 
         }
       });
 
-      if (codeError) {
-        console.error('Error sending verification code:', codeError);
+      if (linkError) {
+        console.error('Error sending verification link:', linkError);
         toast({
           title: 'خطأ',
-          description: 'فشل في إرسال كود التحقق، يرجى المحاولة مرة أخرى',
+          description: 'فشل في إرسال رابط التحقق، يرجى المحاولة مرة أخرى',
           variant: 'destructive',
         });
         setIsLoading(false);
         return;
       }
 
-      // Show email verification component
+      // Show success message
       setRegisteredEmail(email);
-      setShowEmailVerification(true);
+      setEmailSent(true);
       
       toast({
         title: 'تم إنشاء الحساب بنجاح!',
-        description: `تم إرسال كود التحقق المكون من 6 أرقام إلى ${email}`,
+        description: `تم إرسال رابط التحقق إلى ${email}. يرجى فتح بريدك الإلكتروني والنقر على الرابط لتأكيد حسابك.`,
       });
 
       // Clear form
@@ -180,22 +175,45 @@ const Auth = () => {
     }
   };
 
-  const handleVerificationSuccess = () => {
-    setShowEmailVerification(false);
-    setIsLogin(true);
-    toast({
-      title: 'تم تأكيد الإيميل بنجاح!',
-      description: 'يمكنك الآن تسجيل الدخول بحسابك',
-    });
-  };
-
   const handleBackToSignup = () => {
-    setShowEmailVerification(false);
+    setEmailSent(false);
     setIsLogin(false);
   };
 
-  // Show email verification component if needed
-  if (showEmailVerification) {
+  const handleResendLink = async () => {
+    setIsLoading(true);
+    
+    try {
+      console.log('Resending verification link for email:', registeredEmail);
+      
+      const { data, error } = await supabase.functions.invoke('send-verification-link', {
+        body: { email: registeredEmail }
+      });
+
+      if (error) {
+        console.error('Resend error:', error);
+        throw error;
+      }
+
+      toast({
+        title: 'تم إرسال الرابط',
+        description: 'تم إرسال رابط تأكيد جديد إلى بريدك الإلكتروني',
+      });
+      
+    } catch (error: any) {
+      console.error('Error during resend:', error);
+      toast({
+        title: 'خطأ في الإرسال',
+        description: error.message || 'فشل في إرسال رابط التحقق',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Show email sent confirmation if needed
+  if (emailSent) {
     return (
       <div className={`min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center px-4 ${language === 'en' ? 'ltr' : ''}`}>
         <div className="w-full max-w-md">
@@ -204,15 +222,58 @@ const Auth = () => {
               <ArrowLeft className="w-6 h-6" />
             </Link>
             <h1 className={`text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent ${language === 'ar' ? 'mr-4' : 'ml-4'}`}>
-              تأكيد الإيميل
+              تأكيد البريد الإلكتروني
             </h1>
           </div>
           
-          <EmailVerification 
-            email={registeredEmail}
-            onVerificationSuccess={handleVerificationSuccess}
-            onBack={handleBackToSignup}
-          />
+          <Card className="gaming-card">
+            <CardHeader className="text-center bg-slate-900">
+              <CardTitle className="text-2xl font-bold text-white">
+                تحقق من بريدك الإلكتروني
+              </CardTitle>
+              <CardDescription className="text-gray-300">
+                تم إرسال رابط التأكيد إلى: {registeredEmail}
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent className="pt-6 bg-slate-950">
+              <div className="text-center space-y-6">
+                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+                  <Mail className="w-12 h-12 text-green-400 mx-auto mb-3" />
+                  <h3 className="text-lg font-semibold text-green-400 mb-2">تم إرسال الرابط بنجاح!</h3>
+                  <p className="text-gray-300 text-sm">
+                    يرجى فتح بريدك الإلكتروني والنقر على رابط التأكيد لإكمال إنشاء حسابك.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-gray-400 text-sm">
+                    لم تتلق الرابط؟
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleResendLink}
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    {isLoading ? 'جاري الإرسال...' : 'إعادة إرسال رابط جديد'}
+                  </Button>
+                </div>
+                
+                <div className="text-center">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleBackToSignup}
+                    className="text-purple-400 hover:text-purple-300"
+                  >
+                    العودة للتسجيل
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -332,6 +393,7 @@ const Auth = () => {
                     setEmail('');
                     setPassword('');
                     setNickname('');
+                    setEmailSent(false);
                   }}
                   className={`text-purple-400 hover:text-purple-300 font-medium ${language === 'ar' ? 'mr-2' : 'ml-2'}`}
                 >
