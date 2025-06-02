@@ -5,7 +5,7 @@ import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Label } from '../ui/label';
-import { Star, ArrowLeft } from 'lucide-react';
+import { Star, ArrowLeft, DollarSign } from 'lucide-react';
 import { NewPubgAccount } from '../../types/pubgAccount';
 
 interface PubgAccountFormProps {
@@ -32,6 +32,10 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
 
     if (!formData.productName.trim()) {
       newErrors.productName = 'اسم المنتج مطلوب';
+    }
+
+    if (formData.price <= 0) {
+      newErrors.price = 'السعر يجب أن يكون أكبر من صفر';
     }
 
     if (!formData.image.trim()) {
@@ -85,7 +89,7 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
       
       const cleanedData: NewPubgAccount = {
         productName: formData.productName.trim(),
-        price: 0,
+        price: Number(formData.price),
         image: formData.image.trim(),
         description: formData.description.trim(),
         video: formData.video?.trim() || undefined,
@@ -164,6 +168,26 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
                 className={`mt-1 bg-gray-800/50 border-gray-600 text-white ${errors.productName ? 'border-red-500' : ''}`}
               />
               {errors.productName && <p className="text-red-400 text-sm mt-1">{errors.productName}</p>}
+            </div>
+
+            {/* السعر */}
+            <div>
+              <Label htmlFor="price" className="text-gray-300">السعر (بالدولار)</Label>
+              <div className="relative mt-1">
+                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  id="price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.price || ''}
+                  onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
+                  placeholder="0.00"
+                  className={`pl-10 bg-gray-800/50 border-gray-600 text-white ${errors.price ? 'border-red-500' : ''}`}
+                />
+              </div>
+              {errors.price && <p className="text-red-400 text-sm mt-1">{errors.price}</p>}
+              <p className="text-gray-500 text-sm mt-1">أدخل سعر الحساب بالدولار الأمريكي</p>
             </div>
 
             {/* رابط الصورة */}
