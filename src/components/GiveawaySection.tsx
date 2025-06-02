@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { Gift, Users, Calendar, Trophy, Clock } from 'lucide-react';
+import { Gift, Users, Calendar, Trophy, Clock, ExternalLink } from 'lucide-react';
 import { useGiveaways } from '../hooks/useGiveaways';
 
 const GiveawaySection = () => {
@@ -31,6 +31,16 @@ const GiveawaySection = () => {
     }
   };
 
+  const handleParticipate = (giveaway: any) => {
+    if (giveaway.participationLink) {
+      // فتح الرابط في تبويب جديد
+      window.open(giveaway.participationLink, '_blank');
+    } else {
+      console.log('المشاركة في المسابقة:', giveaway.id);
+      // يمكن إضافة منطق افتراضي هنا
+    }
+  };
+
   if (loading) {
     return (
       <section className="py-16 bg-gradient-to-br from-purple-900/20 to-blue-900/20">
@@ -45,22 +55,26 @@ const GiveawaySection = () => {
   }
 
   if (activeGiveaways.length === 0) {
-    return null; // لا نعرض القسم إذا لم تكن هناك مسابقات نشطة
+    return (
+      <section className="py-16 bg-gradient-to-br from-purple-900/20 to-blue-900/20">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <Gift className="w-16 h-16 text-purple-400 mx-auto mb-4" />
+            <h2 className="text-3xl font-bold text-white mb-4">
+              لا توجد مسابقات نشطة حالياً
+            </h2>
+            <p className="text-gray-300 text-lg">
+              ترقبوا مسابقات جديدة قريباً!
+            </p>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (
-    <section id="giveaways" className="py-16 bg-gradient-to-br from-purple-900/20 to-blue-900/20">
+    <section className="py-16 bg-gradient-to-br from-purple-900/20 to-blue-900/20">
       <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold bg-gaming-gradient bg-clip-text text-transparent mb-4">
-            🎁 المسابقات والجوائز
-          </h2>
-          <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-            شارك في مسابقاتنا المثيرة واربح جوائز رائعة!
-          </p>
-        </div>
-
         {/* Giveaways Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {activeGiveaways.map((giveaway) => (
@@ -131,40 +145,23 @@ const GiveawaySection = () => {
                 {/* زر المشاركة */}
                 <Button 
                   className="w-full bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
-                  onClick={() => {
-                    // هنا يمكن إضافة منطق المشاركة في المسابقة
-                    console.log('المشاركة في المسابقة:', giveaway.id);
-                  }}
+                  onClick={() => handleParticipate(giveaway)}
                 >
-                  <Gift className="w-4 h-4 mr-2" />
-                  شارك الآن
+                  {giveaway.participationLink ? (
+                    <>
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      شارك الآن
+                    </>
+                  ) : (
+                    <>
+                      <Gift className="w-4 h-4 mr-2" />
+                      شارك الآن
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
           ))}
-        </div>
-
-        {/* رسالة تشجيعية */}
-        <div className="text-center mt-12">
-          <Card className="gaming-card max-w-2xl mx-auto">
-            <CardContent className="bg-slate-950 p-8">
-              <Gift className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-white mb-4">
-                لا تفوت الفرصة!
-              </h3>
-              <p className="text-gray-300 mb-6">
-                شارك في مسابقاتنا واحصل على فرصة للفوز بجوائز قيمة ومنتجات حصرية
-              </p>
-              <Button 
-                className="bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25"
-                onClick={() => {
-                  document.getElementById('giveaways')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                اعرض جميع المسابقات
-              </Button>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </section>

@@ -3,7 +3,6 @@ import React from 'react';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import ProductsSection from '../components/ProductsSection';
-import GiveawaySection from '../components/GiveawaySection';
 import CustomerChat from '../components/CustomerChat';
 import Cart from '../components/Cart';
 import Footer from '../components/Footer';
@@ -17,7 +16,6 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
-        <GiveawaySection />
         <ProductsSection />
         
         {/* قسم شات العملاء */}

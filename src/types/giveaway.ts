@@ -8,6 +8,7 @@ export interface Giveaway {
   endDate: string;
   isActive: boolean;
   participantsCount: number;
+  participationLink?: string; // رابط المشاركة
   createdAt: string;
   updatedAt: string;
 }
@@ -18,4 +19,5 @@ export interface NewGiveaway {
   image: string;
   prize: string;
   endDate: string;
+  participationLink?: string; // رابط المشاركة
 }
