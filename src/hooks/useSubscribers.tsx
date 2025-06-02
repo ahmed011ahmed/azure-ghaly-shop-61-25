@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Subscriber, NewSubscriber } from '../types/subscriber';
@@ -78,7 +77,7 @@ export const useSubscribers = () => {
           const subscriptionLevel = (storedLevels[permission.email] || 1) as 1 | 2 | 3 | 4 | 5;
           
           formattedSubscribers.push({
-            id: permission.id,
+            id: permission.email,
             email: permission.email,
             nickname: profile?.nickname || 'غير محدد',
             subscription_status: permission.is_active ? 'active' : 'inactive',
@@ -307,8 +306,14 @@ export const useSubscribers = () => {
       // حفظ المستوى محلياً
       setStoredLevel(id, level);
       
-      // إعادة تحميل البيانات لتحديث العرض
-      await loadSubscribers();
+      // تحديث حالة المشتركين محلياً مباشرة
+      setSubscribers(currentSubscribers => 
+        currentSubscribers.map(subscriber => 
+          subscriber.id === id || subscriber.email === id 
+            ? { ...subscriber, subscription_level: level }
+            : subscriber
+        )
+      );
       
       console.log('تم تحديث مستوى الاشتراك بنجاح');
     } catch (error) {
