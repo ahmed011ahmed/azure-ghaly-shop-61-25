@@ -165,12 +165,20 @@ export const useSubscribers = () => {
     try {
       console.log('Adding new subscriber:', subscriber);
       
-      // التحقق من وجود المشترك مسبقاً
-      const { data: existingProfile } = await supabase
+      // التحقق من وجود المشترك مسبقاً في جدول profiles
+      const { data: existingProfile, error: checkError } = await supabase
         .from('profiles')
         .select('id')
         .eq('id', subscriber.email)
-        .single();
+        .maybeSingle();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('خطأ في التحقق من وجود المشترك:', checkError);
+        throw checkError;
+      }
+
+      // حفظ مستوى الاشتراك محلياً أولاً
+      setStoredLevel(subscriber.email, subscriber.subscription_level);
 
       // إذا كان المشترك موجود بالفعل، نقوم بتحديث البيانات فقط
       if (existingProfile) {
@@ -190,15 +198,16 @@ export const useSubscribers = () => {
           throw updateError;
         }
 
-        // حفظ مستوى الاشتراك محلياً
-        setStoredLevel(subscriber.email, subscriber.subscription_level);
-
         // التحقق من وجود أذونات والتحديث أو الإضافة
-        const { data: existingPermission } = await supabase
+        const { data: existingPermission, error: permissionCheckError } = await supabase
           .from('subscriber_permissions')
           .select('id')
           .eq('email', subscriber.email)
-          .single();
+          .maybeSingle();
+
+        if (permissionCheckError && permissionCheckError.code !== 'PGRST116') {
+          console.error('خطأ في التحقق من أذونات المشترك:', permissionCheckError);
+        }
 
         if (existingPermission) {
           // تحديث الأذونات الموجودة
@@ -233,42 +242,36 @@ export const useSubscribers = () => {
       }
 
       // إضافة مشترك جديد
-      // أولاً إضافة إلى جدول profiles
-      const { data: profileData, error: profileError } = await supabase
+      console.log('Creating new subscriber profile...');
+      
+      const { error: profileError } = await supabase
         .from('profiles')
         .insert({
           id: subscriber.email,
-          nickname: subscriber.nickname,
-        })
-        .select()
-        .single();
+          nickname: subscriber.nickname
+        });
 
       if (profileError) {
         console.error('خطأ في إضافة المشترك إلى الملفات الشخصية:', profileError);
         throw profileError;
       }
 
-      console.log('Profile added successfully:', profileData);
-
-      // حفظ مستوى الاشتراك محلياً
-      setStoredLevel(subscriber.email, subscriber.subscription_level);
+      console.log('Profile created successfully');
 
       // إضافة إلى جدول أذونات المشتركين
-      const { data: permissionData, error: permissionError } = await supabase
+      const { error: permissionError } = await supabase
         .from('subscriber_permissions')
         .insert({
           email: subscriber.email,
           is_active: true,
           granted_by: 'admin'
-        })
-        .select()
-        .single();
+        });
 
       if (permissionError) {
         console.error('خطأ في إضافة أذونات المشترك:', permissionError);
         // لا نرمي الخطأ هنا لأن المشترك تم إضافته بنجاح إلى profiles
       } else {
-        console.log('Permission added successfully:', permissionData);
+        console.log('Permission added successfully');
       }
 
       console.log('تم إضافة مشترك جديد بنجاح');
