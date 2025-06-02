@@ -137,9 +137,10 @@ export const useSubscriberPermissions = () => {
   useEffect(() => {
     fetchPermissions();
 
-    // إعداد التحديثات الفورية للأذونات
+    // إنشاء channel مع اسم فريد للأذونات
+    const permissionsChannelId = `permissions_management_${Date.now()}_${Math.random()}`;
     const channel = supabase
-      .channel('permissions_changes')
+      .channel(permissionsChannelId)
       .on(
         'postgres_changes',
         {
@@ -164,6 +165,7 @@ export const useSubscriberPermissions = () => {
       .subscribe();
 
     return () => {
+      console.log('Cleaning up permissions channel');
       supabase.removeChannel(channel);
     };
   }, []);

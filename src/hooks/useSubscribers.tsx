@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Subscriber, NewSubscriber } from '../types/subscriber';
@@ -121,9 +122,10 @@ export const useSubscribers = () => {
   useEffect(() => {
     loadSubscribers();
 
-    // إعداد Real-time subscription للمشتركين
+    // إنشاء channel مع اسم فريد للمشتركين
+    const subscribersChannelId = `subscribers_profiles_${Date.now()}_${Math.random()}`;
     const profilesChannel = supabase
-      .channel('profiles_changes')
+      .channel(subscribersChannelId)
       .on(
         'postgres_changes',
         {
@@ -138,9 +140,10 @@ export const useSubscribers = () => {
       )
       .subscribe();
 
-    // إعداد Real-time subscription للأذونات
+    // إنشاء channel مع اسم فريد للأذونات
+    const permissionsChannelId = `subscribers_permissions_${Date.now()}_${Math.random()}`;
     const permissionsChannel = supabase
-      .channel('permissions_changes')
+      .channel(permissionsChannelId)
       .on(
         'postgres_changes',
         {
@@ -156,6 +159,7 @@ export const useSubscribers = () => {
       .subscribe();
 
     return () => {
+      console.log('Cleaning up subscribers channels');
       supabase.removeChannel(profilesChannel);
       supabase.removeChannel(permissionsChannel);
     };
