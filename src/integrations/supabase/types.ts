@@ -216,6 +216,33 @@ export type Database = {
         }
         Relationships: []
       }
+      pubg_chat_messages: {
+        Row: {
+          created_at: string | null
+          id: string
+          sender: string
+          target_user: string | null
+          text: string
+          user_name: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          sender: string
+          target_user?: string | null
+          text: string
+          user_name?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          sender?: string
+          target_user?: string | null
+          text?: string
+          user_name?: string | null
+        }
+        Relationships: []
+      }
       subscriber_permissions: {
         Row: {
           email: string
