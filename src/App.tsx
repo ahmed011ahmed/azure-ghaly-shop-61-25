@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Services from "./pages/Services";
 import AdminDashboard from "./pages/AdminDashboard";
 import Auth from "./pages/Auth";
+import VerifyEmail from "./pages/VerifyEmail";
 import Subscribers from "./pages/Subscribers";
 import Giveaways from "./pages/Giveaways";
 import NotFound from "./pages/NotFound";
@@ -36,6 +37,7 @@ const App = () => (
                       <Route path="/" element={<Index />} />
                       <Route path="/services" element={<Services />} />
                       <Route path="/auth" element={<Auth />} />
+                      <Route path="/verify-email" element={<VerifyEmail />} />
                       <Route path="/subscribers" element={<Subscribers />} />
                       <Route path="/giveaways" element={<Giveaways />} />
                       <Route path="/admin" element={<AdminDashboard />} />
