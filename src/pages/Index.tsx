@@ -3,6 +3,7 @@ import React from 'react';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import ProductsSection from '../components/ProductsSection';
+import ServicesSection from '../components/ServicesSection';
 import GiveawaySection from '../components/GiveawaySection';
 import CustomerChat from '../components/CustomerChat';
 import Cart from '../components/Cart';
@@ -19,6 +20,7 @@ const Index = () => {
         <Hero />
         <GiveawaySection />
         <ProductsSection />
+        <ServicesSection />
         
         {/* قسم شات العملاء */}
         <section id="chat" className="py-16">

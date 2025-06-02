@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Gift, Settings } from 'lucide-react';
+import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Gift, Settings, Wrench } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductManagement from '../components/admin/ProductManagement';
+import ServicesManagement from '../components/admin/ServicesManagement';
 import AdminLogin from '../components/admin/AdminLogin';
 import AdminChat from '../components/admin/AdminChat';
 import UpdatesManagement from '../components/admin/UpdatesManagement';
@@ -75,6 +75,12 @@ const AdminDashboard = () => {
       label: 'إدارة المنتجات',
       icon: Package,
       permission: 'products'
+    },
+    {
+      id: 'services',
+      label: 'إدارة الخدمات',
+      icon: Wrench,
+      permission: 'services'
     },
     {
       id: 'giveaways',
@@ -274,7 +280,7 @@ const AdminDashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="bg-slate-950">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {(currentUser?.username === 'GHALY' || hasPermission('products')) && (
                     <Button
                       onClick={() => setActiveTab('products')}
@@ -283,6 +289,17 @@ const AdminDashboard = () => {
                       <Package className="w-8 h-8" />
                       <span className="font-semibold">إدارة المنتجات</span>
                       <span className="text-sm opacity-80">إضافة وتعديل المنتجات</span>
+                    </Button>
+                  )}
+                  
+                  {(currentUser?.username === 'GHALY' || hasPermission('services')) && (
+                    <Button
+                      onClick={() => setActiveTab('services')}
+                      className="bg-blue-600 hover:bg-blue-700 text-white p-6 h-auto flex-col space-y-2"
+                    >
+                      <Wrench className="w-8 h-8" />
+                      <span className="font-semibold">إدارة الخدمات</span>
+                      <span className="text-sm opacity-80">إضافة وتعديل الخدمات</span>
                     </Button>
                   )}
                   
@@ -314,6 +331,8 @@ const AdminDashboard = () => {
         )}
 
         {activeTab === 'products' && (currentUser?.username === 'GHALY' || hasPermission('products')) && <ProductManagement />}
+        
+        {activeTab === 'services' && (currentUser?.username === 'GHALY' || hasPermission('services')) && <ServicesManagement />}
         
         {activeTab === 'giveaways' && (currentUser?.username === 'GHALY' || hasPermission('giveaways')) && <GiveawaysManagement />}
         

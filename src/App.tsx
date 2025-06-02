@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import Subscribers from "./pages/Subscribers";
 import NotFound from "./pages/NotFound";
 import { ProductsProvider } from "./contexts/ProductsContext";
+import { ServicesProvider } from "./contexts/ServicesContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider } from "./hooks/useAuth";
@@ -24,20 +25,22 @@ const App = () => (
         <AuthProvider>
           <CartProvider>
             <ProductsProvider>
-              <ChatProvider>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/auth" element={<Auth />} />
-                    <Route path="/subscribers" element={<Subscribers />} />
-                    <Route path="/admin" element={<AdminDashboard />} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </BrowserRouter>
-              </ChatProvider>
+              <ServicesProvider>
+                <ChatProvider>
+                  <Toaster />
+                  <Sonner />
+                  <BrowserRouter>
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/auth" element={<Auth />} />
+                      <Route path="/subscribers" element={<Subscribers />} />
+                      <Route path="/admin" element={<AdminDashboard />} />
+                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </BrowserRouter>
+                </ChatProvider>
+              </ServicesProvider>
             </ProductsProvider>
           </CartProvider>
         </AuthProvider>
