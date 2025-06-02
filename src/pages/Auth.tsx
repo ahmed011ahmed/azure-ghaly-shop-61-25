@@ -52,12 +52,12 @@ const Auth = () => {
     try {
       console.log('Starting signup process for:', email);
       
-      // Create user account with email confirmation disabled
+      // Create user account with email confirmation DISABLED
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: undefined,
+          emailRedirectTo: undefined, // Disable automatic email
           data: {
             nickname: nickname,
           }
