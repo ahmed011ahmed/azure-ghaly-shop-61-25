@@ -53,7 +53,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gaming-gradient rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gaming-gradient rounded-lg flex items-center justify-center mx-[10px]">
               <span className="text-white font-bold text-xl">G</span>
             </div>
             <span className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent">
