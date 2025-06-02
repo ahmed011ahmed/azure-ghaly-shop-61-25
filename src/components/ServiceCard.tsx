@@ -1,4 +1,3 @@
-
 import { ShoppingCart, Heart, Play } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -20,6 +19,7 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
   const { t } = useLanguage();
   const [showVideo, setShowVideo] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [videoLoading, setVideoLoading] = useState(false);
 
   const handleAddToCart = () => {
     addItem({ id, name, price, image });
@@ -33,13 +33,20 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
   const toggleVideo = () => {
     console.log('Toggle video clicked, current showVideo:', showVideo);
     console.log('Video URL:', video);
+    console.log('Video exists:', !!video);
+    
+    if (!showVideo) {
+      setVideoLoading(true);
+      setVideoError(false);
+    }
     setShowVideo(!showVideo);
-    setVideoError(false);
   };
 
-  const handleVideoError = () => {
+  const handleVideoError = (e: any) => {
     console.error('Video failed to load:', video);
+    console.error('Error details:', e);
     setVideoError(true);
+    setVideoLoading(false);
     setShowVideo(false);
   };
 
@@ -48,20 +55,44 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
     setShowVideo(false);
   };
 
+  const handleVideoLoadStart = () => {
+    console.log('Video loading started for URL:', video);
+    setVideoLoading(true);
+  };
+
+  const handleVideoCanPlay = () => {
+    console.log('Video can play');
+    setVideoLoading(false);
+  };
+
+  const handleVideoLoadedData = () => {
+    console.log('Video data loaded successfully');
+    setVideoLoading(false);
+  };
+
   return (
     <div className="gaming-card overflow-hidden group">
       <div className="relative overflow-hidden">
         {showVideo && video && !videoError ? (
           <div className="relative">
+            {videoLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
+                <div className="text-white">جاري تحميل الفيديو...</div>
+              </div>
+            )}
             <video 
               src={video} 
               controls
               autoPlay
+              muted
               className="w-full h-64 object-cover"
               onEnded={handleVideoEnd}
               onError={handleVideoError}
-              onLoadStart={() => console.log('Video loading started')}
-              onCanPlay={() => console.log('Video can play')}
+              onLoadStart={handleVideoLoadStart}
+              onCanPlay={handleVideoCanPlay}
+              onLoadedData={handleVideoLoadedData}
+              onPlay={() => console.log('Video started playing')}
+              onPause={() => console.log('Video paused')}
             />
             <button 
               onClick={toggleVideo}
@@ -89,7 +120,7 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
             )}
             {videoError && video && (
               <div className="absolute top-2 left-2 bg-red-600/90 backdrop-blur-sm px-3 py-1 rounded-full">
-                <span className="text-white text-xs">خطأ في الفيديو</span>
+                <span className="text-white text-xs">خطأ في تحميل الفيديو</span>
               </div>
             )}
           </>

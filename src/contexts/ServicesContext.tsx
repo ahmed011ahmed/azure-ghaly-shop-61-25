@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Service } from '../types/service';
 
@@ -27,7 +26,7 @@ const defaultServices: Service[] = [
     price: "$25",
     description: "حساب بوبجي محترف مع مستوى عالي وأسلحة نادرة وإكسسوارات حصرية",
     image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=500&q=60",
-    video: "https://www.w3schools.com/html/mov_bbb.mp4",
+    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     rating: 5,
     category: "بوبجي"
   },
