@@ -6,6 +6,7 @@ import { usePubgAccounts } from '../hooks/usePubgAccounts';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import Cart from '../components/Cart';
 import PubgCustomerChat from '../components/PubgCustomerChat';
 import PubgAccountCard from '../components/PubgAccountCard';
 import { PubgChatProvider } from '../contexts/PubgChatContext';
@@ -26,6 +27,7 @@ const PubgAccounts = () => {
           </div>
         </div>
         <Footer />
+        <Cart />
       </div>
     );
   }
@@ -76,6 +78,7 @@ const PubgAccounts = () => {
         </main>
 
         <Footer />
+        <Cart />
       </div>
     </PubgChatProvider>
   );
