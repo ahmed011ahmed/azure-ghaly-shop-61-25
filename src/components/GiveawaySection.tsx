@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -32,13 +31,8 @@ const GiveawaySection = () => {
   };
 
   const handleBenefit = (giveaway: any) => {
-    if (giveaway.participationLink) {
-      // فتح الرابط في تبويب جديد
-      window.open(giveaway.participationLink, '_blank');
-    } else {
-      console.log('الاستفادة من العرض:', giveaway.id);
-      // يمكن إضافة منطق افتراضي هنا
-    }
+    console.log('الاستفادة من العرض:', giveaway.id);
+    // يمكن إضافة منطق افتراضي هنا
   };
 
   if (loading) {
