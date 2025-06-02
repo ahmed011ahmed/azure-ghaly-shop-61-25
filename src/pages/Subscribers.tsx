@@ -233,7 +233,7 @@ const Subscribers = () => {
                 <Card key={item.id} className="gaming-card hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300">
                   <CardHeader className="bg-slate-900">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-xl text-white">{item.name}</CardTitle>
+                      <CardTitle className="text-xl text-white">{item.title}</CardTitle>
                       <div className="flex items-center space-x-2">
                         <Badge className="text-purple-400 border-purple-400">
                           المستوى {item.minimum_level || 1}+
@@ -253,7 +253,7 @@ const Subscribers = () => {
                       <span className="text-sm text-green-400">متاح للتحميل</span>
                     </div>
                     <Button 
-                      onClick={() => handleDownload(item.name, item.download_url)}
+                      onClick={() => handleDownload(item.title, item.download_url || '')}
                       className="w-full bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25"
                     >
                       <Download className="w-4 h-4 mr-2" />
