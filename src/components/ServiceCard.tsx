@@ -22,7 +22,7 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
   const [videoLoading, setVideoLoading] = useState(false);
 
   const handleAddToCart = () => {
-    addItem({ id: String(id), name, price, image });
+    addItem({ id, name, price, image });
     console.log(`Adding service ${name} to cart - Price: ${price}`);
   };
 
