@@ -6,6 +6,8 @@ import { useCart } from '../contexts/CartContext';
 const Cart = () => {
   const { state, removeItem, updateQuantity, clearCart, closeCart, getTotalPrice } = useCart();
 
+  console.log('Cart state:', state); // للتتبع
+
   const handleWhatsAppOrder = () => {
     if (state.items.length === 0) return;
     
@@ -33,7 +35,13 @@ const Cart = () => {
     window.open(discordUrl, '_blank');
   };
 
-  if (!state.isOpen) return null;
+  // التأكد من أن السلة تظهر عندما تكون مفتوحة
+  if (!state.isOpen) {
+    console.log('Cart is not open');
+    return null;
+  }
+
+  console.log('Cart is open, rendering...');
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">

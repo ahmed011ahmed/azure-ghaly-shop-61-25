@@ -8,23 +8,21 @@ import { Button } from './ui/button';
 import LanguageToggle from './LanguageToggle';
 
 const Header = () => {
-  const {
-    toggleCart,
-    getTotalItems
-  } = useCart();
-  const {
-    user,
-    profile,
-    signOut,
-    loading
-  } = useAuth();
+  const { toggleCart, getTotalItems } = useCart();
+  const { user, profile, signOut, loading } = useAuth();
   const { t, language } = useLanguage();
 
   const handleSignOut = async () => {
     await signOut();
   };
 
-  return <header className="backdrop-blur-md border-b border-purple-800/30 sticky top-0 z-50 px-[14px] bg-[#1b1b1b]">
+  const handleCartClick = () => {
+    console.log('Cart button clicked'); // للتتبع
+    toggleCart();
+  };
+
+  return (
+    <header className="backdrop-blur-md border-b border-purple-800/30 sticky top-0 z-50 px-[14px] bg-[#1b1b1b]">
       <div className="container mx-auto px-4 py-4 bg-[#1c1c1c]">
         <div className="flex items-center justify-between bg-[#1b1b1b]">
           <div className="flex items-center space-x-3">
@@ -59,8 +57,10 @@ const Header = () => {
             <LanguageToggle />
             
             {/* Auth buttons */}
-            {!loading && <>
-                {user ? <div className="flex items-center space-x-3">
+            {!loading && (
+              <>
+                {user ? (
+                  <div className="flex items-center space-x-3">
                     <div className={`text-gray-300 text-sm ${language === 'ar' ? 'px-[23px]' : ''}`}>
                       {t('header.welcome')} {profile?.nickname || t('header.user')}
                     </div>
@@ -68,24 +68,34 @@ const Header = () => {
                       <LogOut className="w-4 h-4 mr-2" />
                       {t('header.logout')}
                     </Button>
-                  </div> : <Link to="/auth">
+                  </div>
+                ) : (
+                  <Link to="/auth">
                     <Button variant="outline" size="sm" className={`border-purple-500 bg-[#7f00fa]/10 text-slate-50 ${language === 'ar' ? 'px-[12px] py-[9px] my-[12px] mx-[25px]' : ''}`}>
                       <User className="w-4 h-4 mr-2" />
                       {t('header.login')}
                     </Button>
-                  </Link>}
-              </>}
+                  </Link>
+                )}
+              </>
+            )}
             
-            <button onClick={toggleCart} className={`relative bg-gaming-gradient text-white p-2 rounded-lg hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 ${language === 'ar' ? 'py-[8px] mx-[8px] my-[8px] px-[8px]' : ''}`}>
+            <button 
+              onClick={handleCartClick}
+              className={`relative bg-gaming-gradient text-white p-2 rounded-lg hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 ${language === 'ar' ? 'py-[8px] mx-[8px] my-[8px] px-[8px]' : ''}`}
+            >
               <ShoppingCart className="w-6 h-6" />
-              {getTotalItems() > 0 && <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              {getTotalItems() > 0 && (
+                <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                   {getTotalItems()}
-                </span>}
+                </span>
+              )}
             </button>
           </div>
         </div>
       </div>
-    </header>;
+    </header>
+  );
 };
 
 export default Header;
