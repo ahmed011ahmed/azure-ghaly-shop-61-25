@@ -19,6 +19,7 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
   const { addItem } = useCart();
   const { t } = useLanguage();
   const [showVideo, setShowVideo] = useState(false);
+  const [videoError, setVideoError] = useState(false);
 
   const handleAddToCart = () => {
     addItem({ id, name, price, image });
@@ -30,25 +31,43 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
   };
 
   const toggleVideo = () => {
+    console.log('Toggle video clicked, current showVideo:', showVideo);
+    console.log('Video URL:', video);
     setShowVideo(!showVideo);
+    setVideoError(false);
+  };
+
+  const handleVideoError = () => {
+    console.error('Video failed to load:', video);
+    setVideoError(true);
+    setShowVideo(false);
+  };
+
+  const handleVideoEnd = () => {
+    console.log('Video ended');
+    setShowVideo(false);
   };
 
   return (
     <div className="gaming-card overflow-hidden group">
       <div className="relative overflow-hidden">
-        {showVideo && video ? (
+        {showVideo && video && !videoError ? (
           <div className="relative">
             <video 
               src={video} 
               controls
+              autoPlay
               className="w-full h-64 object-cover"
-              onEnded={() => setShowVideo(false)}
+              onEnded={handleVideoEnd}
+              onError={handleVideoError}
+              onLoadStart={() => console.log('Video loading started')}
+              onCanPlay={() => console.log('Video can play')}
             />
             <button 
               onClick={toggleVideo}
-              className="absolute top-2 right-2 bg-gray-900/90 backdrop-blur-sm p-2 rounded-full hover:bg-gray-800/90 transition-colors"
+              className="absolute top-2 right-2 bg-gray-900/90 backdrop-blur-sm p-2 rounded-full hover:bg-gray-800/90 transition-colors z-10"
             >
-              <span className="text-white text-sm">×</span>
+              <span className="text-white text-sm font-bold">×</span>
             </button>
           </div>
         ) : (
@@ -67,6 +86,11 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
                   <Play className="w-8 h-8 text-white fill-current" />
                 </div>
               </button>
+            )}
+            {videoError && video && (
+              <div className="absolute top-2 left-2 bg-red-600/90 backdrop-blur-sm px-3 py-1 rounded-full">
+                <span className="text-white text-xs">خطأ في الفيديو</span>
+              </div>
             )}
           </>
         )}
