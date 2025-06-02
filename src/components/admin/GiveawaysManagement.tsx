@@ -7,7 +7,6 @@ import { Badge } from '../ui/badge';
 import { Plus, Trash2, Eye, EyeOff, Gift, Users, Calendar, Trophy } from 'lucide-react';
 import { useGiveaways } from '../../hooks/useGiveaways';
 import GiveawayForm from './GiveawayForm';
-import { Giveaway } from '../../types/giveaway';
 
 const GiveawaysManagement = () => {
   const { giveaways, loading, addGiveaway, updateGiveaway, deleteGiveaway, toggleActive } = useGiveaways();
