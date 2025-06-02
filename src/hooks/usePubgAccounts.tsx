@@ -35,14 +35,14 @@ export const usePubgAccounts = () => {
         return {
           id: account.id,
           randomId: randomId,
-          productName: account.product_name || 'حساب PUBG',
+          productName: account.product_name || account.productName || 'حساب PUBG',
           price: account.price || 0,
           image: account.image,
           description: account.description,
           video: account.video || undefined,
           rating: account.rating || 5,
           notes: account.notes || undefined,
-          isAvailable: account.is_available,
+          isAvailable: account.is_available !== false, // default to true if not specified
           createdAt: account.created_at,
           updatedAt: account.updated_at
         };
@@ -86,27 +86,31 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة إضافة حساب جديد:', newAccount);
       
-      // إرسال البيانات الأساسية فقط (بدون notes مؤقتاً)
+      // التحقق من صحة البيانات المطلوبة
+      if (!newAccount.productName || !newAccount.image || !newAccount.description) {
+        throw new Error('البيانات المطلوبة مفقودة');
+      }
+
+      // إعداد البيانات للإرسال إلى قاعدة البيانات
       const accountData: any = {
         product_name: newAccount.productName,
-        price: newAccount.price,
+        price: Number(newAccount.price) || 0,
         image: newAccount.image,
         description: newAccount.description,
-        rating: newAccount.rating,
+        rating: Number(newAccount.rating) || 5,
         is_available: true
       };
 
-      // إضافة الحقول الاختيارية فقط إذا كانت متوفرة
-      if (newAccount.video && newAccount.video.trim()) {
+      // إضافة الحقول الاختيارية فقط إذا كانت متوفرة ولها قيم
+      if (newAccount.video && newAccount.video.trim() !== '') {
         accountData.video = newAccount.video;
       }
 
-      // تجاهل حقل notes مؤقتاً حتى يتم إضافته في قاعدة البيانات
-      // if (newAccount.notes && newAccount.notes.trim()) {
-      //   accountData.notes = newAccount.notes;
-      // }
+      if (newAccount.notes && newAccount.notes.trim() !== '') {
+        accountData.notes = newAccount.notes;
+      }
 
-      console.log('البيانات التي سيتم إرسالها:', accountData);
+      console.log('البيانات التي سيتم إرسالها إلى قاعدة البيانات:', accountData);
 
       const { data, error } = await supabase
         .from('pubg_accounts')
@@ -117,7 +121,7 @@ export const usePubgAccounts = () => {
         console.error('خطأ في إضافة حساب PUBG:', error);
         toast({
           title: "خطأ في إضافة الحساب",
-          description: "حدث خطأ أثناء إضافة الحساب. حاول مرة أخرى.",
+          description: `حدث خطأ أثناء إضافة الحساب: ${error.message}`,
           variant: "destructive",
         });
         throw error;
@@ -128,6 +132,7 @@ export const usePubgAccounts = () => {
         title: "تم إضافة الحساب بنجاح",
         description: "تم إضافة حساب PUBG جديد بنجاح.",
       });
+      
       // إعادة تحميل البيانات بعد الإضافة
       await loadAccounts();
     } catch (error) {
@@ -143,13 +148,12 @@ export const usePubgAccounts = () => {
       // تحديث فقط الحقول الموجودة في قاعدة البيانات
       const dbUpdates: any = {};
       if (updates.productName !== undefined) dbUpdates.product_name = updates.productName;
-      if (updates.price !== undefined) dbUpdates.price = updates.price;
+      if (updates.price !== undefined) dbUpdates.price = Number(updates.price);
       if (updates.image !== undefined) dbUpdates.image = updates.image;
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.video !== undefined) dbUpdates.video = updates.video;
-      if (updates.rating !== undefined) dbUpdates.rating = updates.rating;
-      // تجاهل حقل notes مؤقتاً
-      // if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+      if (updates.rating !== undefined) dbUpdates.rating = Number(updates.rating);
+      if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
       if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
       dbUpdates.updated_at = new Date().toISOString();
 

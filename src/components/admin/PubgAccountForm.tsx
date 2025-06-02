@@ -24,42 +24,90 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
     notes: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.productName.trim()) {
+      newErrors.productName = 'اسم المنتج مطلوب';
+    }
+
+    if (!formData.image.trim()) {
+      newErrors.image = 'رابط الصورة مطلوب';
+    } else {
+      // التحقق من صحة رابط الصورة
+      try {
+        new URL(formData.image);
+      } catch {
+        newErrors.image = 'رابط الصورة غير صحيح';
+      }
+    }
+
+    if (!formData.description.trim()) {
+      newErrors.description = 'الوصف مطلوب';
+    } else if (formData.description.length < 20) {
+      newErrors.description = 'الوصف يجب أن يكون 20 حرف على الأقل';
+    }
+
+    if (formData.price < 0) {
+      newErrors.price = 'السعر يجب أن يكون أكبر من أو يساوي 0';
+    }
+
+    if (formData.video && formData.video.trim()) {
+      try {
+        new URL(formData.video);
+      } catch {
+        newErrors.video = 'رابط الفيديو غير صحيح';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // التحقق من صحة البيانات
-    if (!formData.productName.trim()) {
-      alert('يرجى إدخال اسم المنتج');
-      return;
-    }
-    
-    if (!formData.image.trim()) {
-      alert('يرجى إدخال رابط الصورة');
-      return;
-    }
-    
-    if (!formData.description.trim() || formData.description.length < 20) {
-      alert('يرجى إدخال وصف لا يقل عن 20 حرف');
-      return;
-    }
-    
-    if (formData.price < 0) {
-      alert('يرجى إدخال سعر صحيح');
+    if (!validateForm()) {
       return;
     }
 
-    onSubmit(formData);
-    
-    // إعادة تعيين النموذج
-    setFormData({
-      productName: '',
-      price: 0,
-      image: '',
-      description: '',
-      video: '',
-      rating: 5,
-      notes: ''
-    });
+    setIsSubmitting(true);
+
+    try {
+      console.log('إرسال بيانات النموذج:', formData);
+      
+      // تنظيف البيانات قبل الإرسال
+      const cleanedData: NewPubgAccount = {
+        productName: formData.productName.trim(),
+        price: Number(formData.price),
+        image: formData.image.trim(),
+        description: formData.description.trim(),
+        video: formData.video?.trim() || undefined,
+        rating: Number(formData.rating),
+        notes: formData.notes?.trim() || undefined
+      };
+
+      await onSubmit(cleanedData);
+      
+      // إعادة تعيين النموذج عند النجاح
+      setFormData({
+        productName: '',
+        price: 0,
+        image: '',
+        description: '',
+        video: '',
+        rating: 5,
+        notes: ''
+      });
+      setErrors({});
+    } catch (error) {
+      console.error('خطأ في إرسال النموذج:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -68,14 +116,23 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
       ...prev,
       [name]: name === 'price' || name === 'rating' ? Number(value) : value
     }));
+
+    // إزالة الخطأ عند تعديل الحقل
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
       <Star
         key={index}
-        className={`w-6 h-6 cursor-pointer ${
-          index < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'
+        className={`w-6 h-6 cursor-pointer transition-colors ${
+          index < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400 hover:text-yellow-300'
         }`}
         onClick={() => setFormData(prev => ({ ...prev, rating: index + 1 }))}
       />
@@ -100,10 +157,11 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
               type="text"
               value={formData.productName}
               onChange={handleChange}
-              className="bg-gray-800 border-gray-600 text-white"
+              className={`bg-gray-800 border-gray-600 text-white ${errors.productName ? 'border-red-500' : ''}`}
               placeholder="مثال: حساب PUBG مميز مع سكنات نادرة"
               required
             />
+            {errors.productName && <p className="text-red-400 text-sm">{errors.productName}</p>}
           </div>
 
           <div className="space-y-2">
@@ -116,10 +174,11 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
               step="0.01"
               value={formData.price}
               onChange={handleChange}
-              className="bg-gray-800 border-gray-600 text-white"
+              className={`bg-gray-800 border-gray-600 text-white ${errors.price ? 'border-red-500' : ''}`}
               placeholder="25.00"
               required
             />
+            {errors.price && <p className="text-red-400 text-sm">{errors.price}</p>}
           </div>
 
           <div className="space-y-2">
@@ -130,10 +189,11 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
               type="url"
               value={formData.image}
               onChange={handleChange}
-              className="bg-gray-800 border-gray-600 text-white"
+              className={`bg-gray-800 border-gray-600 text-white ${errors.image ? 'border-red-500' : ''}`}
               placeholder="https://example.com/image.jpg"
               required
             />
+            {errors.image && <p className="text-red-400 text-sm">{errors.image}</p>}
           </div>
 
           <div className="space-y-2">
@@ -144,9 +204,10 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
               type="url"
               value={formData.video}
               onChange={handleChange}
-              className="bg-gray-800 border-gray-600 text-white"
+              className={`bg-gray-800 border-gray-600 text-white ${errors.video ? 'border-red-500' : ''}`}
               placeholder="https://example.com/video.mp4"
             />
+            {errors.video && <p className="text-red-400 text-sm">{errors.video}</p>}
             <p className="text-sm text-gray-400">يمكنك ترك هذا الحقل فارغاً إذا لم تكن تريد إضافة فيديو</p>
           </div>
 
@@ -157,12 +218,13 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
               name="description"
               value={formData.description}
               onChange={handleChange}
-              className="bg-gray-800 border-gray-600 text-white resize-none"
+              className={`bg-gray-800 border-gray-600 text-white resize-none ${errors.description ? 'border-red-500' : ''}`}
               placeholder="أدخل وصف تفصيلي للحساب، المستوى، السكنات، الأسلحة، إلخ..."
               maxLength={500}
               rows={4}
               required
             />
+            {errors.description && <p className="text-red-400 text-sm">{errors.description}</p>}
             <p className="text-sm text-gray-400">
               {formData.description.length}/500 حرف (الحد الأدنى 20 حرف)
             </p>
@@ -176,7 +238,6 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
             </div>
           </div>
 
-          {/* إخفاء حقل الملاحظات مؤقتاً حتى يتم إضافته في قاعدة البيانات
           <div className="space-y-2">
             <Label htmlFor="notes" className="text-white">ملاحظات إضافية (اختياري)</Label>
             <Textarea
@@ -190,10 +251,9 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
               rows={3}
             />
             <p className="text-sm text-gray-400">
-              {formData.notes.length}/200 حرف
+              {formData.notes?.length || 0}/200 حرف
             </p>
           </div>
-          */}
 
           <div className="flex space-x-3 justify-end pt-4">
             <Button
@@ -201,14 +261,16 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
               onClick={onCancel}
               variant="outline"
               className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              disabled={isSubmitting}
             >
               إلغاء
             </Button>
             <Button
               type="submit"
               className="bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25"
+              disabled={isSubmitting}
             >
-              إضافة الحساب
+              {isSubmitting ? 'جاري الإضافة...' : 'إضافة الحساب'}
             </Button>
           </div>
         </form>
