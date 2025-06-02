@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Menu, X, ShoppingCart, LogIn, User, LogOut } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import LanguageToggle from './LanguageToggle';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -12,6 +12,8 @@ const Header = () => {
   const { state, toggleCart } = useCart();
   const { t, language } = useLanguage();
   const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -26,10 +28,22 @@ const Header = () => {
 
   const handleNavClick = (item: typeof navItems[0]) => {
     if (item.href === '/') {
-      // للصفحة الرئيسية، نستخدم التمرير للقسم
-      const element = document.getElementById(item.section);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
+      // إذا كنا بالفعل في الصفحة الرئيسية، نتمرر للقسم مباشرة
+      if (location.pathname === '/') {
+        const element = document.getElementById(item.section);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        // إذا كنا في صفحة أخرى، ننتقل للصفحة الرئيسية أولاً ثم نتمرر للقسم
+        navigate('/');
+        // ننتظر قليلاً حتى تحمل الصفحة ثم نتمرر
+        setTimeout(() => {
+          const element = document.getElementById(item.section);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 100);
       }
     }
     setIsMenuOpen(false);
