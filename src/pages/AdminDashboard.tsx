@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Gamepad2, Gift, Settings } from 'lucide-react';
+import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Gift, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductManagement from '../components/admin/ProductManagement';
 import AdminLogin from '../components/admin/AdminLogin';
@@ -11,7 +11,6 @@ import SubscribersManagement from '../components/admin/SubscribersManagement';
 import UserLookup from '../components/admin/UserLookup';
 import PermissionsManagement from '../components/admin/PermissionsManagement';
 import ContentViewer from '../components/admin/ContentViewer';
-import PubgAccountsManagement from '../components/admin/PubgAccountsManagement';
 import GiveawaysManagement from '../components/admin/GiveawaysManagement';
 import AdminUsersManagement from '../components/admin/AdminUsersManagement';
 import { Button } from '../components/ui/button';
@@ -76,12 +75,6 @@ const AdminDashboard = () => {
       label: 'إدارة المنتجات',
       icon: Package,
       permission: 'products'
-    },
-    {
-      id: 'pubg-accounts',
-      label: 'حسابات PUBG',
-      icon: Gamepad2,
-      permission: 'pubg-accounts'
     },
     {
       id: 'giveaways',
@@ -281,7 +274,7 @@ const AdminDashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="bg-slate-950">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {(currentUser?.username === 'GHALY' || hasPermission('products')) && (
                     <Button
                       onClick={() => setActiveTab('products')}
@@ -290,17 +283,6 @@ const AdminDashboard = () => {
                       <Package className="w-8 h-8" />
                       <span className="font-semibold">إدارة المنتجات</span>
                       <span className="text-sm opacity-80">إضافة وتعديل المنتجات</span>
-                    </Button>
-                  )}
-                  
-                  {(currentUser?.username === 'GHALY' || hasPermission('pubg-accounts')) && (
-                    <Button
-                      onClick={() => setActiveTab('pubg-accounts')}
-                      className="bg-orange-600 hover:bg-orange-700 text-white p-6 h-auto flex-col space-y-2"
-                    >
-                      <Gamepad2 className="w-8 h-8" />
-                      <span className="font-semibold">حسابات PUBG</span>
-                      <span className="text-sm opacity-80">إدارة حسابات اللعبة</span>
                     </Button>
                   )}
                   
@@ -332,8 +314,6 @@ const AdminDashboard = () => {
         )}
 
         {activeTab === 'products' && (currentUser?.username === 'GHALY' || hasPermission('products')) && <ProductManagement />}
-        
-        {activeTab === 'pubg-accounts' && (currentUser?.username === 'GHALY' || hasPermission('pubg-accounts')) && <PubgAccountsManagement />}
         
         {activeTab === 'giveaways' && (currentUser?.username === 'GHALY' || hasPermission('giveaways')) && <GiveawaysManagement />}
         
