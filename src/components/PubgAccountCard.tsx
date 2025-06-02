@@ -7,6 +7,7 @@ import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
 import { PubgAccount } from '../types/pubgAccount';
 import { useCart } from '../contexts/CartContext';
+import { useToast } from '../hooks/use-toast';
 
 interface PubgAccountCardProps {
   account: PubgAccount;
@@ -14,6 +15,7 @@ interface PubgAccountCardProps {
 
 const PubgAccountCard: React.FC<PubgAccountCardProps> = ({ account }) => {
   const { addItem } = useCart();
+  const { toast } = useToast();
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
@@ -32,6 +34,11 @@ const PubgAccountCard: React.FC<PubgAccountCardProps> = ({ account }) => {
       name: `${account.productName} - ID: ${account.randomId}`,
       price: `$${account.price}`,
       image: account.image
+    });
+
+    toast({
+      title: "تم إضافة الحساب للسلة",
+      description: "تم إضافة الحساب إلى السلة بنجاح.",
     });
   };
 
@@ -143,7 +150,7 @@ const PubgAccountCard: React.FC<PubgAccountCardProps> = ({ account }) => {
               className="w-full bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2"
             >
               <ShoppingCart className="w-5 h-5" />
-              <span>أضف للسلة - ${account.price}</span>
+              <span>شراء بـ ${account.price}</span>
             </Button>
           </div>
         )}
