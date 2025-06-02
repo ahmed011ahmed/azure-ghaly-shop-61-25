@@ -21,6 +21,19 @@ const Header = () => {
     toggleCart();
   };
 
+  const scrollToSection = (sectionId: string) => {
+    // إذا كنا في الصفحة الرئيسية، نتنقل للقسم مباشرة
+    if (window.location.pathname === '/') {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // إذا كنا في صفحة أخرى، نذهب للصفحة الرئيسية ثم للقسم
+      window.location.href = `/#${sectionId}`;
+    }
+  };
+
   return (
     <header className="backdrop-blur-md border-b border-purple-800/30 sticky top-0 z-50 px-[14px] bg-[#1b1b1b]">
       <div className="container mx-auto px-4 py-4 bg-[#1c1c1c]">
@@ -32,15 +45,24 @@ const Header = () => {
           </div>
           
           <nav className="hidden md:flex items-center space-x-12">
-            <a href="#home" className={`text-gray-300 hover:text-purple-400 font-medium transition-colors ${language === 'ar' ? 'px-[24px] mx-[82px]' : ''}`}>
+            <button 
+              onClick={() => scrollToSection('home')}
+              className={`text-gray-300 hover:text-purple-400 font-medium transition-colors ${language === 'ar' ? 'px-[24px] mx-[82px]' : ''}`}
+            >
               {t('header.home')}
-            </a>
-            <a href="#giveaways" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
+            </button>
+            <button 
+              onClick={() => scrollToSection('giveaways')}
+              className="text-gray-300 hover:text-purple-400 font-medium transition-colors"
+            >
               المسابقات
-            </a>
-            <a href="#products" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
+            </button>
+            <button 
+              onClick={() => scrollToSection('products')}
+              className="text-gray-300 hover:text-purple-400 font-medium transition-colors"
+            >
               {t('header.tools')}
-            </a>
+            </button>
             <Link to="/pubg-accounts" className="text-gray-300 hover:text-purple-400 font-medium transition-colors">
               حسابات PUBG
             </Link>
