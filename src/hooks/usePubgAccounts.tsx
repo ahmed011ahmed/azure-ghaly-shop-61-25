@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { PubgAccount, NewPubgAccount } from '../types/pubgAccount';
@@ -41,7 +39,7 @@ export const usePubgAccounts = () => {
           image: account.image,
           description: account.description,
           video: account.video || undefined,
-          rating: account.rating || 5,
+          rating: 5, // قيمة افتراضية
           notes: account.notes || undefined,
           isAvailable: account.is_available !== false,
           createdAt: account.created_at,
@@ -92,11 +90,10 @@ export const usePubgAccounts = () => {
         throw new Error('البيانات المطلوبة مفقودة');
       }
 
-      // إعداد البيانات للإرسال إلى قاعدة البيانات (بدون حقل الاسم)
+      // إعداد البيانات للإرسال إلى قاعدة البيانات (الحقول الموجودة فقط)
       const accountData: any = {
         image: newAccount.image,
         description: newAccount.description,
-        rating: Number(newAccount.rating) || 5,
         is_available: true
       };
 
@@ -149,7 +146,6 @@ export const usePubgAccounts = () => {
       if (updates.image !== undefined) dbUpdates.image = updates.image;
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.video !== undefined) dbUpdates.video = updates.video;
-      if (updates.rating !== undefined) dbUpdates.rating = Number(updates.rating);
       if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
       if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
       dbUpdates.updated_at = new Date().toISOString();
@@ -228,4 +224,3 @@ export const usePubgAccounts = () => {
     toggleAvailability
   };
 };
-
