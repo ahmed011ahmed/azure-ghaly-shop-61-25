@@ -31,27 +31,51 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
   };
 
   const toggleVideo = () => {
-    console.log('Toggle video clicked, current showVideo:', showVideo);
-    console.log('Video URL:', video);
-    console.log('Video exists:', !!video);
+    console.log('=== TOGGLE VIDEO CLICKED ===');
+    console.log('Service ID:', id);
+    console.log('Service Name:', name);
+    console.log('Current showVideo state:', showVideo);
+    console.log('Video URL provided:', video);
+    console.log('Video URL type:', typeof video);
+    console.log('Video URL length:', video ? video.length : 0);
+    console.log('Has video?', !!video);
+    console.log('Video error state:', videoError);
+    
+    if (!video) {
+      console.error('No video URL provided for this service');
+      return;
+    }
     
     if (!showVideo) {
+      console.log('Setting video to show - starting load');
       setVideoLoading(true);
       setVideoError(false);
+    } else {
+      console.log('Hiding video');
     }
-    setShowVideo(!showVideo);
+    
+    const newShowVideo = !showVideo;
+    console.log('Setting showVideo to:', newShowVideo);
+    setShowVideo(newShowVideo);
   };
 
   const handleVideoError = (e: any) => {
-    console.error('Video failed to load:', video);
-    console.error('Error details:', e);
+    console.error('=== VIDEO ERROR ===');
+    console.error('Video URL that failed:', video);
+    console.error('Error event:', e);
+    console.error('Error type:', e.type);
+    console.error('Error target:', e.target);
+    if (e.target && e.target.error) {
+      console.error('Media error code:', e.target.error.code);
+      console.error('Media error message:', e.target.error.message);
+    }
     setVideoError(true);
     setVideoLoading(false);
     setShowVideo(false);
   };
 
   const handleVideoEnd = () => {
-    console.log('Video ended');
+    console.log('Video playback ended');
     setShowVideo(false);
   };
 
@@ -61,7 +85,7 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
   };
 
   const handleVideoCanPlay = () => {
-    console.log('Video can play');
+    console.log('Video can play - ready for playback');
     setVideoLoading(false);
   };
 
@@ -70,11 +94,24 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
     setVideoLoading(false);
   };
 
+  const handleVideoPlay = () => {
+    console.log('Video started playing successfully');
+  };
+
+  const handleVideoPause = () => {
+    console.log('Video paused');
+  };
+
+  console.log('ServiceCard render - showVideo:', showVideo, 'hasVideo:', !!video, 'videoError:', videoError);
+
   return (
     <div className="gaming-card overflow-hidden group">
       <div className="relative overflow-hidden">
         {showVideo && video && !videoError ? (
           <div className="relative">
+            <div className="absolute top-2 left-2 bg-green-600/90 backdrop-blur-sm px-3 py-1 rounded-full z-30">
+              <span className="text-white text-xs">فيديو نشط</span>
+            </div>
             {videoLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
                 <div className="text-white">جاري تحميل الفيديو...</div>
@@ -91,8 +128,13 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
               onLoadStart={handleVideoLoadStart}
               onCanPlay={handleVideoCanPlay}
               onLoadedData={handleVideoLoadedData}
-              onPlay={() => console.log('Video started playing')}
-              onPause={() => console.log('Video paused')}
+              onPlay={handleVideoPlay}
+              onPause={handleVideoPause}
+              onLoadedMetadata={() => console.log('Video metadata loaded')}
+              onSeeking={() => console.log('Video seeking')}
+              onSeeked={() => console.log('Video seeked')}
+              onWaiting={() => console.log('Video waiting')}
+              onPlaying={() => console.log('Video playing event')}
             />
             <button 
               onClick={toggleVideo}
@@ -112,6 +154,7 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
               <button 
                 onClick={toggleVideo}
                 className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ zIndex: 5 }}
               >
                 <div className="bg-purple-600/90 backdrop-blur-sm p-4 rounded-full hover:bg-purple-500/90 transition-colors">
                   <Play className="w-8 h-8 text-white fill-current" />
@@ -121,6 +164,11 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
             {videoError && video && (
               <div className="absolute top-2 left-2 bg-red-600/90 backdrop-blur-sm px-3 py-1 rounded-full">
                 <span className="text-white text-xs">خطأ في تحميل الفيديو</span>
+              </div>
+            )}
+            {!video && (
+              <div className="absolute top-2 left-2 bg-yellow-600/90 backdrop-blur-sm px-3 py-1 rounded-full">
+                <span className="text-white text-xs">لا يوجد فيديو</span>
               </div>
             )}
           </>
