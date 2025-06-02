@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Gamepad2, Gift, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -138,20 +139,22 @@ const AdminDashboard = () => {
     }
   ];
 
-  // فلترة الأقسام حسب الصلاحيات
-  const availableTabs = allTabs.filter(tab => 
-    tab.permission === null || hasPermission(tab.permission)
-  );
+  // فلترة الأقسام حسب الصلاحيات - المستخدم GHALY يرى كل شيء
+  const availableTabs = currentUser?.username === 'GHALY' 
+    ? allTabs 
+    : allTabs.filter(tab => 
+        tab.permission === null || hasPermission(tab.permission)
+      );
 
   // التحقق من أن التاب النشط متاح للمستخدم والتصحيح إذا لزم الأمر
   useEffect(() => {
-    if (currentUser && availableTabs.length > 0) {
+    if (isAuthenticated && currentUser && availableTabs.length > 0) {
       const currentTabAvailable = availableTabs.find(tab => tab.id === activeTab);
       if (!currentTabAvailable) {
         setActiveTab('overview');
       }
     }
-  }, [currentUser, activeTab, availableTabs]);
+  }, [currentUser, activeTab, availableTabs, isAuthenticated]);
 
   // إذا لم يكن مسجل الدخول، اظهر صفحة تسجيل الدخول
   if (!isAuthenticated) {
@@ -207,7 +210,7 @@ const AdminDashboard = () => {
             </div>
             
             <div className="flex items-center space-x-3">
-              {hasPermission('products') && (
+              {(currentUser?.username === 'GHALY' || hasPermission('products')) && (
                 <Button
                   onClick={() => setActiveTab('products')}
                   className="bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25 py-[16px] my-[9px] mx-[17px]"
@@ -279,7 +282,7 @@ const AdminDashboard = () => {
               </CardHeader>
               <CardContent className="bg-slate-950">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  {hasPermission('products') && (
+                  {(currentUser?.username === 'GHALY' || hasPermission('products')) && (
                     <Button
                       onClick={() => setActiveTab('products')}
                       className="bg-purple-600 hover:bg-purple-700 text-white p-6 h-auto flex-col space-y-2"
@@ -290,7 +293,7 @@ const AdminDashboard = () => {
                     </Button>
                   )}
                   
-                  {hasPermission('pubg-accounts') && (
+                  {(currentUser?.username === 'GHALY' || hasPermission('pubg-accounts')) && (
                     <Button
                       onClick={() => setActiveTab('pubg-accounts')}
                       className="bg-orange-600 hover:bg-orange-700 text-white p-6 h-auto flex-col space-y-2"
@@ -301,7 +304,7 @@ const AdminDashboard = () => {
                     </Button>
                   )}
                   
-                  {hasPermission('giveaways') && (
+                  {(currentUser?.username === 'GHALY' || hasPermission('giveaways')) && (
                     <Button
                       onClick={() => setActiveTab('giveaways')}
                       className="bg-pink-600 hover:bg-pink-700 text-white p-6 h-auto flex-col space-y-2"
@@ -312,7 +315,7 @@ const AdminDashboard = () => {
                     </Button>
                   )}
                   
-                  {hasPermission('subscribers') && (
+                  {(currentUser?.username === 'GHALY' || hasPermission('subscribers')) && (
                     <Button
                       onClick={() => setActiveTab('subscribers')}
                       className="bg-green-600 hover:bg-green-700 text-white p-6 h-auto flex-col space-y-2"
@@ -328,27 +331,27 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {activeTab === 'products' && hasPermission('products') && <ProductManagement />}
+        {activeTab === 'products' && (currentUser?.username === 'GHALY' || hasPermission('products')) && <ProductManagement />}
         
-        {activeTab === 'pubg-accounts' && hasPermission('pubg-accounts') && <PubgAccountsManagement />}
+        {activeTab === 'pubg-accounts' && (currentUser?.username === 'GHALY' || hasPermission('pubg-accounts')) && <PubgAccountsManagement />}
         
-        {activeTab === 'giveaways' && hasPermission('giveaways') && <GiveawaysManagement />}
+        {activeTab === 'giveaways' && (currentUser?.username === 'GHALY' || hasPermission('giveaways')) && <GiveawaysManagement />}
         
-        {activeTab === 'subscribers' && hasPermission('subscribers') && <SubscribersManagement />}
+        {activeTab === 'subscribers' && (currentUser?.username === 'GHALY' || hasPermission('subscribers')) && <SubscribersManagement />}
         
-        {activeTab === 'user-lookup' && hasPermission('user-lookup') && <UserLookup />}
+        {activeTab === 'user-lookup' && (currentUser?.username === 'GHALY' || hasPermission('user-lookup')) && <UserLookup />}
         
-        {activeTab === 'permissions' && hasPermission('permissions') && <PermissionsManagement />}
+        {activeTab === 'permissions' && (currentUser?.username === 'GHALY' || hasPermission('permissions')) && <PermissionsManagement />}
         
-        {activeTab === 'downloads' && hasPermission('downloads') && <DownloadsManagement />}
+        {activeTab === 'downloads' && (currentUser?.username === 'GHALY' || hasPermission('downloads')) && <DownloadsManagement />}
         
-        {activeTab === 'updates' && hasPermission('updates') && <UpdatesManagement />}
+        {activeTab === 'updates' && (currentUser?.username === 'GHALY' || hasPermission('updates')) && <UpdatesManagement />}
         
-        {activeTab === 'content' && hasPermission('content') && <ContentViewer />}
+        {activeTab === 'content' && (currentUser?.username === 'GHALY' || hasPermission('content')) && <ContentViewer />}
         
-        {activeTab === 'chat' && hasPermission('chat') && <AdminChat />}
+        {activeTab === 'chat' && (currentUser?.username === 'GHALY' || hasPermission('chat')) && <AdminChat />}
         
-        {activeTab === 'admin-users' && hasPermission('admin-users') && <AdminUsersManagement />}
+        {activeTab === 'admin-users' && (currentUser?.username === 'GHALY' || hasPermission('admin-users')) && <AdminUsersManagement />}
       </div>
     </div>
   );
