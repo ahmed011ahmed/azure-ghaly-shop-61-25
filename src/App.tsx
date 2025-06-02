@@ -10,7 +10,6 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Auth from "./pages/Auth";
 import VerifyEmail from "./pages/VerifyEmail";
 import Subscribers from "./pages/Subscribers";
-import Giveaways from "./pages/Giveaways";
 import NotFound from "./pages/NotFound";
 import { ProductsProvider } from "./contexts/ProductsContext";
 import { ServicesProvider } from "./contexts/ServicesContext";
@@ -39,7 +38,6 @@ const App = () => (
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/verify-email" element={<VerifyEmail />} />
                       <Route path="/subscribers" element={<Subscribers />} />
-                      <Route path="/giveaways" element={<Giveaways />} />
                       <Route path="/admin" element={<AdminDashboard />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
