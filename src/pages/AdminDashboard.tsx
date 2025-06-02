@@ -25,15 +25,14 @@ const AdminDashboard = () => {
   // التحقق من حالة تسجيل الدخول عند تحميل الصفحة
   useEffect(() => {
     const adminAuth = localStorage.getItem('adminAuthenticated');
+    const currentAdminUser = localStorage.getItem('current_admin_user');
+    
     if (adminAuth === 'true') {
       setIsAuthenticated(true);
-      
-      // جلب معلومات المستخدم الحالي
-      const currentAdminUser = localStorage.getItem('current_admin_user');
       if (currentAdminUser) {
         const userData = JSON.parse(currentAdminUser);
         setCurrentUser(userData);
-        console.log('Current user permissions:', userData.permissions);
+        console.log('Current admin user:', userData);
       }
     }
   }, []);
@@ -42,13 +41,13 @@ const AdminDashboard = () => {
     setIsAuthenticated(true);
     localStorage.setItem('adminAuthenticated', 'true');
     
-    // جلب معلومات المستخدم بعد تسجيل الدخول
+    // تحديث بيانات المستخدم الحالي
     const currentAdminUser = localStorage.getItem('current_admin_user');
     if (currentAdminUser) {
       const userData = JSON.parse(currentAdminUser);
       setCurrentUser(userData);
-      console.log('User logged in with permissions:', userData.permissions);
     }
+    
     console.log('Admin logged in successfully');
   };
 
@@ -62,14 +61,14 @@ const AdminDashboard = () => {
   };
 
   // التحقق من الصلاحيات
-  const hasPermission = (permissionId: string) => {
-    // المستخدم الأساسي GHALY له صلاحيات كاملة
+  const hasPermission = (permission: string): boolean => {
+    // المستخدم الافتراضي له جميع الصلاحيات
     if (currentUser?.username === 'GHALY') {
       return true;
     }
     
-    // التحقق من صلاحيات المستخدمين الآخرين
-    return currentUser?.permissions?.includes(permissionId) || false;
+    // التحقق من صلاحيات المستخدم
+    return currentUser?.permissions?.includes(permission) || false;
   };
 
   // إذا لم يكن مسجل الدخول، اظهر صفحة تسجيل الدخول
@@ -110,7 +109,7 @@ const AdminDashboard = () => {
       id: 'overview',
       label: 'نظرة عامة',
       icon: Eye,
-      permission: null // متاح للجميع
+      permission: null // النظرة العامة متاحة للجميع
     },
     {
       id: 'products',
@@ -181,24 +180,15 @@ const AdminDashboard = () => {
   ];
 
   // فلترة التابات حسب الصلاحيات
-  const tabs = allTabs.filter(tab => {
-    if (!tab.permission) return true; // نظرة عامة متاحة للجميع
-    return hasPermission(tab.permission);
-  });
+  const tabs = allTabs.filter(tab => 
+    tab.permission === null || hasPermission(tab.permission)
+  );
 
-  // التحقق من أن التاب النشط متاح للمستخدم
-  useEffect(() => {
-    const currentTab = allTabs.find(tab => tab.id === activeTab);
-    if (currentTab && currentTab.permission && !hasPermission(currentTab.permission)) {
-      setActiveTab('overview');
-    }
-  }, [currentUser]);
-
-  // إنشاء قائمة الإجراءات السريعة حسب الصلاحيات
+  // فلترة الإجراءات السريعة حسب الصلاحيات
   const quickActions = [
     {
       id: 'products',
-      title: 'إدارة المنتجات',
+      label: 'إدارة المنتجات',
       description: 'إضافة وتعديل المنتجات',
       icon: Package,
       color: 'bg-purple-600 hover:bg-purple-700',
@@ -206,7 +196,7 @@ const AdminDashboard = () => {
     },
     {
       id: 'pubg-accounts',
-      title: 'حسابات PUBG',
+      label: 'حسابات PUBG',
       description: 'إدارة حسابات اللعبة',
       icon: Gamepad2,
       color: 'bg-orange-600 hover:bg-orange-700',
@@ -214,7 +204,7 @@ const AdminDashboard = () => {
     },
     {
       id: 'giveaways',
-      title: 'المسابقات والجوائز',
+      label: 'المسابقات والجوائز',
       description: 'إدارة الـ Giveaways',
       icon: Gift,
       color: 'bg-pink-600 hover:bg-pink-700',
@@ -222,7 +212,7 @@ const AdminDashboard = () => {
     },
     {
       id: 'subscribers',
-      title: 'إدارة المشتركين',
+      label: 'إدارة المشتركين',
       description: 'إدارة العضويات',
       icon: Users,
       color: 'bg-green-600 hover:bg-green-700',
@@ -243,11 +233,7 @@ const AdminDashboard = () => {
               <h1 className="text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent mx-[13px]">
                 لوحة تحكم الإدارة
               </h1>
-              {currentUser && (
-                <div className="text-sm text-gray-400">
-                  مرحباً، {currentUser.username}
-                </div>
-              )}
+              <span className="text-sm text-gray-400">مرحباً، {currentUser?.username}</span>
             </div>
             
             <div className="flex items-center space-x-3">
@@ -331,7 +317,7 @@ const AdminDashboard = () => {
                         className={`${action.color} text-white p-6 h-auto flex-col space-y-2`}
                       >
                         <action.icon className="w-8 h-8" />
-                        <span className="font-semibold">{action.title}</span>
+                        <span className="font-semibold">{action.label}</span>
                         <span className="text-sm opacity-80">{action.description}</span>
                       </Button>
                     ))}
@@ -340,40 +326,57 @@ const AdminDashboard = () => {
               </Card>
             )}
 
-            {/* رسالة في حالة عدم وجود صلاحيات */}
+            {/* رسالة عدم وجود صلاحيات */}
             {quickActions.length === 0 && (
               <Card className="gaming-card">
-                <CardContent className="bg-slate-950 pt-8 pb-8 text-center">
+                <CardContent className="bg-slate-950 text-center py-12">
                   <Shield className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-300 mb-2">مرحباً بك في لوحة التحكم</h3>
-                  <p className="text-gray-500">يمكنك الوصول للأقسام المتاحة لك من خلال التابات في الأعلى</p>
+                  <h3 className="text-lg font-medium text-gray-300 mb-2">صلاحيات محدودة</h3>
+                  <p className="text-gray-500">لا توجد إجراءات سريعة متاحة لك حالياً</p>
                 </CardContent>
               </Card>
             )}
           </div>
         )}
 
-        {activeTab === 'products' && hasPermission('products') && <ProductManagement />}
+        {hasPermission('products') && activeTab === 'products' && <ProductManagement />}
         
-        {activeTab === 'pubg-accounts' && hasPermission('pubg-accounts') && <PubgAccountsManagement />}
+        {hasPermission('pubg-accounts') && activeTab === 'pubg-accounts' && <PubgAccountsManagement />}
         
-        {activeTab === 'giveaways' && hasPermission('giveaways') && <GiveawaysManagement />}
+        {hasPermission('giveaways') && activeTab === 'giveaways' && <GiveawaysManagement />}
         
-        {activeTab === 'subscribers' && hasPermission('subscribers') && <SubscribersManagement />}
+        {hasPermission('subscribers') && activeTab === 'subscribers' && <SubscribersManagement />}
         
-        {activeTab === 'user-lookup' && hasPermission('user-lookup') && <UserLookup />}
+        {hasPermission('user-lookup') && activeTab === 'user-lookup' && <UserLookup />}
         
-        {activeTab === 'permissions' && hasPermission('permissions') && <PermissionsManagement />}
+        {hasPermission('permissions') && activeTab === 'permissions' && <PermissionsManagement />}
         
-        {activeTab === 'downloads' && hasPermission('downloads') && <DownloadsManagement />}
+        {hasPermission('downloads') && activeTab === 'downloads' && <DownloadsManagement />}
         
-        {activeTab === 'updates' && hasPermission('updates') && <UpdatesManagement />}
+        {hasPermission('updates') && activeTab === 'updates' && <UpdatesManagement />}
         
-        {activeTab === 'content' && hasPermission('content') && <ContentViewer />}
+        {hasPermission('content') && activeTab === 'content' && <ContentViewer />}
         
-        {activeTab === 'chat' && hasPermission('chat') && <AdminChat />}
+        {hasPermission('chat') && activeTab === 'chat' && <AdminChat />}
         
-        {activeTab === 'admin-users' && hasPermission('admin-users') && <AdminUsersManagement />}
+        {hasPermission('admin-users') && activeTab === 'admin-users' && <AdminUsersManagement />}
+
+        {/* رسالة عدم وجود صلاحية للقسم المحدد */}
+        {!hasPermission(allTabs.find(tab => tab.id === activeTab)?.permission || '') && activeTab !== 'overview' && (
+          <Card className="gaming-card">
+            <CardContent className="bg-slate-950 text-center py-12">
+              <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-red-400 mb-2">غير مخول</h3>
+              <p className="text-gray-500">ليس لديك صلاحية للوصول إلى هذا القسم</p>
+              <Button
+                onClick={() => setActiveTab('overview')}
+                className="mt-4 bg-purple-600 hover:bg-purple-700"
+              >
+                العودة للنظرة العامة
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
