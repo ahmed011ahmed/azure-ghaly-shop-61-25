@@ -166,7 +166,75 @@ export const useSubscribers = () => {
     try {
       console.log('Adding new subscriber:', subscriber);
       
-      // إضافة إلى جدول profiles
+      // التحقق من وجود المشترك مسبقاً
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', subscriber.email)
+        .single();
+
+      // إذا كان المشترك موجود بالفعل، نقوم بتحديث البيانات فقط
+      if (existingProfile) {
+        console.log('Subscriber already exists, updating data...');
+        
+        // تحديث البيانات في جدول profiles
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            nickname: subscriber.nickname,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', subscriber.email);
+
+        if (updateError) {
+          console.error('خطأ في تحديث المشترك:', updateError);
+          throw updateError;
+        }
+
+        // حفظ مستوى الاشتراك محلياً
+        setStoredLevel(subscriber.email, subscriber.subscription_level);
+
+        // التحقق من وجود أذونات والتحديث أو الإضافة
+        const { data: existingPermission } = await supabase
+          .from('subscriber_permissions')
+          .select('id')
+          .eq('email', subscriber.email)
+          .single();
+
+        if (existingPermission) {
+          // تحديث الأذونات الموجودة
+          const { error: permissionUpdateError } = await supabase
+            .from('subscriber_permissions')
+            .update({
+              is_active: true,
+              granted_by: 'admin'
+            })
+            .eq('email', subscriber.email);
+
+          if (permissionUpdateError) {
+            console.error('خطأ في تحديث أذونات المشترك:', permissionUpdateError);
+          }
+        } else {
+          // إضافة أذونات جديدة
+          const { error: permissionError } = await supabase
+            .from('subscriber_permissions')
+            .insert({
+              email: subscriber.email,
+              is_active: true,
+              granted_by: 'admin'
+            });
+
+          if (permissionError) {
+            console.error('خطأ في إضافة أذونات المشترك:', permissionError);
+          }
+        }
+
+        console.log('تم تحديث المشترك بنجاح');
+        return;
+      }
+
+      // إضافة مشترك جديد
+      // أولاً إضافة إلى جدول profiles
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .insert({
@@ -199,6 +267,7 @@ export const useSubscribers = () => {
 
       if (permissionError) {
         console.error('خطأ في إضافة أذونات المشترك:', permissionError);
+        // لا نرمي الخطأ هنا لأن المشترك تم إضافته بنجاح إلى profiles
       } else {
         console.log('Permission added successfully:', permissionData);
       }
