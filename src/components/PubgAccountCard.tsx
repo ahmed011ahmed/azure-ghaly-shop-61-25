@@ -1,17 +1,20 @@
 
 import React from 'react';
-import { Star, Play } from 'lucide-react';
+import { Star, Play, ShoppingCart } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
 import { PubgAccount } from '../types/pubgAccount';
+import { useCart } from '../contexts/CartContext';
 
 interface PubgAccountCardProps {
   account: PubgAccount;
 }
 
 const PubgAccountCard: React.FC<PubgAccountCardProps> = ({ account }) => {
+  const { addItem } = useCart();
+
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
       <Star
@@ -21,6 +24,15 @@ const PubgAccountCard: React.FC<PubgAccountCardProps> = ({ account }) => {
         }`}
       />
     ));
+  };
+
+  const handleAddToCart = () => {
+    addItem({
+      id: parseInt(account.id.replace(/-/g, '').slice(0, 8), 16),
+      name: `${account.productName} - ID: ${account.randomId}`,
+      price: `$${account.price}`,
+      image: account.image
+    });
   };
 
   return (
@@ -113,6 +125,19 @@ const PubgAccountCard: React.FC<PubgAccountCardProps> = ({ account }) => {
         {account.notes && (
           <div className="bg-purple-900/20 rounded-lg p-3 mb-4">
             <p className="text-purple-300 text-sm">{account.notes}</p>
+          </div>
+        )}
+
+        {/* زر الإضافة للسلة */}
+        {account.isAvailable && (
+          <div className="mb-4">
+            <Button
+              onClick={handleAddToCart}
+              className="w-full bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              <span>أضف للسلة - ${account.price}</span>
+            </Button>
           </div>
         )}
         

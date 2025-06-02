@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { PubgAccount, NewPubgAccount } from '../types/pubgAccount';
@@ -34,13 +35,13 @@ export const usePubgAccounts = () => {
         return {
           id: account.id,
           randomId: randomId,
-          productName: 'حساب PUBG', // قيمة ثابتة
-          price: 0, // قيمة افتراضية
+          productName: account.product_name || 'حساب PUBG',
+          price: account.price || 0,
           image: account.image,
           description: account.description,
           video: account.video || undefined,
-          rating: 5, // قيمة افتراضية
-          notes: undefined, // لا توجد ملاحظات في قاعدة البيانات حالياً
+          rating: account.rating || 5,
+          notes: account.notes || undefined,
           isAvailable: account.is_available,
           createdAt: account.created_at,
           updatedAt: account.updated_at
@@ -85,16 +86,23 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة إضافة حساب جديد:', newAccount);
       
-      // إرسال البيانات الأساسية - فقط الحقول الموجودة في الجدول
+      // إرسال البيانات الكاملة
       const accountData: any = {
+        product_name: newAccount.productName,
+        price: newAccount.price,
         image: newAccount.image,
         description: newAccount.description,
+        rating: newAccount.rating,
         is_available: true
       };
 
-      // إضافة الفيديو فقط إذا كان متوفراً
+      // إضافة الحقول الاختيارية
       if (newAccount.video && newAccount.video.trim()) {
         accountData.video = newAccount.video;
+      }
+
+      if (newAccount.notes && newAccount.notes.trim()) {
+        accountData.notes = newAccount.notes;
       }
 
       console.log('البيانات التي سيتم إرسالها:', accountData);
@@ -133,9 +141,13 @@ export const usePubgAccounts = () => {
       
       // تحديث فقط الحقول الموجودة في قاعدة البيانات
       const dbUpdates: any = {};
+      if (updates.productName !== undefined) dbUpdates.product_name = updates.productName;
+      if (updates.price !== undefined) dbUpdates.price = updates.price;
       if (updates.image !== undefined) dbUpdates.image = updates.image;
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.video !== undefined) dbUpdates.video = updates.video;
+      if (updates.rating !== undefined) dbUpdates.rating = updates.rating;
+      if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
       if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
       dbUpdates.updated_at = new Date().toISOString();
 
