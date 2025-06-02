@@ -105,22 +105,6 @@ const GiveawayForm: React.FC<GiveawayFormProps> = ({ onSubmit, onCancel }) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="participationLink" className="text-white">رابط المشاركة</Label>
-            <Input
-              id="participationLink"
-              name="participationLink"
-              type="url"
-              value={formData.participationLink}
-              onChange={handleChange}
-              className="bg-gray-800 border-gray-600 text-white"
-              placeholder="https://example.com/participate"
-            />
-            <p className="text-xs text-gray-400">
-              الرابط الذي سيتم توجيه المستخدمين إليه عند الضغط على "شارك الآن"
-            </p>
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="endDate" className="text-white">تاريخ انتهاء الـ Giveaway</Label>
             <Input
               id="endDate"

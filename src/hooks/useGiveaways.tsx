@@ -31,7 +31,7 @@ export const useGiveaways = () => {
         endDate: giveaway.end_date,
         isActive: giveaway.is_active,
         participantsCount: giveaway.participants_count || 0,
-        participationLink: giveaway.participation_link,
+        participationLink: giveaway.participation_link || '',
         createdAt: giveaway.created_at,
         updatedAt: giveaway.updated_at
       })) || [];
@@ -81,7 +81,6 @@ export const useGiveaways = () => {
           image: newGiveaway.image,
           prize: newGiveaway.prize,
           end_date: newGiveaway.endDate,
-          participation_link: newGiveaway.participationLink || null,
           is_active: true,
           participants_count: 0
         });
@@ -106,7 +105,6 @@ export const useGiveaways = () => {
       if (updates.image !== undefined) dbUpdates.image = updates.image;
       if (updates.prize !== undefined) dbUpdates.prize = updates.prize;
       if (updates.endDate !== undefined) dbUpdates.end_date = updates.endDate;
-      if (updates.participationLink !== undefined) dbUpdates.participation_link = updates.participationLink;
       if (updates.isActive !== undefined) dbUpdates.is_active = updates.isActive;
       if (updates.participantsCount !== undefined) dbUpdates.participants_count = updates.participantsCount;
       dbUpdates.updated_at = new Date().toISOString();
