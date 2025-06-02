@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Gamepad2, Gift, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -54,7 +53,7 @@ const AdminDashboard = () => {
 
   // التحقق من الصلاحيات
   const hasPermission = (permission: string) => {
-    // المستخدم الأساسي GHALY له صلاحيات كاملة
+    // المستخدم الأساسي GHALY له صلاحيات كاملة دائماً
     if (currentUser?.username === 'GHALY') {
       return true;
     }
