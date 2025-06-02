@@ -8,10 +8,10 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { items } = useCart();
+  const { state, toggleCart } = useCart();
   const { t, language } = useLanguage();
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
 
   const navItems = [
     { name: t('nav.home'), href: '/', section: 'home' },
@@ -74,7 +74,10 @@ const Header = () => {
             <LanguageToggle />
             
             {/* Cart */}
-            <button className="relative p-2 text-gray-300 hover:text-purple-400 transition-colors">
+            <button 
+              onClick={toggleCart}
+              className="relative p-2 text-gray-300 hover:text-purple-400 transition-colors"
+            >
               <ShoppingCart className="w-6 h-6" />
               {totalItems > 0 && (
                 <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
