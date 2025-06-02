@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Star, Package, Loader2 } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -14,7 +15,7 @@ const ServicesManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<number | null>(null);
 
   const handleAddService = () => {
     setEditingService(null);
@@ -26,7 +27,7 @@ const ServicesManagement = () => {
     setShowForm(true);
   };
 
-  const handleDeleteService = async (id: string) => {
+  const handleDeleteService = async (id: number) => {
     if (window.confirm('هل أنت متأكد من حذف هذا الحساب؟')) {
       try {
         setActionLoading(id);
@@ -58,8 +59,7 @@ const ServicesManagement = () => {
   const filteredServices = services.filter(service => 
     service.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.id.toLowerCase().includes(searchTerm.toLowerCase())
+    service.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (showForm) {
@@ -101,7 +101,7 @@ const ServicesManagement = () => {
               <Label htmlFor="search" className="text-gray-300">البحث في الحسابات</Label>
               <Input 
                 id="search"
-                placeholder="ابحث باسم الحساب أو الوصف أو الفئة أو الـ ID..." 
+                placeholder="ابحث باسم الحساب أو الوصف أو الفئة..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="mt-1 bg-gray-800/50 border-gray-600 text-white" 
@@ -133,7 +133,6 @@ const ServicesManagement = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-gray-300">ID</TableHead>
                     <TableHead className="text-gray-300">الصورة</TableHead>
                     <TableHead className="text-gray-300">اسم الحساب</TableHead>
                     <TableHead className="text-gray-300">الفئة</TableHead>
@@ -146,9 +145,6 @@ const ServicesManagement = () => {
                 <TableBody>
                   {filteredServices.map((service) => (
                     <TableRow key={service.id}>
-                      <TableCell className="font-mono text-purple-300 font-bold">
-                        {service.id}
-                      </TableCell>
                       <TableCell>
                         <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-700">
                           <img 

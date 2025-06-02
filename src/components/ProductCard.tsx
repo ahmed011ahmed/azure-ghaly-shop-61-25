@@ -17,7 +17,7 @@ const ProductCard = ({ id, name, price, image, description, rating }: ProductCar
   const { t } = useLanguage();
 
   const handleAddToCart = () => {
-    addItem({ id: String(id), name, price, image });
+    addItem({ id, name, price, image });
     console.log(`Adding ${name} to cart - Price: ${price}`);
   };
 

@@ -1,10 +1,11 @@
+
 import { ShoppingCart, Heart, Play } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useState } from 'react';
 
 interface ServiceCardProps {
-  id: string;
+  id: number;
   name: string;
   price: string;
   image: string;
@@ -46,9 +47,11 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
       console.log('Setting video to show - starting load');
       setVideoLoading(true);
       setVideoError(false);
+      // إضافة منع التمرير عند فتح الفيديو
       document.body.style.overflow = 'hidden';
     } else {
       console.log('Hiding video');
+      // إعادة التمرير عند إغلاق الفيديو
       document.body.style.overflow = 'auto';
     }
     

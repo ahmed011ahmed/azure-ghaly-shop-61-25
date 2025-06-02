@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Service } from '../types/service';
 
@@ -6,8 +5,8 @@ interface ServicesContextType {
   services: Service[];
   loading: boolean;
   addService: (service: Omit<Service, 'id'>) => Promise<void>;
-  updateService: (id: string, service: Omit<Service, 'id'>) => Promise<void>;
-  deleteService: (id: string) => Promise<void>;
+  updateService: (id: number, service: Omit<Service, 'id'>) => Promise<void>;
+  deleteService: (id: number) => Promise<void>;
 }
 
 const ServicesContext = createContext<ServicesContextType | undefined>(undefined);
@@ -20,28 +19,9 @@ export const useServices = () => {
   return context;
 };
 
-// دالة لإنشاء ID عشوائي مكون من 6 حروف وأرقام
-const generateRandomId = (): string => {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-};
-
-// التأكد من عدم تكرار الـ ID
-const generateUniqueId = (existingServices: Service[]): string => {
-  let newId = generateRandomId();
-  while (existingServices.some(service => service.id === newId)) {
-    newId = generateRandomId();
-  }
-  return newId;
-};
-
 const defaultServices: Service[] = [
   {
-    id: "A1B2C3",
+    id: 1,
     name: "🔒 حساب بوبجي متقدم",
     price: "$25",
     description: "حساب بوبجي محترف مع مستوى عالي وأسلحة نادرة وإكسسوارات حصرية",
@@ -51,7 +31,7 @@ const defaultServices: Service[] = [
     category: "بوبجي"
   },
   {
-    id: "X7Y8Z9",
+    id: 2,
     name: "⚡ حساب فورتنايت مميز",
     price: "$30",
     description: "حساب فورتنايت مع سكنز حصرية ومستوى عالي ومجموعة كبيرة من الأدوات",
@@ -60,7 +40,7 @@ const defaultServices: Service[] = [
     category: "فورتنايت"
   },
   {
-    id: "M5N6P7",
+    id: 3,
     name: "🎯 حساب كول أوف ديوتي",
     price: "$15",
     description: "حساب كول أوف ديوتي مع إنجازات متقدمة وأسلحة مفتوحة ومستوى احترافي",
@@ -98,20 +78,20 @@ export const ServicesProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const addService = async (serviceData: Omit<Service, 'id'>) => {
     const newService: Service = {
       ...serviceData,
-      id: generateUniqueId(services)
+      id: Date.now()
     };
     const updatedServices = [...services, newService];
     saveServices(updatedServices);
   };
 
-  const updateService = async (id: string, serviceData: Omit<Service, 'id'>) => {
+  const updateService = async (id: number, serviceData: Omit<Service, 'id'>) => {
     const updatedServices = services.map(service => 
       service.id === id ? { ...serviceData, id } : service
     );
     saveServices(updatedServices);
   };
 
-  const deleteService = async (id: string) => {
+  const deleteService = async (id: number) => {
     const updatedServices = services.filter(service => service.id !== id);
     saveServices(updatedServices);
   };

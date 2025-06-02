@@ -1,6 +1,6 @@
 
 export interface Service {
-  id: string; // تغيير من number إلى string للـ ID العشوائي
+  id: number;
   name: string;
   price: string;
   image: string;
