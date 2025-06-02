@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Giveaway, NewGiveaway } from '../types/giveaway';
@@ -81,6 +80,7 @@ export const useGiveaways = () => {
           image: newGiveaway.image,
           prize: newGiveaway.prize,
           end_date: newGiveaway.endDate,
+          participation_link: newGiveaway.participationLink,
           is_active: true,
           participants_count: 0
         });
@@ -107,6 +107,7 @@ export const useGiveaways = () => {
       if (updates.endDate !== undefined) dbUpdates.end_date = updates.endDate;
       if (updates.isActive !== undefined) dbUpdates.is_active = updates.isActive;
       if (updates.participantsCount !== undefined) dbUpdates.participants_count = updates.participantsCount;
+      if (updates.participationLink !== undefined) dbUpdates.participation_link = updates.participationLink;
       dbUpdates.updated_at = new Date().toISOString();
 
       const { error } = await supabase

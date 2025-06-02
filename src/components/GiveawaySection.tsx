@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { Gift, Users, Calendar, Trophy, Clock, ExternalLink } from 'lucide-react';
+import { Gift, Users, Calendar, Trophy, Clock, Star } from 'lucide-react';
 import { useGiveaways } from '../hooks/useGiveaways';
 
 const GiveawaySection = () => {
@@ -31,12 +31,12 @@ const GiveawaySection = () => {
     }
   };
 
-  const handleParticipate = (giveaway: any) => {
+  const handleBenefit = (giveaway: any) => {
     if (giveaway.participationLink) {
       // فتح الرابط في تبويب جديد
       window.open(giveaway.participationLink, '_blank');
     } else {
-      console.log('المشاركة في المسابقة:', giveaway.id);
+      console.log('الاستفادة من العرض:', giveaway.id);
       // يمكن إضافة منطق افتراضي هنا
     }
   };
@@ -142,22 +142,13 @@ const GiveawaySection = () => {
                   </div>
                 </div>
 
-                {/* زر المشاركة */}
+                {/* زر الاستفادة */}
                 <Button 
                   className="w-full bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
-                  onClick={() => handleParticipate(giveaway)}
+                  onClick={() => handleBenefit(giveaway)}
                 >
-                  {giveaway.participationLink ? (
-                    <>
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      شارك الآن
-                    </>
-                  ) : (
-                    <>
-                      <Gift className="w-4 h-4 mr-2" />
-                      شارك الآن
-                    </>
-                  )}
+                  <Star className="w-4 h-4 mr-2" />
+                  استفيد
                 </Button>
               </CardContent>
             </Card>
