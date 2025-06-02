@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { PubgAccount, NewPubgAccount } from '../types/pubgAccount';
@@ -34,8 +35,8 @@ export const usePubgAccounts = () => {
         return {
           id: account.id,
           randomId: randomId,
-          productName: account.product_name || 'حساب PUBG',
-          price: 0, // قيمة افتراضية حيث أن الجدول لا يحتوي على عمود السعر
+          productName: account.name || account.product_name || 'حساب PUBG',
+          price: 0,
           image: account.image,
           description: account.description,
           video: account.video || undefined,
@@ -90,9 +91,9 @@ export const usePubgAccounts = () => {
         throw new Error('البيانات المطلوبة مفقودة');
       }
 
-      // إعداد البيانات للإرسال إلى قاعدة البيانات (بدون حقل السعر)
+      // إعداد البيانات للإرسال إلى قاعدة البيانات باستخدام أسماء الأعمدة الصحيحة
       const accountData: any = {
-        product_name: newAccount.productName,
+        name: newAccount.productName, // استخدام name بدلاً من product_name
         image: newAccount.image,
         description: newAccount.description,
         rating: Number(newAccount.rating) || 5,
@@ -143,9 +144,9 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة تحديث الحساب:', id, updates);
       
-      // تحديث فقط الحقول الموجودة في قاعدة البيانات (بدون السعر)
+      // تحديث فقط الحقول الموجودة في قاعدة البيانات
       const dbUpdates: any = {};
-      if (updates.productName !== undefined) dbUpdates.product_name = updates.productName;
+      if (updates.productName !== undefined) dbUpdates.name = updates.productName;
       if (updates.image !== undefined) dbUpdates.image = updates.image;
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.video !== undefined) dbUpdates.video = updates.video;
