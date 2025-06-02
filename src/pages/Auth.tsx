@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
+import EmailVerification from '@/components/EmailVerification';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,6 +17,8 @@ const Auth = () => {
   const [nickname, setNickname] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
   const { toast } = useToast();
   const { t, language } = useLanguage();
   const navigate = useNavigate();
@@ -48,12 +51,12 @@ const Auth = () => {
     try {
       console.log('Starting signup process for:', email);
       
-      // Create user account without automatic permission addition
+      // Create user account
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: undefined, // Disable email confirmation
+          emailRedirectTo: undefined,
           data: {
             nickname: nickname,
           }
@@ -81,13 +84,39 @@ const Auth = () => {
 
       console.log('User created successfully:', data.user?.id);
 
-      toast({
-        title: t('success.accountCreated'),
-        description: t('success.accountCreated.desc'),
+      // Generate verification code
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Send verification code
+      const { data: codeData, error: codeError } = await supabase.functions.invoke('send-verification-code', {
+        body: { 
+          email, 
+          code: verificationCode,
+          user_id: data.user?.id 
+        }
       });
 
-      // Switch to login form
-      setIsLogin(true);
+      if (codeError) {
+        console.error('Error sending verification code:', codeError);
+        toast({
+          title: 'خطأ',
+          description: 'فشل في إرسال كود التحقق، يرجى المحاولة مرة أخرى',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Show email verification component
+      setRegisteredEmail(email);
+      setShowEmailVerification(true);
+      
+      toast({
+        title: 'تم إنشاء الحساب بنجاح!',
+        description: 'يرجى تأكيد الإيميل لإكمال التسجيل',
+      });
+
+      // Clear form
       setEmail('');
       setPassword('');
       setNickname('');
@@ -149,6 +178,44 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
+
+  const handleVerificationSuccess = () => {
+    setShowEmailVerification(false);
+    setIsLogin(true);
+    toast({
+      title: 'تم تأكيد الإيميل بنجاح!',
+      description: 'يمكنك الآن تسجيل الدخول بحسابك',
+    });
+  };
+
+  const handleBackToSignup = () => {
+    setShowEmailVerification(false);
+    setIsLogin(false);
+  };
+
+  // Show email verification component if needed
+  if (showEmailVerification) {
+    return (
+      <div className={`min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center px-4 ${language === 'en' ? 'ltr' : ''}`}>
+        <div className="w-full max-w-md">
+          <div className="flex items-center mb-6">
+            <Link to="/" className="text-gray-300 hover:text-purple-400 transition-colors">
+              <ArrowLeft className="w-6 h-6" />
+            </Link>
+            <h1 className={`text-2xl font-bold bg-gaming-gradient bg-clip-text text-transparent ${language === 'ar' ? 'mr-4' : 'ml-4'}`}>
+              تأكيد الإيميل
+            </h1>
+          </div>
+          
+          <EmailVerification 
+            email={registeredEmail}
+            onVerificationSuccess={handleVerificationSuccess}
+            onBack={handleBackToSignup}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center px-4 ${language === 'en' ? 'ltr' : ''}`}>
