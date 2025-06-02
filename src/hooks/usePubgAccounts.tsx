@@ -34,12 +34,12 @@ export const usePubgAccounts = () => {
         return {
           id: account.id,
           randomId: randomId,
-          productName: 'حساب PUBG', // اسم ثابت لأن الجدول لا يحتوي على حقل الاسم
-          price: 0,
+          productName: account.product_name || 'حساب PUBG',
+          price: account.price || 0,
           image: account.image,
           description: account.description,
           video: account.video || undefined,
-          rating: 5, // قيمة افتراضية
+          rating: account.rating || 5,
           notes: account.notes || undefined,
           isAvailable: account.is_available !== false,
           createdAt: account.created_at,
@@ -92,8 +92,11 @@ export const usePubgAccounts = () => {
 
       // إعداد البيانات للإرسال إلى قاعدة البيانات (الحقول الموجودة فقط)
       const accountData: any = {
+        product_name: newAccount.productName,
+        price: newAccount.price,
         image: newAccount.image,
         description: newAccount.description,
+        rating: newAccount.rating,
         is_available: true
       };
 
@@ -143,9 +146,12 @@ export const usePubgAccounts = () => {
       
       // تحديث فقط الحقول الموجودة في قاعدة البيانات
       const dbUpdates: any = {};
+      if (updates.productName !== undefined) dbUpdates.product_name = updates.productName;
+      if (updates.price !== undefined) dbUpdates.price = updates.price;
       if (updates.image !== undefined) dbUpdates.image = updates.image;
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.video !== undefined) dbUpdates.video = updates.video;
+      if (updates.rating !== undefined) dbUpdates.rating = updates.rating;
       if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
       if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
       dbUpdates.updated_at = new Date().toISOString();

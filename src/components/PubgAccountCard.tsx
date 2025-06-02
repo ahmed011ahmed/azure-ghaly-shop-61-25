@@ -108,6 +108,13 @@ const PubgAccountCard: React.FC<PubgAccountCardProps> = ({ account }) => {
           </div>
         </div>
 
+        {/* السعر في المحتوى */}
+        <div className="text-center mb-4">
+          <div className="text-3xl font-bold text-green-400">
+            ${account.price}
+          </div>
+        </div>
+
         {/* التقييم */}
         <div className="flex items-center mb-4">
           <div className="flex items-center space-x-1">
