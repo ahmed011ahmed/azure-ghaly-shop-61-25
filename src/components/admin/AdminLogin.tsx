@@ -28,6 +28,12 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
     setTimeout(() => {
       // التحقق من اليوزر الافتراضي
       if (username === 'GHALY' && password === 'Admin Team') {
+        // حفظ معلومات المستخدم الأساسي
+        localStorage.setItem('current_admin_user', JSON.stringify({
+          id: 'default',
+          username: 'GHALY',
+          permissions: [] // صلاحيات فارغة تعني صلاحيات كاملة للمستخدم الأساسي
+        }));
         onLogin();
         setIsLoading(false);
         return;
@@ -41,17 +47,9 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
       console.log('Available users:', adminUsers);
       
       const validUser = adminUsers.find((user: any) => {
-        // التحقق من البيانات الجديدة التي تحتوي على username و password
-        if (user.username && user.password) {
-          return user.username === username && 
-                 user.password === password && 
-                 user.is_active;
-        }
-        // التحقق من البيانات القديمة التي تحتوي على email فقط
-        if (user.email && !user.username) {
-          return user.email === username && user.is_active;
-        }
-        return false;
+        return user.username === username && 
+               user.password === password && 
+               user.is_active;
       });
 
       console.log('Found valid user:', validUser);
@@ -60,7 +58,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
         // حفظ معلومات المستخدم المسجل للدخول
         localStorage.setItem('current_admin_user', JSON.stringify({
           id: validUser.id,
-          username: validUser.username || validUser.email,
+          username: validUser.username,
           permissions: validUser.permissions
         }));
         onLogin();
