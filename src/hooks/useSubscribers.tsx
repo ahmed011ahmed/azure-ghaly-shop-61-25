@@ -3,14 +3,31 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Subscriber, NewSubscriber } from '../types/subscriber';
 
-// نوع محلي للملف الشخصي مع مستوى الاشتراك
-interface ProfileWithLevel {
+// نوع محلي للملف الشخصي
+interface ProfileData {
   id: string;
   nickname: string;
   created_at: string;
   updated_at: string;
-  subscription_level?: number;
 }
+
+// تخزين محلي لمستويات الاشتراك
+const SUBSCRIPTION_LEVELS_KEY = 'subscriber_levels';
+
+const getStoredLevels = (): Record<string, number> => {
+  try {
+    const stored = localStorage.getItem(SUBSCRIPTION_LEVELS_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+};
+
+const setStoredLevel = (email: string, level: number) => {
+  const levels = getStoredLevels();
+  levels[email] = level;
+  localStorage.setItem(SUBSCRIPTION_LEVELS_KEY, JSON.stringify(levels));
+};
 
 export const useSubscribers = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
@@ -45,6 +62,9 @@ export const useSubscribers = () => {
 
       console.log('Profiles data:', profilesData);
 
+      // جلب المستويات المحفوظة محلياً
+      const storedLevels = getStoredLevels();
+
       // دمج البيانات وإنشاء قائمة المشتركين
       const formattedSubscribers: Subscriber[] = [];
 
@@ -52,13 +72,10 @@ export const useSubscribers = () => {
       if (permissionsData) {
         permissionsData.forEach(permission => {
           // البحث عن الملف الشخصي المطابق
-          const profile = (profilesData || []).find(p => p.id === permission.email) as ProfileWithLevel;
+          const profile = (profilesData || []).find(p => p.id === permission.email) as ProfileData;
           
-          // التأكد من أن مستوى الاشتراك هو من النوع الصحيح
-          let subscriptionLevel: 1 | 2 | 3 | 4 | 5 = 1;
-          if (profile?.subscription_level && profile.subscription_level >= 1 && profile.subscription_level <= 5) {
-            subscriptionLevel = profile.subscription_level as 1 | 2 | 3 | 4 | 5;
-          }
+          // استخدام المستوى المحفوظ محلياً أو المستوى الافتراضي
+          const subscriptionLevel = (storedLevels[permission.email] || 1) as 1 | 2 | 3 | 4 | 5;
           
           formattedSubscribers.push({
             id: permission.id,
@@ -75,14 +92,10 @@ export const useSubscribers = () => {
       // إضافة المشتركين من جدول profiles الذين ليس لديهم أذونات
       if (profilesData) {
         profilesData.forEach(profile => {
-          const profileWithLevel = profile as ProfileWithLevel;
           const hasPermission = (permissionsData || []).some(p => p.email === profile.id);
           if (!hasPermission) {
-            // التأكد من أن مستوى الاشتراك هو من النوع الصحيح
-            let subscriptionLevel: 1 | 2 | 3 | 4 | 5 = 1;
-            if (profileWithLevel.subscription_level && profileWithLevel.subscription_level >= 1 && profileWithLevel.subscription_level <= 5) {
-              subscriptionLevel = profileWithLevel.subscription_level as 1 | 2 | 3 | 4 | 5;
-            }
+            // استخدام المستوى المحفوظ محلياً أو المستوى الافتراضي
+            const subscriptionLevel = (storedLevels[profile.id] || 1) as 1 | 2 | 3 | 4 | 5;
             
             formattedSubscribers.push({
               id: profile.id,
@@ -153,7 +166,7 @@ export const useSubscribers = () => {
     try {
       console.log('Adding new subscriber:', subscriber);
       
-      // إضافة إلى جدول profiles مع المستوى
+      // إضافة إلى جدول profiles
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .insert({
@@ -169,6 +182,9 @@ export const useSubscribers = () => {
       }
 
       console.log('Profile added successfully:', profileData);
+
+      // حفظ مستوى الاشتراك محلياً
+      setStoredLevel(subscriber.email, subscriber.subscription_level);
 
       // إضافة إلى جدول أذونات المشتركين
       const { data: permissionData, error: permissionError } = await supabase
@@ -219,26 +235,11 @@ export const useSubscribers = () => {
     try {
       console.log('Updating subscription level:', { id, level });
       
-      // نحتاج إلى تحديث المستوى في جدول profiles باستخدام RPC أو إضافة عمود
-      // سنستخدم RPC function لحفظ المستوى
-      const { error } = await supabase.rpc('update_user_subscription_level', {
-        user_email: id,
-        new_level: level
-      });
-
-      if (error) {
-        console.error('خطأ في تحديث مستوى الاشتراك:', error);
-        // إذا فشل RPC، نجرب تحديث الجدول مباشرة إذا كان هناك عمود subscription_level
-        const { error: directError } = await supabase
-          .from('profiles')
-          .update({ subscription_level: level })
-          .eq('id', id);
-        
-        if (directError) {
-          console.error('خطأ في التحديث المباشر:', directError);
-          throw directError;
-        }
-      }
+      // حفظ المستوى محلياً
+      setStoredLevel(id, level);
+      
+      // إعادة تحميل البيانات لتحديث العرض
+      await loadSubscribers();
       
       console.log('تم تحديث مستوى الاشتراك بنجاح');
     } catch (error) {
@@ -270,6 +271,11 @@ export const useSubscribers = () => {
       if (permissionError) {
         console.error('خطأ في حذف أذونات المشترك:', permissionError);
       }
+
+      // حذف المستوى المحفوظ محلياً
+      const levels = getStoredLevels();
+      delete levels[id];
+      localStorage.setItem(SUBSCRIPTION_LEVELS_KEY, JSON.stringify(levels));
 
       console.log('تم حذف المشترك بنجاح');
     } catch (error) {
