@@ -54,12 +54,18 @@ export const useSubscribers = () => {
           // البحث عن الملف الشخصي المطابق
           const profile = (profilesData || []).find(p => p.id === permission.email) as ProfileWithLevel;
           
+          // التأكد من أن مستوى الاشتراك هو من النوع الصحيح
+          let subscriptionLevel: 1 | 2 | 3 | 4 | 5 = 1;
+          if (profile?.subscription_level && profile.subscription_level >= 1 && profile.subscription_level <= 5) {
+            subscriptionLevel = profile.subscription_level as 1 | 2 | 3 | 4 | 5;
+          }
+          
           formattedSubscribers.push({
             id: permission.id,
             email: permission.email,
             nickname: profile?.nickname || 'غير محدد',
             subscription_status: permission.is_active ? 'active' : 'inactive',
-            subscription_level: profile?.subscription_level || 1, // جلب المستوى من profiles
+            subscription_level: subscriptionLevel,
             subscription_date: permission.granted_at,
             last_login: profile?.updated_at || null
           });
@@ -72,12 +78,18 @@ export const useSubscribers = () => {
           const profileWithLevel = profile as ProfileWithLevel;
           const hasPermission = (permissionsData || []).some(p => p.email === profile.id);
           if (!hasPermission) {
+            // التأكد من أن مستوى الاشتراك هو من النوع الصحيح
+            let subscriptionLevel: 1 | 2 | 3 | 4 | 5 = 1;
+            if (profileWithLevel.subscription_level && profileWithLevel.subscription_level >= 1 && profileWithLevel.subscription_level <= 5) {
+              subscriptionLevel = profileWithLevel.subscription_level as 1 | 2 | 3 | 4 | 5;
+            }
+            
             formattedSubscribers.push({
               id: profile.id,
               email: profile.id,
               nickname: profile.nickname || 'غير محدد',
               subscription_status: 'pending',
-              subscription_level: profileWithLevel.subscription_level || 1, // المستوى من profiles
+              subscription_level: subscriptionLevel,
               subscription_date: profile.created_at,
               last_login: profile.updated_at
             });
@@ -147,7 +159,6 @@ export const useSubscribers = () => {
         .insert({
           id: subscriber.email,
           nickname: subscriber.nickname,
-          // سنحفظ المستوى في حقل مخصص أو استخدام RPC
         })
         .select()
         .single();
@@ -208,9 +219,26 @@ export const useSubscribers = () => {
     try {
       console.log('Updating subscription level:', { id, level });
       
-      // تحديث المستوى في جدول profiles
-      // نحتاج إلى استخدام RPC أو إضافة عمود للمستوى
-      console.log('Level update not implemented yet - need database schema update');
+      // نحتاج إلى تحديث المستوى في جدول profiles باستخدام RPC أو إضافة عمود
+      // سنستخدم RPC function لحفظ المستوى
+      const { error } = await supabase.rpc('update_user_subscription_level', {
+        user_email: id,
+        new_level: level
+      });
+
+      if (error) {
+        console.error('خطأ في تحديث مستوى الاشتراك:', error);
+        // إذا فشل RPC، نجرب تحديث الجدول مباشرة إذا كان هناك عمود subscription_level
+        const { error: directError } = await supabase
+          .from('profiles')
+          .update({ subscription_level: level })
+          .eq('id', id);
+        
+        if (directError) {
+          console.error('خطأ في التحديث المباشر:', directError);
+          throw directError;
+        }
+      }
       
       console.log('تم تحديث مستوى الاشتراك بنجاح');
     } catch (error) {
