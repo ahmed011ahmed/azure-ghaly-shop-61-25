@@ -1,15 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
-
-interface Subscriber {
-  id?: string;
-  email: string;
-  nickname: string;
-  subscription_status: 'active' | 'inactive' | 'pending';
-  subscription_date?: string;
-  last_login?: string;
-}
+import { Subscriber, NewSubscriber } from '../types/subscriber';
 
 export const useSubscribers = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
@@ -28,7 +20,6 @@ export const useSubscribers = () => {
 
       if (permissionsError) {
         console.error('خطأ في تحميل أذونات المشتركين:', permissionsError);
-        // لا نرجع هنا، نحاول جلب المشتركين من مكان آخر
       }
 
       console.log('Permissions data:', permissionsData);
@@ -59,6 +50,7 @@ export const useSubscribers = () => {
             email: permission.email,
             nickname: profile?.nickname || 'غير محدد',
             subscription_status: permission.is_active ? 'active' : 'inactive',
+            subscription_level: permission.subscription_level || 1, // إضافة المستوى
             subscription_date: permission.granted_at,
             last_login: profile?.updated_at || null
           });
@@ -75,6 +67,7 @@ export const useSubscribers = () => {
               email: profile.id,
               nickname: profile.nickname || 'غير محدد',
               subscription_status: 'pending',
+              subscription_level: 1, // المستوى الافتراضي
               subscription_date: profile.created_at,
               last_login: profile.updated_at
             });
@@ -134,7 +127,7 @@ export const useSubscribers = () => {
     };
   }, []);
 
-  const addSubscriber = async (subscriber: { email: string; nickname: string }): Promise<void> => {
+  const addSubscriber = async (subscriber: NewSubscriber): Promise<void> => {
     try {
       console.log('Adding new subscriber:', subscriber);
       
@@ -142,7 +135,7 @@ export const useSubscribers = () => {
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .insert({
-          id: subscriber.email, // استخدام الإيميل كـ ID
+          id: subscriber.email,
           nickname: subscriber.nickname
         })
         .select()
@@ -155,20 +148,20 @@ export const useSubscribers = () => {
 
       console.log('Profile added successfully:', profileData);
 
-      // إضافة إلى جدول أذونات المشتركين
+      // إضافة إلى جدول أذونات المشتركين مع المستوى
       const { data: permissionData, error: permissionError } = await supabase
         .from('subscriber_permissions')
         .insert({
           email: subscriber.email,
           is_active: true,
-          granted_by: 'admin'
+          granted_by: 'admin',
+          subscription_level: subscriber.subscription_level
         })
         .select()
         .single();
 
       if (permissionError) {
         console.error('خطأ في إضافة أذونات المشترك:', permissionError);
-        // لا نرمي خطأ هنا لأن المشترك تم إضافته بالفعل
       } else {
         console.log('Permission added successfully:', permissionData);
       }
@@ -197,6 +190,27 @@ export const useSubscribers = () => {
       console.log('تم تحديث حالة الاشتراك بنجاح');
     } catch (error) {
       console.error('خطأ في تحديث حالة الاشتراك:', error);
+      throw error;
+    }
+  };
+
+  const updateSubscriptionLevel = async (id: string, level: 1 | 2 | 3 | 4 | 5): Promise<void> => {
+    try {
+      console.log('Updating subscription level:', { id, level });
+      
+      const { error } = await supabase
+        .from('subscriber_permissions')
+        .update({ subscription_level: level })
+        .eq('email', id);
+
+      if (error) {
+        console.error('خطأ في تحديث مستوى الاشتراك:', error);
+        throw error;
+      }
+
+      console.log('تم تحديث مستوى الاشتراك بنجاح');
+    } catch (error) {
+      console.error('خطأ في تحديث مستوى الاشتراك:', error);
       throw error;
     }
   };
@@ -237,6 +251,7 @@ export const useSubscribers = () => {
     loading,
     addSubscriber,
     updateSubscriptionStatus,
+    updateSubscriptionLevel,
     deleteSubscriber
   };
 };

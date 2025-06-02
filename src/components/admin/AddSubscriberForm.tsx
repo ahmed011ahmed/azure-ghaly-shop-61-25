@@ -7,13 +7,10 @@ import { Label } from '../ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { NewSubscriber, SUBSCRIPTION_LEVELS } from '../../types/subscriber';
 
 interface AddSubscriberFormProps {
-  onAdd: (subscriber: {
-    email: string;
-    nickname: string;
-    subscription_level: 1 | 2 | 3 | 4 | 5;
-  }) => Promise<void>;
+  onAdd: (subscriber: NewSubscriber) => Promise<void>;
   defaultLevel?: number;
 }
 
@@ -48,6 +45,11 @@ const AddSubscriberForm = ({ onAdd, defaultLevel }: AddSubscriberFormProps) => {
       setEmail('');
       setNickname('');
       setSubscriptionLevel(defaultLevel?.toString() || '1');
+      
+      toast({
+        title: "تم بنجاح",
+        description: "تم إضافة المشترك الجديد بنجاح",
+      });
     } catch (error) {
       console.error('Error adding subscriber:', error);
       toast({
@@ -60,16 +62,25 @@ const AddSubscriberForm = ({ onAdd, defaultLevel }: AddSubscriberFormProps) => {
     }
   };
 
+  const getLevelInfo = (level: string) => {
+    const levelNum = parseInt(level);
+    return SUBSCRIPTION_LEVELS.find(l => l.level === levelNum);
+  };
+
   return (
     <Card className="gaming-card">
       <CardHeader className="bg-slate-900">
         <CardTitle className="text-white flex items-center">
           <Plus className="w-5 h-5 mr-2" />
           إضافة مشترك جديد
-          {defaultLevel && <span className="text-purple-400 mr-2">- المستوى {defaultLevel}</span>}
+          {defaultLevel && (
+            <span className="text-purple-400 mr-2">
+              - {SUBSCRIPTION_LEVELS[defaultLevel - 1].name}
+            </span>
+          )}
         </CardTitle>
         <CardDescription className="text-gray-300">
-          إضافة مشترك جديد إلى النظام
+          إضافة مشترك جديد إلى النظام مع تحديد مستوى الاشتراك
         </CardDescription>
       </CardHeader>
       <CardContent className="bg-slate-950 pt-6">
@@ -106,13 +117,21 @@ const AddSubscriberForm = ({ onAdd, defaultLevel }: AddSubscriberFormProps) => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">المستوى 1 - برونزي</SelectItem>
-                <SelectItem value="2">المستوى 2 - فضي</SelectItem>
-                <SelectItem value="3">المستوى 3 - ذهبي</SelectItem>
-                <SelectItem value="4">المستوى 4 - بلاتيني</SelectItem>
-                <SelectItem value="5">المستوى 5 - ماسي</SelectItem>
+                {SUBSCRIPTION_LEVELS.map((level) => (
+                  <SelectItem key={level.level} value={level.level.toString()}>
+                    <div className="flex items-center space-x-2">
+                      <span className={level.color}>●</span>
+                      <span>المستوى {level.level} - {level.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
+            {getLevelInfo(subscriptionLevel) && (
+              <p className="text-xs text-gray-400 mt-1">
+                {getLevelInfo(subscriptionLevel)?.description}
+              </p>
+            )}
           </div>
           
           <div className="flex items-end">

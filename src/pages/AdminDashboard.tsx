@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Gift, Settings, Wrench } from 'lucide-react';
+import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Gift, Settings, Wrench, Crown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductManagement from '../components/admin/ProductManagement';
 import ServicesManagement from '../components/admin/ServicesManagement';
@@ -8,6 +9,7 @@ import AdminChat from '../components/admin/AdminChat';
 import UpdatesManagement from '../components/admin/UpdatesManagement';
 import DownloadsManagement from '../components/admin/DownloadsManagement';
 import SubscribersManagement from '../components/admin/SubscribersManagement';
+import SubscriberLevelsManagement from '../components/admin/SubscriberLevelsManagement';
 import UserLookup from '../components/admin/UserLookup';
 import PermissionsManagement from '../components/admin/PermissionsManagement';
 import ContentViewer from '../components/admin/ContentViewer';
@@ -92,6 +94,12 @@ const AdminDashboard = () => {
       id: 'subscribers',
       label: 'إدارة المشتركين',
       icon: Users,
+      permission: 'subscribers'
+    },
+    {
+      id: 'subscriber-levels',
+      label: 'مستويات الاشتراك',
+      icon: Crown,
       permission: 'subscribers'
     },
     {
@@ -337,6 +345,8 @@ const AdminDashboard = () => {
         {activeTab === 'giveaways' && (currentUser?.username === 'GHALY' || hasPermission('giveaways')) && <GiveawaysManagement />}
         
         {activeTab === 'subscribers' && (currentUser?.username === 'GHALY' || hasPermission('subscribers')) && <SubscribersManagement />}
+        
+        {activeTab === 'subscriber-levels' && (currentUser?.username === 'GHALY' || hasPermission('subscribers')) && <SubscriberLevelsManagement />}
         
         {activeTab === 'user-lookup' && (currentUser?.username === 'GHALY' || hasPermission('user-lookup')) && <UserLookup />}
         
