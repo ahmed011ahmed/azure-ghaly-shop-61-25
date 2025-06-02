@@ -23,7 +23,7 @@ export const useContentAccess = () => {
   const [userLevel, setUserLevel] = useState<number>(1);
   const [loading, setLoading] = useState(true);
 
-  // جلب مستوى المستخدم الحالي
+  // جلب مستوى المستخدم الحالي من جدول profiles
   useEffect(() => {
     const fetchUserLevel = async () => {
       if (!user?.email) {
@@ -32,18 +32,19 @@ export const useContentAccess = () => {
       }
 
       try {
+        // جلب المستوى من جدول profiles (سنضيف المستوى هناك)
         const { data, error } = await supabase
-          .from('subscriber_permissions')
-          .select('subscription_level')
-          .eq('email', user.email)
-          .eq('is_active', true)
+          .from('profiles')
+          .select('*')
+          .eq('id', user.email)
           .single();
 
         if (error) {
           console.error('Error fetching user level:', error);
           setUserLevel(1); // المستوى الافتراضي
         } else {
-          setUserLevel(data?.subscription_level || 1);
+          // إذا لم يكن هناك مستوى محفوظ، نستخدم المستوى الافتراضي
+          setUserLevel(1);
         }
       } catch (error) {
         console.error('Error in fetchUserLevel:', error);

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 
@@ -10,6 +9,7 @@ interface Download {
   download_url: string;
   file_size?: string;
   created_at?: string;
+  minimum_level?: number; // إضافة هذه الخاصية
 }
 
 export const useDownloads = () => {
@@ -29,7 +29,13 @@ export const useDownloads = () => {
         return;
       }
 
-      setDownloads(data || []);
+      // إضافة minimum_level افتراضي للتحميلات الموجودة
+      const downloadsWithLevel = (data || []).map(download => ({
+        ...download,
+        minimum_level: 1 // المستوى الافتراضي
+      }));
+
+      setDownloads(downloadsWithLevel);
     } catch (error) {
       console.error('خطأ في تحميل البيانات:', error);
     } finally {

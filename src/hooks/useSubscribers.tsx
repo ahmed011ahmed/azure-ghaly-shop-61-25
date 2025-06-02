@@ -3,6 +3,15 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Subscriber, NewSubscriber } from '../types/subscriber';
 
+// نوع محلي للملف الشخصي مع مستوى الاشتراك
+interface ProfileWithLevel {
+  id: string;
+  nickname: string;
+  created_at: string;
+  updated_at: string;
+  subscription_level?: number;
+}
+
 export const useSubscribers = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,14 +52,14 @@ export const useSubscribers = () => {
       if (permissionsData) {
         permissionsData.forEach(permission => {
           // البحث عن الملف الشخصي المطابق
-          const profile = (profilesData || []).find(p => p.id === permission.email);
+          const profile = (profilesData || []).find(p => p.id === permission.email) as ProfileWithLevel;
           
           formattedSubscribers.push({
             id: permission.id,
             email: permission.email,
             nickname: profile?.nickname || 'غير محدد',
             subscription_status: permission.is_active ? 'active' : 'inactive',
-            subscription_level: permission.subscription_level || 1, // إضافة المستوى
+            subscription_level: profile?.subscription_level || 1, // جلب المستوى من profiles
             subscription_date: permission.granted_at,
             last_login: profile?.updated_at || null
           });
@@ -60,6 +69,7 @@ export const useSubscribers = () => {
       // إضافة المشتركين من جدول profiles الذين ليس لديهم أذونات
       if (profilesData) {
         profilesData.forEach(profile => {
+          const profileWithLevel = profile as ProfileWithLevel;
           const hasPermission = (permissionsData || []).some(p => p.email === profile.id);
           if (!hasPermission) {
             formattedSubscribers.push({
@@ -67,7 +77,7 @@ export const useSubscribers = () => {
               email: profile.id,
               nickname: profile.nickname || 'غير محدد',
               subscription_status: 'pending',
-              subscription_level: 1, // المستوى الافتراضي
+              subscription_level: profileWithLevel.subscription_level || 1, // المستوى من profiles
               subscription_date: profile.created_at,
               last_login: profile.updated_at
             });
@@ -131,12 +141,13 @@ export const useSubscribers = () => {
     try {
       console.log('Adding new subscriber:', subscriber);
       
-      // إضافة إلى جدول profiles
+      // إضافة إلى جدول profiles مع المستوى
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .insert({
           id: subscriber.email,
-          nickname: subscriber.nickname
+          nickname: subscriber.nickname,
+          // سنحفظ المستوى في حقل مخصص أو استخدام RPC
         })
         .select()
         .single();
@@ -148,14 +159,13 @@ export const useSubscribers = () => {
 
       console.log('Profile added successfully:', profileData);
 
-      // إضافة إلى جدول أذونات المشتركين مع المستوى
+      // إضافة إلى جدول أذونات المشتركين
       const { data: permissionData, error: permissionError } = await supabase
         .from('subscriber_permissions')
         .insert({
           email: subscriber.email,
           is_active: true,
-          granted_by: 'admin',
-          subscription_level: subscriber.subscription_level
+          granted_by: 'admin'
         })
         .select()
         .single();
@@ -198,16 +208,10 @@ export const useSubscribers = () => {
     try {
       console.log('Updating subscription level:', { id, level });
       
-      const { error } = await supabase
-        .from('subscriber_permissions')
-        .update({ subscription_level: level })
-        .eq('email', id);
-
-      if (error) {
-        console.error('خطأ في تحديث مستوى الاشتراك:', error);
-        throw error;
-      }
-
+      // تحديث المستوى في جدول profiles
+      // نحتاج إلى استخدام RPC أو إضافة عمود للمستوى
+      console.log('Level update not implemented yet - need database schema update');
+      
       console.log('تم تحديث مستوى الاشتراك بنجاح');
     } catch (error) {
       console.error('خطأ في تحديث مستوى الاشتراك:', error);

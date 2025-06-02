@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 
@@ -8,6 +7,7 @@ interface Update {
   description: string;
   version: string;
   created_at?: string;
+  minimum_level?: number; // إضافة هذه الخاصية
 }
 
 export const useUpdates = () => {
@@ -27,7 +27,13 @@ export const useUpdates = () => {
         return;
       }
 
-      setUpdates(data || []);
+      // إضافة minimum_level افتراضي للتحديثات الموجودة
+      const updatesWithLevel = (data || []).map(update => ({
+        ...update,
+        minimum_level: 1 // المستوى الافتراضي
+      }));
+
+      setUpdates(updatesWithLevel);
     } catch (error) {
       console.error('خطأ في تحميل البيانات:', error);
     } finally {
