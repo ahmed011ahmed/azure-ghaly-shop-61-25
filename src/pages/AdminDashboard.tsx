@@ -63,39 +63,6 @@ const AdminDashboard = () => {
     return currentUser?.permissions?.includes(permission) || false;
   };
 
-  // إذا لم يكن مسجل الدخول، اظهر صفحة تسجيل الدخول
-  if (!isAuthenticated) {
-    return <AdminLogin onLogin={handleLogin} />;
-  }
-
-  // بيانات إحصائية وهمية
-  const stats = [
-    {
-      title: 'إجمالي المنتجات',
-      value: '4',
-      icon: Package,
-      color: 'text-blue-500'
-    },
-    {
-      title: 'إجمالي المبيعات',
-      value: '$185',
-      icon: DollarSign,
-      color: 'text-green-500'
-    },
-    {
-      title: 'العملاء',
-      value: '127',
-      icon: Users,
-      color: 'text-purple-500'
-    },
-    {
-      title: 'معدل النمو',
-      value: '+12%',
-      icon: TrendingUp,
-      color: 'text-pink-500'
-    }
-  ];
-
   // قائمة جميع الأقسام مع شروط الصلاحيات
   const allTabs = [
     {
@@ -177,13 +144,48 @@ const AdminDashboard = () => {
     tab.permission === null || hasPermission(tab.permission)
   );
 
-  // التحقق من أن التاب النشط متاح للمستخدم
+  // التحقق من أن التاب النشط متاح للمستخدم والتصحيح إذا لزم الأمر
   useEffect(() => {
-    const currentTabAvailable = availableTabs.find(tab => tab.id === activeTab);
-    if (!currentTabAvailable) {
-      setActiveTab('overview');
+    if (currentUser && availableTabs.length > 0) {
+      const currentTabAvailable = availableTabs.find(tab => tab.id === activeTab);
+      if (!currentTabAvailable) {
+        setActiveTab('overview');
+      }
     }
-  }, [currentUser, activeTab]);
+  }, [currentUser, activeTab, availableTabs]);
+
+  // إذا لم يكن مسجل الدخول، اظهر صفحة تسجيل الدخول
+  if (!isAuthenticated) {
+    return <AdminLogin onLogin={handleLogin} />;
+  }
+
+  // بيانات إحصائية وهمية
+  const stats = [
+    {
+      title: 'إجمالي المنتجات',
+      value: '4',
+      icon: Package,
+      color: 'text-blue-500'
+    },
+    {
+      title: 'إجمالي المبيعات',
+      value: '$185',
+      icon: DollarSign,
+      color: 'text-green-500'
+    },
+    {
+      title: 'العملاء',
+      value: '127',
+      icon: Users,
+      color: 'text-purple-500'
+    },
+    {
+      title: 'معدل النمو',
+      value: '+12%',
+      icon: TrendingUp,
+      color: 'text-pink-500'
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900">
