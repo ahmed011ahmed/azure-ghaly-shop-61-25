@@ -176,6 +176,7 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
             </div>
           </div>
 
+          {/* إخفاء حقل الملاحظات مؤقتاً حتى يتم إضافته في قاعدة البيانات
           <div className="space-y-2">
             <Label htmlFor="notes" className="text-white">ملاحظات إضافية (اختياري)</Label>
             <Textarea
@@ -192,6 +193,7 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
               {formData.notes.length}/200 حرف
             </p>
           </div>
+          */}
 
           <div className="flex space-x-3 justify-end pt-4">
             <Button

@@ -86,7 +86,7 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة إضافة حساب جديد:', newAccount);
       
-      // إرسال البيانات الكاملة
+      // إرسال البيانات الأساسية فقط (بدون notes مؤقتاً)
       const accountData: any = {
         product_name: newAccount.productName,
         price: newAccount.price,
@@ -96,14 +96,15 @@ export const usePubgAccounts = () => {
         is_available: true
       };
 
-      // إضافة الحقول الاختيارية
+      // إضافة الحقول الاختيارية فقط إذا كانت متوفرة
       if (newAccount.video && newAccount.video.trim()) {
         accountData.video = newAccount.video;
       }
 
-      if (newAccount.notes && newAccount.notes.trim()) {
-        accountData.notes = newAccount.notes;
-      }
+      // تجاهل حقل notes مؤقتاً حتى يتم إضافته في قاعدة البيانات
+      // if (newAccount.notes && newAccount.notes.trim()) {
+      //   accountData.notes = newAccount.notes;
+      // }
 
       console.log('البيانات التي سيتم إرسالها:', accountData);
 
@@ -147,7 +148,8 @@ export const usePubgAccounts = () => {
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.video !== undefined) dbUpdates.video = updates.video;
       if (updates.rating !== undefined) dbUpdates.rating = updates.rating;
-      if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+      // تجاهل حقل notes مؤقتاً
+      // if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
       if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
       dbUpdates.updated_at = new Date().toISOString();
 
