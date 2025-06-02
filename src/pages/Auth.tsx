@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
@@ -56,7 +55,7 @@ const Auth = () => {
         email,
         password,
         options: {
-          emailRedirectTo: undefined, // Disable automatic email
+          emailRedirectTo: undefined,
           data: {
             nickname: nickname,
           }
@@ -92,11 +91,24 @@ const Auth = () => {
         }
       });
 
+      console.log('Verification link response:', { linkData, linkError });
+
       if (linkError) {
         console.error('Error sending verification link:', linkError);
         toast({
           title: 'خطأ',
           description: 'فشل في إرسال رابط التحقق، يرجى المحاولة مرة أخرى',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      if (!linkData?.success) {
+        console.error('Verification link failed:', linkData);
+        toast({
+          title: 'خطأ',
+          description: linkData?.error || 'فشل في إرسال رابط التحقق',
           variant: 'destructive',
         });
         setIsLoading(false);
