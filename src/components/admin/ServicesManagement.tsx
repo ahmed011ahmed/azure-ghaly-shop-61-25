@@ -28,13 +28,13 @@ const ServicesManagement = () => {
   };
 
   const handleDeleteService = async (id: number) => {
-    if (window.confirm('هل أنت متأكد من حذف هذه الخدمة؟')) {
+    if (window.confirm('هل أنت متأكد من حذف هذا الحساب؟')) {
       try {
         setActionLoading(id);
         await deleteService(id);
       } catch (error) {
         console.error('Error deleting service:', error);
-        alert('حدث خطأ أثناء حذف الخدمة');
+        alert('حدث خطأ أثناء حذف الحساب');
       } finally {
         setActionLoading(null);
       }
@@ -52,7 +52,7 @@ const ServicesManagement = () => {
       setEditingService(null);
     } catch (error) {
       console.error('Error saving service:', error);
-      alert('حدث خطأ أثناء حفظ الخدمة');
+      alert('حدث خطأ أثناء حفظ الحساب');
     }
   };
 
@@ -80,8 +80,8 @@ const ServicesManagement = () => {
       {/* Header with Add Button */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white">إدارة الخدمات</h2>
-          <p className="text-gray-300 mt-1">إضافة وتعديل وحذف الخدمات</p>
+          <h2 className="text-2xl font-bold text-white">إدارة الحسابات</h2>
+          <p className="text-gray-300 mt-1">إضافة وتعديل وحذف الحسابات</p>
         </div>
         <Button 
           onClick={handleAddService} 
@@ -89,7 +89,7 @@ const ServicesManagement = () => {
           disabled={loading}
         >
           <Plus className="w-4 h-4 mr-2" />
-          إضافة خدمة جديدة
+          إضافة حساب جديد
         </Button>
       </div>
 
@@ -98,10 +98,10 @@ const ServicesManagement = () => {
         <CardContent className="pt-6 bg-slate-950">
           <div className="flex items-center space-x-4">
             <div className="flex-1">
-              <Label htmlFor="search" className="text-gray-300">البحث في الخدمات</Label>
+              <Label htmlFor="search" className="text-gray-300">البحث في الحسابات</Label>
               <Input 
                 id="search"
-                placeholder="ابحث باسم الخدمة أو الوصف أو الفئة..." 
+                placeholder="ابحث باسم الحساب أو الوصف أو الفئة..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="mt-1 bg-gray-800/50 border-gray-600 text-white" 
@@ -116,17 +116,17 @@ const ServicesManagement = () => {
       <Card className="gaming-card">
         <CardHeader className="bg-slate-900">
           <CardTitle className="text-slate-50">
-            قائمة الخدمات ({loading ? '...' : filteredServices.length})
+            قائمة الحسابات ({loading ? '...' : filteredServices.length})
           </CardTitle>
           <CardDescription className="text-gray-300">
-            جميع الخدمات المتاحة في الموقع
+            جميع الحسابات المتاحة في الموقع
           </CardDescription>
         </CardHeader>
         <CardContent className="bg-slate-950">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
-              <span className="text-gray-300 mr-3">جاري تحميل الخدمات...</span>
+              <span className="text-gray-300 mr-3">جاري تحميل الحسابات...</span>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -134,7 +134,7 @@ const ServicesManagement = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-gray-300">الصورة</TableHead>
-                    <TableHead className="text-gray-300">اسم الخدمة</TableHead>
+                    <TableHead className="text-gray-300">اسم الحساب</TableHead>
                     <TableHead className="text-gray-300">الفئة</TableHead>
                     <TableHead className="text-gray-300">السعر</TableHead>
                     <TableHead className="text-gray-300">التقييم</TableHead>
@@ -217,14 +217,14 @@ const ServicesManagement = () => {
           {!loading && filteredServices.length === 0 && (
             <div className="text-center py-12">
               <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-300 mb-2">لا توجد خدمات</h3>
+              <h3 className="text-lg font-medium text-gray-300 mb-2">لا توجد حسابات</h3>
               <p className="text-gray-500 mb-4">
-                {searchTerm ? 'لم يتم العثور على خدمات تطابق البحث' : 'لم يتم إضافة أي خدمات بعد'}
+                {searchTerm ? 'لم يتم العثور على حسابات تطابق البحث' : 'لم يتم إضافة أي حسابات بعد'}
               </p>
               {!searchTerm && (
                 <Button onClick={handleAddService} className="bg-gaming-gradient">
                   <Plus className="w-4 h-4 mr-2" />
-                  إضافة أول خدمة
+                  إضافة أول حساب
                 </Button>
               )}
             </div>

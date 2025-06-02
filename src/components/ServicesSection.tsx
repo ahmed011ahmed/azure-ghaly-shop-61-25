@@ -11,20 +11,20 @@ const ServicesSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            خدمات <span className="bg-gaming-gradient bg-clip-text text-transparent">احترافية</span>
+            حسابات <span className="bg-gaming-gradient bg-clip-text text-transparent">احترافية</span>
           </h2>
           <p className="text-xl text-purple-200 max-w-2xl mx-auto mb-4">
-            خدمات متخصصة لتطوير تجربة اللعب وتحسين الأداء
+            حسابات متخصصة لتطوير تجربة اللعب وتحسين الأداء
           </p>
           <p className="text-lg text-pink-400 font-semibold">
-            خدمات عالية الجودة بأسعار تنافسية
+            حسابات عالية الجودة بأسعار تنافسية
           </p>
         </div>
         
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
-            <span className="text-gray-300 mr-3">جاري تحميل الخدمات...</span>
+            <span className="text-gray-300 mr-3">جاري تحميل الحسابات...</span>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

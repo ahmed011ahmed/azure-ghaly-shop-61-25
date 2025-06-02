@@ -41,7 +41,7 @@ const ServiceForm = ({ service, onSave, onCancel }: ServiceFormProps) => {
     const newErrors: Record<string, string> = {};
     
     if (!formData.name.trim()) {
-      newErrors.name = 'اسم الخدمة مطلوب';
+      newErrors.name = 'اسم الحساب مطلوب';
     }
     
     if (!formData.price.trim()) {
@@ -51,7 +51,7 @@ const ServiceForm = ({ service, onSave, onCancel }: ServiceFormProps) => {
     }
     
     if (!formData.description.trim()) {
-      newErrors.description = 'وصف الخدمة مطلوب';
+      newErrors.description = 'وصف الحساب مطلوب';
     } else if (formData.description.length < 20) {
       newErrors.description = 'الوصف يجب أن يكون 20 حرف على الأقل';
     }
@@ -63,7 +63,7 @@ const ServiceForm = ({ service, onSave, onCancel }: ServiceFormProps) => {
     }
     
     if (!formData.category.trim()) {
-      newErrors.category = 'فئة الخدمة مطلوبة';
+      newErrors.category = 'فئة الحساب مطلوبة';
     }
     
     if (formData.rating < 1 || formData.rating > 5) {
@@ -117,30 +117,30 @@ const ServiceForm = ({ service, onSave, onCancel }: ServiceFormProps) => {
         </Button>
         
         <h2 className="text-2xl font-bold text-white">
-          {service ? 'تعديل الخدمة' : 'إضافة خدمة جديدة'}
+          {service ? 'تعديل الحساب' : 'إضافة حساب جديد'}
         </h2>
         <p className="text-gray-300 mt-1">
-          {service ? 'قم بتعديل بيانات الخدمة' : 'أدخل بيانات الخدمة الجديدة'}
+          {service ? 'قم بتعديل بيانات الحساب' : 'أدخل بيانات الحساب الجديد'}
         </p>
       </div>
 
       <Card className="gaming-card">
         <CardHeader className="bg-slate-950">
-          <CardTitle className="text-white">بيانات الخدمة</CardTitle>
+          <CardTitle className="text-white">بيانات الحساب</CardTitle>
           <CardDescription className="text-gray-300">
             جميع الحقول مطلوبة
           </CardDescription>
         </CardHeader>
         <CardContent className="bg-gray-950">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* اسم الخدمة */}
+            {/* اسم الحساب */}
             <div>
-              <Label htmlFor="name" className="text-gray-300">اسم الخدمة</Label>
+              <Label htmlFor="name" className="text-gray-300">اسم الحساب</Label>
               <Input 
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder="مثال: 🔒 خدمة الأمان المتقدم"
+                placeholder="مثال: 🔒 حساب بوبجي متقدم"
                 className={`mt-1 bg-gray-800/50 border-gray-600 text-white ${errors.name ? 'border-red-500' : ''}`}
               />
               {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
@@ -160,14 +160,14 @@ const ServiceForm = ({ service, onSave, onCancel }: ServiceFormProps) => {
               <p className="text-gray-500 text-sm mt-1">السعر يجب أن يبدأ بعلامة $</p>
             </div>
 
-            {/* فئة الخدمة */}
+            {/* فئة الحساب */}
             <div>
-              <Label htmlFor="category" className="text-gray-300">فئة الخدمة</Label>
+              <Label htmlFor="category" className="text-gray-300">فئة الحساب</Label>
               <Input 
                 id="category"
                 value={formData.category}
                 onChange={(e) => handleInputChange('category', e.target.value)}
-                placeholder="مثال: أمان، أداء، تدريب"
+                placeholder="مثال: بوبجي، فورتنايت، كول أوف ديوتي"
                 className={`mt-1 bg-gray-800/50 border-gray-600 text-white ${errors.category ? 'border-red-500' : ''}`}
               />
               {errors.category && <p className="text-red-400 text-sm mt-1">{errors.category}</p>}
@@ -175,12 +175,12 @@ const ServiceForm = ({ service, onSave, onCancel }: ServiceFormProps) => {
 
             {/* الوصف */}
             <div>
-              <Label htmlFor="description" className="text-gray-300">وصف الخدمة</Label>
+              <Label htmlFor="description" className="text-gray-300">وصف الحساب</Label>
               <textarea 
                 id="description"
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder="أدخل وصف تفصيلي للخدمة..."
+                placeholder="أدخل وصف تفصيلي للحساب..."
                 rows={4}
                 className={`mt-1 w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none ${errors.description ? 'border-red-500' : ''}`}
               />
@@ -259,7 +259,7 @@ const ServiceForm = ({ service, onSave, onCancel }: ServiceFormProps) => {
                 type="submit" 
                 className="bg-gaming-gradient hover:shadow-lg hover:shadow-purple-500/25"
               >
-                {service ? 'حفظ التعديلات' : 'إضافة الخدمة'}
+                {service ? 'حفظ التعديلات' : 'إضافة الحساب'}
               </Button>
             </div>
           </form>
