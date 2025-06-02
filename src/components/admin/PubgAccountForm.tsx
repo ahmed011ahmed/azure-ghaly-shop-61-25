@@ -16,7 +16,7 @@ interface PubgAccountFormProps {
 const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel }) => {
   const [formData, setFormData] = useState<NewPubgAccount>({
     productName: '',
-    price: 0,
+    price: 0, // سيتم تجاهل هذا الحقل
     image: '',
     description: '',
     video: '',
@@ -37,7 +37,6 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
     if (!formData.image.trim()) {
       newErrors.image = 'رابط الصورة مطلوب';
     } else {
-      // التحقق من صحة رابط الصورة
       try {
         new URL(formData.image);
       } catch {
@@ -49,10 +48,6 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
       newErrors.description = 'الوصف مطلوب';
     } else if (formData.description.length < 20) {
       newErrors.description = 'الوصف يجب أن يكون 20 حرف على الأقل';
-    }
-
-    if (formData.price < 0) {
-      newErrors.price = 'السعر يجب أن يكون أكبر من أو يساوي 0';
     }
 
     if (formData.video && formData.video.trim()) {
@@ -79,10 +74,9 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
     try {
       console.log('إرسال بيانات النموذج:', formData);
       
-      // تنظيف البيانات قبل الإرسال
       const cleanedData: NewPubgAccount = {
         productName: formData.productName.trim(),
-        price: Number(formData.price),
+        price: 0, // قيمة افتراضية
         image: formData.image.trim(),
         description: formData.description.trim(),
         video: formData.video?.trim() || undefined,
@@ -92,7 +86,6 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
 
       await onSubmit(cleanedData);
       
-      // إعادة تعيين النموذج عند النجاح
       setFormData({
         productName: '',
         price: 0,
@@ -114,10 +107,9 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'price' || name === 'rating' ? Number(value) : value
+      [name]: name === 'rating' ? Number(value) : value
     }));
 
-    // إزالة الخطأ عند تعديل الحقل
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -162,23 +154,6 @@ const PubgAccountForm: React.FC<PubgAccountFormProps> = ({ onSubmit, onCancel })
               required
             />
             {errors.productName && <p className="text-red-400 text-sm">{errors.productName}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="price" className="text-white">السعر (بالدولار) *</Label>
-            <Input
-              id="price"
-              name="price"
-              type="number"
-              min="0"
-              step="0.01"
-              value={formData.price}
-              onChange={handleChange}
-              className={`bg-gray-800 border-gray-600 text-white ${errors.price ? 'border-red-500' : ''}`}
-              placeholder="25.00"
-              required
-            />
-            {errors.price && <p className="text-red-400 text-sm">{errors.price}</p>}
           </div>
 
           <div className="space-y-2">

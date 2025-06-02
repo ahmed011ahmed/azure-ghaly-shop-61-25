@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { PubgAccount, NewPubgAccount } from '../types/pubgAccount';
@@ -35,14 +34,14 @@ export const usePubgAccounts = () => {
         return {
           id: account.id,
           randomId: randomId,
-          productName: account.product_name || account.productName || 'حساب PUBG',
-          price: account.price || 0,
+          productName: account.product_name || 'حساب PUBG',
+          price: 0, // قيمة افتراضية حيث أن الجدول لا يحتوي على عمود السعر
           image: account.image,
           description: account.description,
           video: account.video || undefined,
           rating: account.rating || 5,
           notes: account.notes || undefined,
-          isAvailable: account.is_available !== false, // default to true if not specified
+          isAvailable: account.is_available !== false,
           createdAt: account.created_at,
           updatedAt: account.updated_at
         };
@@ -72,7 +71,7 @@ export const usePubgAccounts = () => {
         },
         (payload) => {
           console.log('تم تحديث بيانات حسابات PUBG:', payload);
-          loadAccounts(); // إعادة تحميل البيانات عند حدوث تغيير
+          loadAccounts();
         }
       )
       .subscribe();
@@ -91,10 +90,9 @@ export const usePubgAccounts = () => {
         throw new Error('البيانات المطلوبة مفقودة');
       }
 
-      // إعداد البيانات للإرسال إلى قاعدة البيانات
+      // إعداد البيانات للإرسال إلى قاعدة البيانات (بدون حقل السعر)
       const accountData: any = {
         product_name: newAccount.productName,
-        price: Number(newAccount.price) || 0,
         image: newAccount.image,
         description: newAccount.description,
         rating: Number(newAccount.rating) || 5,
@@ -145,10 +143,9 @@ export const usePubgAccounts = () => {
     try {
       console.log('محاولة تحديث الحساب:', id, updates);
       
-      // تحديث فقط الحقول الموجودة في قاعدة البيانات
+      // تحديث فقط الحقول الموجودة في قاعدة البيانات (بدون السعر)
       const dbUpdates: any = {};
       if (updates.productName !== undefined) dbUpdates.product_name = updates.productName;
-      if (updates.price !== undefined) dbUpdates.price = Number(updates.price);
       if (updates.image !== undefined) dbUpdates.image = updates.image;
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.video !== undefined) dbUpdates.video = updates.video;
@@ -177,7 +174,6 @@ export const usePubgAccounts = () => {
         title: "تم تحديث الحساب بنجاح",
         description: "تم تحديث حساب PUBG بنجاح.",
       });
-      // إعادة تحميل البيانات بعد التحديث
       await loadAccounts();
     } catch (error) {
       console.error('خطأ في تحديث الحساب:', error);
@@ -209,7 +205,6 @@ export const usePubgAccounts = () => {
         title: "تم حذف الحساب بنجاح",
         description: "تم حذف حساب PUBG بنجاح.",
       });
-      // إعادة تحميل البيانات بعد الحذف
       await loadAccounts();
     } catch (error) {
       console.error('خطأ في حذف الحساب:', error);
