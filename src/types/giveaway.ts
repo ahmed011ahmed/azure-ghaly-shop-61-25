@@ -19,5 +19,5 @@ export interface NewGiveaway {
   image: string;
   prize: string;
   endDate: string;
-  participationLink?: string; // رابط المشاركة
+  participationLink: string; // إزالة ? لجعله مطلوب
 }

@@ -71,6 +71,8 @@ export const useGiveaways = () => {
 
   const addGiveaway = async (newGiveaway: NewGiveaway): Promise<void> => {
     try {
+      console.log('Adding giveaway with data:', newGiveaway);
+      
       const { error } = await supabase
         .from('giveaways')
         .insert({
@@ -79,7 +81,7 @@ export const useGiveaways = () => {
           image: newGiveaway.image,
           prize: newGiveaway.prize,
           end_date: newGiveaway.endDate,
-          participation_link: newGiveaway.participationLink,
+          participation_link: newGiveaway.participationLink || null,
           is_active: true,
           participants_count: 0
         });

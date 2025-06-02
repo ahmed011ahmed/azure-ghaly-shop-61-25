@@ -23,6 +23,14 @@ const GiveawayForm: React.FC<GiveawayFormProps> = ({ onSubmit, onCancel }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form data being submitted:', formData);
+    
+    // التحقق من أن جميع الحقول المطلوبة مملوءة
+    if (!formData.title || !formData.description || !formData.image || !formData.prize || !formData.endDate) {
+      alert('يرجى ملء جميع الحقول المطلوبة');
+      return;
+    }
+    
     onSubmit(formData);
     // إعادة تعيين النموذج
     setFormData({
@@ -37,6 +45,7 @@ const GiveawayForm: React.FC<GiveawayFormProps> = ({ onSubmit, onCancel }) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    console.log(`Field ${name} changed to:`, value);
     setFormData(prev => ({
       ...prev,
       [name]: value
