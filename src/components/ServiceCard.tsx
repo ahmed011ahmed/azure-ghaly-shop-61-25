@@ -1,21 +1,24 @@
 
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingCart, Heart, Play } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useState } from 'react';
 
 interface ServiceCardProps {
   id: number;
   name: string;
   price: string;
   image: string;
+  video?: string;
   description: string;
   rating: number;
   category: string;
 }
 
-const ServiceCard = ({ id, name, price, image, description, rating, category }: ServiceCardProps) => {
+const ServiceCard = ({ id, name, price, image, video, description, rating, category }: ServiceCardProps) => {
   const { addItem } = useCart();
   const { t } = useLanguage();
+  const [showVideo, setShowVideo] = useState(false);
 
   const handleAddToCart = () => {
     addItem({ id, name, price, image });
@@ -26,14 +29,48 @@ const ServiceCard = ({ id, name, price, image, description, rating, category }: 
     console.log(`Adding service ${name} to favorites`);
   };
 
+  const toggleVideo = () => {
+    setShowVideo(!showVideo);
+  };
+
   return (
     <div className="gaming-card overflow-hidden group">
       <div className="relative overflow-hidden">
-        <img 
-          src={image} 
-          alt={name}
-          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-        />
+        {showVideo && video ? (
+          <div className="relative">
+            <video 
+              src={video} 
+              controls
+              className="w-full h-64 object-cover"
+              onEnded={() => setShowVideo(false)}
+            />
+            <button 
+              onClick={toggleVideo}
+              className="absolute top-2 right-2 bg-gray-900/90 backdrop-blur-sm p-2 rounded-full hover:bg-gray-800/90 transition-colors"
+            >
+              <span className="text-white text-sm">×</span>
+            </button>
+          </div>
+        ) : (
+          <>
+            <img 
+              src={image} 
+              alt={name}
+              className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+            />
+            {video && (
+              <button 
+                onClick={toggleVideo}
+                className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <div className="bg-purple-600/90 backdrop-blur-sm p-4 rounded-full hover:bg-purple-500/90 transition-colors">
+                  <Play className="w-8 h-8 text-white fill-current" />
+                </div>
+              </button>
+            )}
+          </>
+        )}
+        
         <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
           <button 
             onClick={handleAddToFavorites}

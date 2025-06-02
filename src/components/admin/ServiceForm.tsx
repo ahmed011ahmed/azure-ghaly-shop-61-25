@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Star } from 'lucide-react';
+import { ArrowLeft, Star, Play } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -19,6 +19,7 @@ const ServiceForm = ({ service, onSave, onCancel }: ServiceFormProps) => {
     price: '',
     description: '',
     image: '',
+    video: '',
     rating: 5,
     category: ''
   });
@@ -31,6 +32,7 @@ const ServiceForm = ({ service, onSave, onCancel }: ServiceFormProps) => {
         price: service.price,
         description: service.description,
         image: service.image,
+        video: service.video || '',
         rating: service.rating,
         category: service.category
       });
@@ -60,6 +62,10 @@ const ServiceForm = ({ service, onSave, onCancel }: ServiceFormProps) => {
       newErrors.image = 'رابط الصورة مطلوب';
     } else if (!isValidUrl(formData.image)) {
       newErrors.image = 'رابط الصورة غير صحيح';
+    }
+
+    if (formData.video && !isValidUrl(formData.video)) {
+      newErrors.video = 'رابط الفيديو غير صحيح';
     }
     
     if (!formData.category.trim()) {
@@ -128,7 +134,7 @@ const ServiceForm = ({ service, onSave, onCancel }: ServiceFormProps) => {
         <CardHeader className="bg-slate-950">
           <CardTitle className="text-white">بيانات الحساب</CardTitle>
           <CardDescription className="text-gray-300">
-            جميع الحقول مطلوبة
+            جميع الحقول مطلوبة عدا الفيديو
           </CardDescription>
         </CardHeader>
         <CardContent className="bg-gray-950">
@@ -210,6 +216,40 @@ const ServiceForm = ({ service, onSave, onCancel }: ServiceFormProps) => {
                     <img 
                       src={formData.image} 
                       alt="معاينة" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* رابط الفيديو */}
+            <div>
+              <Label htmlFor="video" className="text-gray-300">رابط الفيديو (اختياري)</Label>
+              <Input 
+                id="video"
+                value={formData.video}
+                onChange={(e) => handleInputChange('video', e.target.value)}
+                placeholder="https://example.com/video.mp4"
+                className={`mt-1 bg-gray-800/50 border-gray-600 text-white ${errors.video ? 'border-red-500' : ''}`}
+              />
+              {errors.video && <p className="text-red-400 text-sm mt-1">{errors.video}</p>}
+              <p className="text-gray-500 text-sm mt-1">يمكن ترك هذا الحقل فارغاً إذا لم تكن تريد إضافة فيديو</p>
+              
+              {/* معاينة الفيديو */}
+              {formData.video && isValidUrl(formData.video) && (
+                <div className="mt-4">
+                  <p className="text-gray-300 text-sm mb-2 flex items-center gap-2">
+                    <Play className="w-4 h-4" />
+                    معاينة الفيديو:
+                  </p>
+                  <div className="w-64 h-36 rounded-lg overflow-hidden bg-gray-700">
+                    <video 
+                      src={formData.video} 
+                      controls
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
