@@ -1,3 +1,4 @@
+
 import { ShoppingCart, Heart, Play } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
