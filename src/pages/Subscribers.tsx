@@ -17,7 +17,7 @@ const Subscribers = () => {
   const { toast } = useToast();
   const { updates, loading: updatesLoading } = useUpdates();
   const { downloads, loading: downloadsLoading } = useDownloads();
-  const { userLevel, loading: contentLoading, filterContentByLevel, hasPermission } = useContentAccess();
+  const { userLevel, loading: contentLoading, availableContent, hasPermission } = useContentAccess();
 
   const handleDownload = (name: string, url: string) => {
     toast({
@@ -147,9 +147,9 @@ const Subscribers = () => {
     );
   }
 
-  // فلترة المحتوى حسب مستوى المستخدم
-  const accessibleDownloads = filterContentByLevel(downloads.map(d => ({ ...d, minimum_level: d.minimum_level || 1 })));
-  const accessibleUpdates = filterContentByLevel(updates.map(u => ({ ...u, minimum_level: u.minimum_level || 1 })));
+  // فلترة المحتوى حسب مستوى المستخدم - استخدام availableContent المتاح بالفعل
+  const accessibleDownloads = availableContent.filter(item => item.type === 'download');
+  const accessibleUpdates = availableContent.filter(item => item.type === 'update');
   
   const currentLevelInfo = getCurrentLevelInfo();
 
