@@ -12,7 +12,6 @@ import SubscriberLevelsManagement from '../components/admin/SubscriberLevelsMana
 import UserLookup from '../components/admin/UserLookup';
 import PermissionsManagement from '../components/admin/PermissionsManagement';
 import ContentViewer from '../components/admin/ContentViewer';
-import GiveawaysManagement from '../components/admin/GiveawaysManagement';
 import AdminUsersManagement from '../components/admin/AdminUsersManagement';
 import ContentManagement from '../components/admin/ContentManagement';
 import { Button } from '../components/ui/button';
@@ -83,12 +82,6 @@ const AdminDashboard = () => {
       label: 'إدارة الخدمات',
       icon: Wrench,
       permission: 'services'
-    },
-    {
-      id: 'giveaways',
-      label: 'المسابقات والجوائز',
-      icon: Gift,
-      permission: 'giveaways'
     },
     {
       id: 'content-management',
@@ -347,8 +340,6 @@ const AdminDashboard = () => {
         {activeTab === 'products' && (currentUser?.username === 'GHALY' || hasPermission('products')) && <ProductManagement />}
         
         {activeTab === 'services' && (currentUser?.username === 'GHALY' || hasPermission('services')) && <ServicesManagement />}
-        
-        {activeTab === 'giveaways' && (currentUser?.username === 'GHALY' || hasPermission('giveaways')) && <GiveawaysManagement />}
         
         {activeTab === 'subscribers' && (currentUser?.username === 'GHALY' || hasPermission('subscribers')) && <SubscribersManagement />}
         
