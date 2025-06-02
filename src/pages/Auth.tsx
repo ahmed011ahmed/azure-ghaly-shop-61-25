@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
@@ -51,7 +52,7 @@ const Auth = () => {
     try {
       console.log('Starting signup process for:', email);
       
-      // Create user account
+      // Create user account with email confirmation disabled
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -84,7 +85,7 @@ const Auth = () => {
 
       console.log('User created successfully:', data.user?.id);
 
-      // Generate verification code
+      // Generate verification code (6 digits)
       const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
       
       // Send verification code
@@ -113,7 +114,7 @@ const Auth = () => {
       
       toast({
         title: 'تم إنشاء الحساب بنجاح!',
-        description: 'يرجى تأكيد الإيميل لإكمال التسجيل',
+        description: `تم إرسال كود التحقق المكون من 6 أرقام إلى ${email}`,
       });
 
       // Clear form

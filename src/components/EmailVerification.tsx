@@ -71,7 +71,7 @@ const EmailVerification = ({ email, onVerificationSuccess, onBack }: EmailVerifi
     setIsResending(true);
     
     try {
-      // Generate new verification code
+      // Generate new verification code (6 digits)
       const newCode = Math.floor(100000 + Math.random() * 900000).toString();
       
       console.log('Resending verification code for email:', email);
@@ -89,7 +89,7 @@ const EmailVerification = ({ email, onVerificationSuccess, onBack }: EmailVerifi
 
       toast({
         title: 'تم إرسال الكود',
-        description: 'تم إرسال كود تأكيد جديد إلى بريدك الإلكتروني',
+        description: 'تم إرسال كود تأكيد جديد مكون من 6 أرقام إلى بريدك الإلكتروني',
       });
       
       // Clear the input field
@@ -113,7 +113,7 @@ const EmailVerification = ({ email, onVerificationSuccess, onBack }: EmailVerifi
           تأكيد البريد الإلكتروني
         </CardTitle>
         <CardDescription className="text-gray-300">
-          تم إرسال كود التأكيد إلى: {email}
+          تم إرسال كود مكون من 6 أرقام إلى: {email}
         </CardDescription>
       </CardHeader>
       
@@ -137,6 +137,9 @@ const EmailVerification = ({ email, onVerificationSuccess, onBack }: EmailVerifi
               maxLength={6}
               required
             />
+            <p className="text-sm text-gray-400 text-center">
+              أدخل الكود المكون من 6 أرقام الذي تم إرساله إلى بريدك الإلكتروني
+            </p>
           </div>
 
           <Button 
@@ -160,7 +163,7 @@ const EmailVerification = ({ email, onVerificationSuccess, onBack }: EmailVerifi
               disabled={isResending}
               className="w-full"
             >
-              {isResending ? 'جاري الإرسال...' : 'إعادة إرسال الكود'}
+              {isResending ? 'جاري الإرسال...' : 'إعادة إرسال كود جديد'}
             </Button>
           </div>
           
