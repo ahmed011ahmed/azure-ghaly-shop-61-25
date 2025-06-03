@@ -78,7 +78,7 @@ export const useAdminUsers = () => {
       const existingUsers = storedData ? JSON.parse(storedData) : [];
       
       const existingUser = existingUsers.find((user: AdminUser) => 
-        user.username === username && user.is_active
+        user.username === username.trim() && user.is_active
       );
 
       if (existingUser) {
@@ -93,20 +93,24 @@ export const useAdminUsers = () => {
       const newUser: AdminUser = {
         id: Date.now().toString(),
         username: username.trim(),
-        password: password.trim(), // التأكد من إزالة المسافات الزائدة
+        password: password.trim(),
         permissions: permissions,
         created_at: new Date().toISOString(),
         is_active: true
       };
 
       const updatedUsers = [...existingUsers, newUser];
+      
+      // حفظ جميع المستخدمين في localStorage (بما في ذلك غير النشطين)
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUsers));
       
-      // تحديث الحالة المحلية
-      setAdminUsers(updatedUsers.filter(user => user.is_active));
+      // تحديث الحالة المحلية بالمستخدمين النشطين فقط
+      const activeUsers = updatedUsers.filter(user => user.is_active);
+      setAdminUsers(activeUsers);
 
       console.log('Admin user added successfully:', newUser);
-      console.log('Updated users array:', updatedUsers);
+      console.log('Updated users array in localStorage:', updatedUsers);
+      console.log('Active users for display:', activeUsers);
       
       toast({
         title: "تم بنجاح",
@@ -138,7 +142,10 @@ export const useAdminUsers = () => {
       );
       
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUsers));
-      setAdminUsers(updatedUsers);
+      
+      // تحديث الحالة المحلية بالمستخدمين النشطين فقط
+      const activeUsers = updatedUsers.filter((user: AdminUser) => user.is_active);
+      setAdminUsers(activeUsers);
 
       toast({
         title: "تم التحديث",
@@ -165,12 +172,16 @@ export const useAdminUsers = () => {
       const storedData = localStorage.getItem(STORAGE_KEY);
       const existingUsers = storedData ? JSON.parse(storedData) : [];
       
+      // تعطيل المستخدم بدلاً من حذفه
       const updatedUsers = existingUsers.map((user: AdminUser) =>
         user.id === userId ? { ...user, is_active: false } : user
-      ).filter((user: AdminUser) => user.is_active);
+      );
       
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUsers));
-      setAdminUsers(updatedUsers);
+      
+      // تحديث الحالة المحلية بالمستخدمين النشطين فقط
+      const activeUsers = updatedUsers.filter((user: AdminUser) => user.is_active);
+      setAdminUsers(activeUsers);
 
       toast({
         title: "تم الحذف",
