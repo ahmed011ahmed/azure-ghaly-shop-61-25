@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -49,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 // تحديث الملف الشخصي بالمعرف الفريد
                 const { data: updatedProfile } = await supabase
                   .from('profiles')
-                  .update({ unique_id: session.user.user_metadata.unique_id })
+                  .update({ unique_id: session.user.user_metadata.unique_id } as any)
                   .eq('id', session.user.id)
                   .select()
                   .single();
