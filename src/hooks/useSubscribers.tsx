@@ -17,6 +17,7 @@ interface SubscriberLevelData {
   email: string;
   id: string;
   subscription_level: number;
+  subscription_duration: number | null;
   updated_at: string;
   updated_by: string | null;
 }
@@ -85,8 +86,7 @@ export const useSubscribers = () => {
           // البحث عن مستوى الاشتراك من قاعدة البيانات
           const levelRecord = (levelsData || []).find(l => l.email === permission.email) as SubscriberLevelData;
           const subscriptionLevel = (levelRecord?.subscription_level || 1) as 1 | 2 | 3 | 4 | 5;
-          // استخدام مدة افتراضية 30 يوم حيث أن العمود غير موجود في قاعدة البيانات
-          const subscriptionDuration = 30;
+          const subscriptionDuration = levelRecord?.subscription_duration || 30;
           
           // حساب تاريخ انتهاء الاشتراك
           const expiryDate = calculateExpiryDate(permission.granted_at, subscriptionDuration);
@@ -113,8 +113,7 @@ export const useSubscribers = () => {
             // البحث عن مستوى الاشتراك من قاعدة البيانات
             const levelRecord = (levelsData || []).find(l => l.email === profile.id) as SubscriberLevelData;
             const subscriptionLevel = (levelRecord?.subscription_level || 1) as 1 | 2 | 3 | 4 | 5;
-            // استخدام مدة افتراضية 30 يوم
-            const subscriptionDuration = 30;
+            const subscriptionDuration = levelRecord?.subscription_duration || 30;
             
             // حساب تاريخ انتهاء الاشتراك
             const expiryDate = calculateExpiryDate(profile.created_at, subscriptionDuration);
@@ -212,12 +211,13 @@ export const useSubscribers = () => {
     try {
       console.log('Adding new subscriber:', subscriber);
       
-      // حفظ مستوى الاشتراك في قاعدة البيانات (بدون مدة الاشتراك لأن العمود غير موجود)
+      // حفظ مستوى الاشتراك ومدته في قاعدة البيانات
       const { error: levelError } = await supabase
         .from('subscriber_levels')
         .upsert({
           email: subscriber.email,
           subscription_level: subscriber.subscription_level,
+          subscription_duration: subscriber.subscription_duration,
           updated_by: 'admin'
         });
 
@@ -295,27 +295,28 @@ export const useSubscribers = () => {
     }
   };
 
-  // تحديث مدة الاشتراك - مؤقتاً معطل لأن العمود غير موجود في قاعدة البيانات
   const updateSubscriptionDuration = async (id: string, duration: number): Promise<void> => {
     try {
-      console.log('Updating subscription duration (currently disabled):', { id, duration });
+      console.log('Updating subscription duration:', { id, duration });
       
-      // مؤقتاً سنعرض رسالة أن الميزة غير متاحة
-      console.warn('تحديث مدة الاشتراك غير متاح حالياً - يجب إضافة عمود subscription_duration إلى جدول subscriber_levels');
+      const { error } = await supabase
+        .from('subscriber_levels')
+        .upsert({
+          email: id,
+          subscription_duration: duration,
+          updated_by: 'admin'
+        }, {
+          onConflict: 'email'
+        });
+
+      if (error) {
+        console.error('خطأ في تحديث مدة الاشتراك في قاعدة البيانات:', error);
+        throw error;
+      }
       
-      // تحديث البيانات المحلية فقط
-      setSubscribers(prevSubscribers => 
-        prevSubscribers.map(subscriber => 
-          subscriber.id === id 
-            ? { 
-                ...subscriber, 
-                subscription_duration: duration,
-                expiry_date: calculateExpiryDate(subscriber.subscription_date || new Date().toISOString(), duration)
-              }
-            : subscriber
-        )
-      );
+      console.log('تم تحديث مدة الاشتراك بنجاح في قاعدة البيانات');
       
+      await loadSubscribers();
     } catch (error) {
       console.error('خطأ في تحديث مدة الاشتراك:', error);
       throw error;

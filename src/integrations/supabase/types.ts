@@ -278,6 +278,7 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          subscription_duration: number | null
           subscription_level: number
           updated_at: string
           updated_by: string | null
@@ -286,6 +287,7 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          subscription_duration?: number | null
           subscription_level?: number
           updated_at?: string
           updated_by?: string | null
@@ -294,6 +296,7 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          subscription_duration?: number | null
           subscription_level?: number
           updated_at?: string
           updated_by?: string | null
