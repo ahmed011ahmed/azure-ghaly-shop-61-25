@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 const PermissionsManagement = () => {
   const [newEmail, setNewEmail] = useState('');
+  const [durationDays, setDurationDays] = useState<string>('30'); // افتراضي 30 يوم
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
@@ -104,9 +105,11 @@ const PermissionsManagement = () => {
       }
 
       // البريد غير موجود، أضف إذن جديد
-      const success = await addPermission(newEmail.trim());
+      const duration = parseInt(durationDays);
+      const success = await addPermission(newEmail.trim(), isNaN(duration) || duration < 1 ? undefined : duration);
       if (success) {
         setNewEmail('');
+        setDurationDays('30');
       }
     } catch (error) {
       console.error('Unexpected error in handleAddPermission:', error);
@@ -159,35 +162,73 @@ const PermissionsManagement = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="bg-slate-950 pt-6">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <Label htmlFor="email" className="text-gray-300">البريد الإلكتروني</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="أدخل البريد الإلكتروني..."
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                className="bg-gray-800/50 border-gray-600 text-white"
-                onKeyPress={(e) => e.key === 'Enter' && handleAddPermission()}
-              />
+          <div className="space-y-4">
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <Label htmlFor="email" className="text-gray-300">البريد الإلكتروني</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="أدخل البريد الإلكتروني..."
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  className="bg-gray-800/50 border-gray-600 text-white"
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddPermission()}
+                />
+              </div>
+              <div className="w-48">
+                <Label htmlFor="duration" className="text-gray-300">مدة الإذن (بالأيام)</Label>
+                <Input
+                  id="duration"
+                  type="number"
+                  placeholder="30"
+                  value={durationDays}
+                  onChange={(e) => setDurationDays(e.target.value)}
+                  className="bg-gray-800/50 border-gray-600 text-white"
+                  min="1"
+                />
+              </div>
+              <div className="flex items-end">
+                <Button
+                  onClick={handleAddPermission}
+                  disabled={actionLoading === 'add'}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {actionLoading === 'add' ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      إضافة
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
-            <div className="flex items-end">
-              <Button
-                onClick={handleAddPermission}
-                disabled={actionLoading === 'add'}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                {actionLoading === 'add' ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    إضافة
-                  </>
-                )}
-              </Button>
-            </div>
+            
+            {/* معاينة المدة */}
+            {durationDays && parseInt(durationDays) > 0 && (
+              <div className="p-3 bg-gray-800/30 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-300">المدة المحددة:</span>
+                  <span className="text-green-400 font-semibold">
+                    {durationDays} يوم
+                  </span>
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-gray-300">ينتهي في:</span>
+                  <span className="text-orange-400 font-semibold">
+                    {(() => {
+                      const days = parseInt(durationDays);
+                      if (isNaN(days) || days < 1) return 'غير محدد';
+                      const expireDate = new Date();
+                      expireDate.setDate(expireDate.getDate() + days);
+                      return expireDate.toLocaleDateString('ar-EG');
+                    })()}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -238,8 +279,9 @@ const PermissionsManagement = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-gray-300">البريد الإلكتروني</TableHead>
+                    <TableHead className="text-gray-300">المدة</TableHead>
+                    <TableHead className="text-gray-300">تاريخ الانتهاء</TableHead>
                     <TableHead className="text-gray-300">تاريخ الإضافة</TableHead>
-                    <TableHead className="text-gray-300">تم الإضافة بواسطة</TableHead>
                     <TableHead className="text-gray-300">الإجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -250,10 +292,23 @@ const PermissionsManagement = () => {
                         {permission.email}
                       </TableCell>
                       <TableCell className="text-gray-300">
-                        {new Date(permission.granted_at).toLocaleDateString('ar-EG')}
+                        {permission.duration_days ? (
+                          <span className="text-green-400">{permission.duration_days} يوم</span>
+                        ) : (
+                          <span className="text-blue-400">غير محدود</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-gray-300">
-                        {permission.granted_by}
+                        {permission.expires_at ? (
+                          <span className="text-orange-400">
+                            {new Date(permission.expires_at).toLocaleDateString('ar-EG')}
+                          </span>
+                        ) : (
+                          <span className="text-blue-400">لا ينتهي</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-gray-300">
+                        {new Date(permission.granted_at).toLocaleDateString('ar-EG')}
                       </TableCell>
                       <TableCell>
                         <Button
