@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageSquare, User, Loader2, Image, Link, Hash } from 'lucide-react';
+import { Send, MessageSquare, User, Loader2, Image, Link } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -24,13 +23,11 @@ const CustomerChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
-  
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({
       behavior: 'smooth'
     });
   };
-  
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -46,7 +43,6 @@ const CustomerChat = () => {
     }
     setPreviousMessageCount(messages.length);
   }, [messages, previousMessageCount]);
-  
   const playWhatsAppNotificationSound = () => {
     try {
       // صوت إشعار مثل الواتساب
@@ -70,7 +66,6 @@ const CustomerChat = () => {
       console.log('خطأ في تشغيل الصوت:', error);
     }
   };
-  
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() && user) {
@@ -78,7 +73,6 @@ const CustomerChat = () => {
       setNewMessage('');
     }
   };
-  
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && user) {
@@ -90,7 +84,6 @@ const CustomerChat = () => {
       reader.readAsDataURL(file);
     }
   };
-  
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString(language === 'ar' ? 'ar-SA' : 'en-US', {
       hour: '2-digit',
@@ -98,16 +91,13 @@ const CustomerChat = () => {
       hour12: true
     });
   };
-  
   const isImageMessage = (text: string) => {
     return text.startsWith(t('chat.image'));
   };
-  
   const isLinkMessage = (text: string) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     return urlRegex.test(text);
   };
-  
   const renderMessageContent = (text: string) => {
     if (isImageMessage(text)) {
       const imageData = text.replace(`${t('chat.image')} `, '');
@@ -141,7 +131,6 @@ const CustomerChat = () => {
     // رسائل العميل: فقط رسائله الخاصة
     return message.userName === profile?.nickname;
   });
-  
   if (!user) {
     return <Card className="gaming-card w-full max-w-4xl">
         <CardContent className="bg-slate-950 text-center py-8">
@@ -151,29 +140,16 @@ const CustomerChat = () => {
         </CardContent>
       </Card>;
   }
-  
   return <Card className="gaming-card w-full max-w-4xl h-96 flex flex-col">
       <CardHeader className="bg-slate-900 flex-shrink-0 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <MessageSquare className="w-5 h-5 text-purple-400" />
-            <div>
-              <CardTitle className="text-white text-sm">{t('chat.support')}</CardTitle>
-              <CardDescription className="text-gray-300 text-xs">
-                {t('chat.hello')} {profile?.nickname}
-              </CardDescription>
-            </div>
+        <div className="flex items-center space-x-3">
+          <MessageSquare className="w-5 h-5 text-purple-400" />
+          <div>
+            <CardTitle className="text-white text-sm">{t('chat.support')}</CardTitle>
+            <CardDescription className="text-gray-300 text-xs">
+              {t('chat.hello')} {profile?.nickname}
+            </CardDescription>
           </div>
-          
-          {/* عرض المعرف الفريد للمستخدم من metadata */}
-          {user?.user_metadata?.unique_id && (
-            <div className="flex items-center space-x-2 bg-purple-600/20 px-3 py-1 rounded-full">
-              <Hash className="w-4 h-4 text-purple-400" />
-              <span className="font-mono text-purple-300 text-xs">
-                {user.user_metadata.unique_id}
-              </span>
-            </div>
-          )}
         </div>
       </CardHeader>
 
@@ -187,12 +163,6 @@ const CustomerChat = () => {
               <div className="text-center">
                 <MessageSquare className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                 <p className="text-gray-300 text-xs">{t('chat.noMessages')}</p>
-                {user?.user_metadata?.unique_id && (
-                  <div className="mt-2 text-xs text-purple-300">
-                    <Hash className="w-3 h-3 inline mr-1" />
-                    معرفك الفريد: {user.user_metadata.unique_id}
-                  </div>
-                )}
               </div>
             </div> : <div className="space-y-2">
               {customerMessages.map(message => <div key={message.id} className={`flex ${message.sender === 'admin' ? 'justify-start' : 'justify-end'}`}>
@@ -206,9 +176,6 @@ const CustomerChat = () => {
                       </span>
                       {message.sender === 'admin' && message.targetUser && <span className="text-xs bg-purple-700/30 px-1 rounded text-purple-200">
                           {t('chat.private')}
-                        </span>}
-                      {message.sender === 'user' && user?.user_metadata?.unique_id && <span className="text-xs bg-blue-700/30 px-1 rounded text-blue-200">
-                          {user.user_metadata.unique_id}
                         </span>}
                     </div>
                     <div className="text-white text-xs leading-relaxed">

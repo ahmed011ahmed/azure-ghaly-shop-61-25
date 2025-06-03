@@ -39,13 +39,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             try {
               const { data: profileData } = await supabase
                 .from('profiles')
-                .select('id, nickname, created_at, updated_at')
+                .select('*')
                 .eq('id', session.user.id)
                 .single();
               
-              if (profileData) {
-                setProfile(profileData);
-              }
+              setProfile(profileData);
             } catch (error) {
               console.error('Error fetching profile:', error);
             }
