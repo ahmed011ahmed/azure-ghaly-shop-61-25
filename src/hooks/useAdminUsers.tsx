@@ -71,7 +71,7 @@ export const useAdminUsers = () => {
   // إضافة مستخدم إدارة جديد
   const addAdminUser = async (username: string, password: string, permissions: string[]) => {
     try {
-      console.log('Adding admin user:', username, 'with permissions:', permissions);
+      console.log('Adding admin user:', username, 'with password:', password, 'and permissions:', permissions);
       
       // التحقق من عدم وجود اسم المستخدم مسبقاً
       const storedData = localStorage.getItem(STORAGE_KEY);
@@ -92,8 +92,8 @@ export const useAdminUsers = () => {
 
       const newUser: AdminUser = {
         id: Date.now().toString(),
-        username: username,
-        password: password,
+        username: username.trim(),
+        password: password.trim(), // التأكد من إزالة المسافات الزائدة
         permissions: permissions,
         created_at: new Date().toISOString(),
         is_active: true
@@ -101,9 +101,13 @@ export const useAdminUsers = () => {
 
       const updatedUsers = [...existingUsers, newUser];
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUsers));
-      setAdminUsers(updatedUsers);
+      
+      // تحديث الحالة المحلية
+      setAdminUsers(updatedUsers.filter(user => user.is_active));
 
       console.log('Admin user added successfully:', newUser);
+      console.log('Updated users array:', updatedUsers);
+      
       toast({
         title: "تم بنجاح",
         description: `تم إضافة مستخدم الإدارة: ${username}`

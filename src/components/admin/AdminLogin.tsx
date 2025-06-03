@@ -26,13 +26,16 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
 
     // محاكاة تأخير تسجيل الدخول
     setTimeout(() => {
+      console.log('Attempting login with:', { username: username.trim(), password: password.trim() });
+      
       // التحقق من اليوزر الافتراضي
-      if (username === 'GHALY' && password === 'Admin Team') {
+      if (username.trim() === 'GHALY' && password.trim() === 'Admin Team') {
         const defaultUser = {
           id: 'default',
           username: 'GHALY',
           permissions: [] // صلاحيات كاملة (فارغة تعني الكل)
         };
+        console.log('Default user login successful:', defaultUser);
         onLogin(defaultUser);
         setIsLoading(false);
         return;
@@ -42,20 +45,22 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
       const storedData = localStorage.getItem('admin_users_data');
       const adminUsers = storedData ? JSON.parse(storedData) : [];
       
-      console.log('Checking login for:', username);
+      console.log('Checking login for:', username.trim());
       console.log('Available users:', adminUsers);
       
       const validUser = adminUsers.find((user: any) => {
+        console.log('Checking user:', user);
+        console.log('Username match:', user.username === username.trim());
+        console.log('Password match:', user.password === password.trim());
+        console.log('Is active:', user.is_active);
+        
         // التحقق من البيانات الجديدة التي تحتوي على username و password
         if (user.username && user.password) {
-          return user.username === username && 
-                 user.password === password && 
+          return user.username === username.trim() && 
+                 user.password === password.trim() && 
                  user.is_active;
         }
-        // التحقق من البيانات القديمة التي تحتوي على email فقط
-        if (user.email && !user.username) {
-          return user.email === username && user.is_active;
-        }
+        
         return false;
       });
 
@@ -65,11 +70,13 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
         // إنشاء كائن المستخدم المسجل للدخول
         const loggedInUser = {
           id: validUser.id,
-          username: validUser.username || validUser.email,
+          username: validUser.username,
           permissions: validUser.permissions || []
         };
+        console.log('Login successful for user:', loggedInUser);
         onLogin(loggedInUser);
       } else {
+        console.log('Login failed - no matching user found');
         setError('اسم المستخدم أو كلمة المرور غير صحيحة');
       }
       setIsLoading(false);
