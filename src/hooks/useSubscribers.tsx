@@ -11,7 +11,7 @@ interface ProfileData {
   updated_at: string;
 }
 
-// نوع محلي لمستوى الاشتراك مع خاصية المدة
+// نوع محلي لمستوى الاشتراك
 interface SubscriberLevelData {
   created_at: string;
   email: string;
@@ -19,7 +19,6 @@ interface SubscriberLevelData {
   subscription_level: number;
   updated_at: string;
   updated_by: string | null;
-  subscription_duration?: number; // إضافة خاصية المدة كخاصية اختيارية
 }
 
 export const useSubscribers = () => {
@@ -86,7 +85,8 @@ export const useSubscribers = () => {
           // البحث عن مستوى الاشتراك من قاعدة البيانات
           const levelRecord = (levelsData || []).find(l => l.email === permission.email) as SubscriberLevelData;
           const subscriptionLevel = (levelRecord?.subscription_level || 1) as 1 | 2 | 3 | 4 | 5;
-          const subscriptionDuration = levelRecord?.subscription_duration || 30;
+          // استخدام مدة افتراضية 30 يوم حيث أن العمود غير موجود في قاعدة البيانات
+          const subscriptionDuration = 30;
           
           // حساب تاريخ انتهاء الاشتراك
           const expiryDate = calculateExpiryDate(permission.granted_at, subscriptionDuration);
@@ -113,7 +113,8 @@ export const useSubscribers = () => {
             // البحث عن مستوى الاشتراك من قاعدة البيانات
             const levelRecord = (levelsData || []).find(l => l.email === profile.id) as SubscriberLevelData;
             const subscriptionLevel = (levelRecord?.subscription_level || 1) as 1 | 2 | 3 | 4 | 5;
-            const subscriptionDuration = levelRecord?.subscription_duration || 30;
+            // استخدام مدة افتراضية 30 يوم
+            const subscriptionDuration = 30;
             
             // حساب تاريخ انتهاء الاشتراك
             const expiryDate = calculateExpiryDate(profile.created_at, subscriptionDuration);
@@ -211,110 +212,18 @@ export const useSubscribers = () => {
     try {
       console.log('Adding new subscriber:', subscriber);
       
-      // التحقق من وجود المشترك مسبقاً في جدول profiles
-      const { data: existingProfile, error: checkError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', subscriber.email)
-        .maybeSingle();
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        console.error('خطأ في التحقق من وجود المشترك:', checkError);
-        throw checkError;
-      }
-
-      // حفظ مستوى ومدة الاشتراك في قاعدة البيانات
+      // حفظ مستوى الاشتراك في قاعدة البيانات (بدون مدة الاشتراك لأن العمود غير موجود)
       const { error: levelError } = await supabase
         .from('subscriber_levels')
         .upsert({
           email: subscriber.email,
           subscription_level: subscriber.subscription_level,
-          subscription_duration: subscriber.subscription_duration,
           updated_by: 'admin'
         });
 
       if (levelError) {
         console.error('خطأ في حفظ مستوى الاشتراك:', levelError);
-        // لا نرمي الخطأ هنا لأن هذا لن يمنع إضافة المشترك
       }
-
-      // إذا كان المشترك موجود بالفعل، نقوم بتحديث البيانات فقط
-      if (existingProfile) {
-        console.log('Subscriber already exists, updating data...');
-        
-        // تحديث البيانات في جدول profiles
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({
-            nickname: subscriber.nickname,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', subscriber.email);
-
-        if (updateError) {
-          console.error('خطأ في تحديث المشترك:', updateError);
-          throw updateError;
-        }
-
-        // التحقق من وجود أذونات والتحديث أو الإضافة
-        const { data: existingPermission, error: permissionCheckError } = await supabase
-          .from('subscriber_permissions')
-          .select('id')
-          .eq('email', subscriber.email)
-          .maybeSingle();
-
-        if (permissionCheckError && permissionCheckError.code !== 'PGRST116') {
-          console.error('خطأ في التحقق من أذونات المشترك:', permissionCheckError);
-        }
-
-        if (existingPermission) {
-          // تحديث الأذونات الموجودة
-          const { error: permissionUpdateError } = await supabase
-            .from('subscriber_permissions')
-            .update({
-              is_active: true,
-              granted_by: 'admin'
-            })
-            .eq('email', subscriber.email);
-
-          if (permissionUpdateError) {
-            console.error('خطأ في تحديث أذونات المشترك:', permissionUpdateError);
-          }
-        } else {
-          // إضافة أذونات جديدة
-          const { error: permissionError } = await supabase
-            .from('subscriber_permissions')
-            .insert({
-              email: subscriber.email,
-              is_active: true,
-              granted_by: 'admin'
-            });
-
-          if (permissionError) {
-            console.error('خطأ في إضافة أذونات المشترك:', permissionError);
-          }
-        }
-
-        console.log('تم تحديث المشترك بنجاح');
-        return;
-      }
-
-      // إضافة مشترك جديد
-      console.log('Creating new subscriber profile...');
-      
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: subscriber.email,
-          nickname: subscriber.nickname
-        });
-
-      if (profileError) {
-        console.error('خطأ في إضافة المشترك إلى الملفات الشخصية:', profileError);
-        throw profileError;
-      }
-
-      console.log('Profile created successfully');
 
       // إضافة إلى جدول أذونات المشتركين
       const { error: permissionError } = await supabase
@@ -327,9 +236,7 @@ export const useSubscribers = () => {
 
       if (permissionError) {
         console.error('خطأ في إضافة أذونات المشترك:', permissionError);
-        // لا نرمي الخطأ هنا لأن المشترك تم إضافته بنجاح إلى profiles
-      } else {
-        console.log('Permission added successfully');
+        throw permissionError;
       }
 
       console.log('تم إضافة مشترك جديد بنجاح');
@@ -388,29 +295,27 @@ export const useSubscribers = () => {
     }
   };
 
-  // تحديث مدة الاشتراك
+  // تحديث مدة الاشتراك - مؤقتاً معطل لأن العمود غير موجود في قاعدة البيانات
   const updateSubscriptionDuration = async (id: string, duration: number): Promise<void> => {
     try {
-      console.log('Updating subscription duration:', { id, duration });
+      console.log('Updating subscription duration (currently disabled):', { id, duration });
       
-      const { error } = await supabase
-        .from('subscriber_levels')
-        .upsert({
-          email: id,
-          subscription_duration: duration,
-          updated_by: 'admin'
-        }, {
-          onConflict: 'email'
-        });
-
-      if (error) {
-        console.error('خطأ في تحديث مدة الاشتراك في قاعدة البيانات:', error);
-        throw error;
-      }
+      // مؤقتاً سنعرض رسالة أن الميزة غير متاحة
+      console.warn('تحديث مدة الاشتراك غير متاح حالياً - يجب إضافة عمود subscription_duration إلى جدول subscriber_levels');
       
-      console.log('تم تحديث مدة الاشتراك بنجاح في قاعدة البيانات');
+      // تحديث البيانات المحلية فقط
+      setSubscribers(prevSubscribers => 
+        prevSubscribers.map(subscriber => 
+          subscriber.id === id 
+            ? { 
+                ...subscriber, 
+                subscription_duration: duration,
+                expiry_date: calculateExpiryDate(subscriber.subscription_date || new Date().toISOString(), duration)
+              }
+            : subscriber
+        )
+      );
       
-      await loadSubscribers();
     } catch (error) {
       console.error('خطأ في تحديث مدة الاشتراك:', error);
       throw error;
@@ -421,16 +326,6 @@ export const useSubscribers = () => {
     try {
       console.log('Deleting subscriber:', id);
       
-      // حذف من جدول profiles
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', id);
-
-      if (profileError) {
-        console.error('خطأ في حذف المشترك من الملفات الشخصية:', profileError);
-      }
-
       // حذف من جدول أذونات المشتركين
       const { error: permissionError } = await supabase
         .from('subscriber_permissions')
