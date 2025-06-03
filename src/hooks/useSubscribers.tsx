@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Subscriber, NewSubscriber } from '../types/subscriber';
@@ -8,6 +9,17 @@ interface ProfileData {
   nickname: string;
   created_at: string;
   updated_at: string;
+}
+
+// نوع محلي لمستوى الاشتراك مع خاصية المدة
+interface SubscriberLevelData {
+  created_at: string;
+  email: string;
+  id: string;
+  subscription_level: number;
+  updated_at: string;
+  updated_by: string | null;
+  subscription_duration?: number; // إضافة خاصية المدة كخاصية اختيارية
 }
 
 export const useSubscribers = () => {
@@ -72,7 +84,7 @@ export const useSubscribers = () => {
           const profile = (profilesData || []).find(p => p.id === permission.email) as ProfileData;
           
           // البحث عن مستوى الاشتراك من قاعدة البيانات
-          const levelRecord = (levelsData || []).find(l => l.email === permission.email);
+          const levelRecord = (levelsData || []).find(l => l.email === permission.email) as SubscriberLevelData;
           const subscriptionLevel = (levelRecord?.subscription_level || 1) as 1 | 2 | 3 | 4 | 5;
           const subscriptionDuration = levelRecord?.subscription_duration || 30;
           
@@ -99,7 +111,7 @@ export const useSubscribers = () => {
           const hasPermission = (permissionsData || []).some(p => p.email === profile.id);
           if (!hasPermission) {
             // البحث عن مستوى الاشتراك من قاعدة البيانات
-            const levelRecord = (levelsData || []).find(l => l.email === profile.id);
+            const levelRecord = (levelsData || []).find(l => l.email === profile.id) as SubscriberLevelData;
             const subscriptionLevel = (levelRecord?.subscription_level || 1) as 1 | 2 | 3 | 4 | 5;
             const subscriptionDuration = levelRecord?.subscription_duration || 30;
             
