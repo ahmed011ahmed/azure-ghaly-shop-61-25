@@ -65,7 +65,7 @@ export const useSubscribers = () => {
           const profile = (profilesData || []).find(p => p.id === permission.email) as ProfileData;
           
           // البحث عن مستوى الاشتراك من قاعدة البيانات
-          const levelRecord = (levelsData || []).find(l => l.email === permission.email) as any;
+          const levelRecord = (levelsData || []).find(l => l.email === permission.email);
           const subscriptionLevel = (levelRecord?.subscription_level || 1) as 1 | 2 | 3 | 4 | 5;
           
           formattedSubscribers.push({
@@ -75,9 +75,7 @@ export const useSubscribers = () => {
             subscription_status: permission.is_active ? 'active' : 'inactive',
             subscription_level: subscriptionLevel,
             subscription_date: permission.granted_at,
-            last_login: profile?.updated_at || null,
-            duration_days: levelRecord?.duration_days || undefined,
-            expires_at: levelRecord?.expires_at || undefined
+            last_login: profile?.updated_at || null
           });
         });
       }
@@ -88,7 +86,7 @@ export const useSubscribers = () => {
           const hasPermission = (permissionsData || []).some(p => p.email === profile.id);
           if (!hasPermission) {
             // البحث عن مستوى الاشتراك من قاعدة البيانات
-            const levelRecord = (levelsData || []).find(l => l.email === profile.id) as any;
+            const levelRecord = (levelsData || []).find(l => l.email === profile.id);
             const subscriptionLevel = (levelRecord?.subscription_level || 1) as 1 | 2 | 3 | 4 | 5;
             
             formattedSubscribers.push({
@@ -98,9 +96,7 @@ export const useSubscribers = () => {
               subscription_status: 'pending',
               subscription_level: subscriptionLevel,
               subscription_date: profile.created_at,
-              last_login: profile.updated_at,
-              duration_days: levelRecord?.duration_days || undefined,
-              expires_at: levelRecord?.expires_at || undefined
+              last_login: profile.updated_at
             });
           }
         });
@@ -196,18 +192,12 @@ export const useSubscribers = () => {
         throw checkError;
       }
 
-      // حساب تاريخ انتهاء الاشتراك
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + subscriber.duration_days);
-
       // حفظ مستوى الاشتراك في قاعدة البيانات
       const { error: levelError } = await supabase
         .from('subscriber_levels')
         .upsert({
           email: subscriber.email,
           subscription_level: subscriber.subscription_level,
-          duration_days: subscriber.duration_days,
-          expires_at: expiresAt.toISOString(),
           updated_by: 'admin'
         });
 

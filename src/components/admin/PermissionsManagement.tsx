@@ -159,36 +159,34 @@ const PermissionsManagement = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="bg-slate-950 pt-6">
-          <div className="space-y-4">
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <Label htmlFor="email" className="text-gray-300">البريد الإلكتروني</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="أدخل البريد الإلكتروني..."
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  className="bg-gray-800/50 border-gray-600 text-white"
-                  onKeyPress={(e) => e.key === 'Enter' && handleAddPermission()}
-                />
-              </div>
-              <div className="flex items-end">
-                <Button
-                  onClick={handleAddPermission}
-                  disabled={actionLoading === 'add'}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  {actionLoading === 'add' ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      إضافة
-                    </>
-                  )}
-                </Button>
-              </div>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <Label htmlFor="email" className="text-gray-300">البريد الإلكتروني</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="أدخل البريد الإلكتروني..."
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                className="bg-gray-800/50 border-gray-600 text-white"
+                onKeyPress={(e) => e.key === 'Enter' && handleAddPermission()}
+              />
+            </div>
+            <div className="flex items-end">
+              <Button
+                onClick={handleAddPermission}
+                disabled={actionLoading === 'add'}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {actionLoading === 'add' ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    إضافة
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         </CardContent>
@@ -241,6 +239,7 @@ const PermissionsManagement = () => {
                   <TableRow>
                     <TableHead className="text-gray-300">البريد الإلكتروني</TableHead>
                     <TableHead className="text-gray-300">تاريخ الإضافة</TableHead>
+                    <TableHead className="text-gray-300">تم الإضافة بواسطة</TableHead>
                     <TableHead className="text-gray-300">الإجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -252,6 +251,9 @@ const PermissionsManagement = () => {
                       </TableCell>
                       <TableCell className="text-gray-300">
                         {new Date(permission.granted_at).toLocaleDateString('ar-EG')}
+                      </TableCell>
+                      <TableCell className="text-gray-300">
+                        {permission.granted_by}
                       </TableCell>
                       <TableCell>
                         <Button
