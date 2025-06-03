@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
+import { generateUniqueId } from '@/utils/generateId';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -50,6 +51,10 @@ const Auth = () => {
     try {
       console.log('Starting signup process for:', email);
       
+      // إنشاء معرف فريد للمستخدم الجديد
+      const userUniqueId = generateUniqueId();
+      console.log('Generated unique ID for new user:', userUniqueId);
+      
       // Create user account with email confirmation DISABLED
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -58,6 +63,7 @@ const Auth = () => {
           emailRedirectTo: undefined,
           data: {
             nickname: nickname,
+            unique_id: userUniqueId, // إضافة المعرف الفريد إلى بيانات المستخدم
           }
         }
       });
@@ -81,7 +87,7 @@ const Auth = () => {
         return;
       }
 
-      console.log('User created successfully:', data.user?.id);
+      console.log('User created successfully with unique ID:', userUniqueId);
 
       // Send verification link
       const { data: linkData, error: linkError } = await supabase.functions.invoke('send-verification-link', {
@@ -100,7 +106,7 @@ const Auth = () => {
         setEmailSent(true);
         toast({
           title: 'تم الإرسال بنجاح!',
-          description: 'تم إرسال رابط التحقق إلى البريد الإلكتروني',
+          description: `تم إنشاء حسابك بالمعرف الفريد: ${userUniqueId}. تم إرسال رابط التحقق إلى البريد الإلكتروني`,
         });
         setIsLoading(false);
         return;
@@ -113,7 +119,7 @@ const Auth = () => {
         setEmailSent(true);
         toast({
           title: 'تم الإرسال بنجاح!',
-          description: 'تم إرسال رابط التحقق إلى البريد الإلكتروني',
+          description: `تم إنشاء حسابك بالمعرف الفريد: ${userUniqueId}. تم إرسال رابط التحقق إلى البريد الإلكتروني`,
         });
         setIsLoading(false);
         return;
@@ -125,7 +131,7 @@ const Auth = () => {
       
       toast({
         title: 'تم إنشاء الحساب بنجاح!',
-        description: `تم إرسال رابط التحقق إلى ${email}. يرجى فتح بريدك الإلكتروني والنقر على الرابط لتأكيد حسابك.`,
+        description: `تم إنشاء حسابك بالمعرف الفريد: ${userUniqueId}. تم إرسال رابط التحقق إلى ${email}. يرجى فتح بريدك الإلكتروني والنقر على الرابط لتأكيد حسابك.`,
       });
 
       // Clear form

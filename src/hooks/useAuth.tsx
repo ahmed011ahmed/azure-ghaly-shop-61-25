@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface Profile {
   id: string;
   nickname: string;
+  unique_id?: string;
   created_at: string;
   updated_at: string;
 }
@@ -43,7 +44,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 .eq('id', session.user.id)
                 .single();
               
-              setProfile(profileData);
+              // إضافة المعرف الفريد من metadata المستخدم إذا لم يكن موجود في الملف الشخصي
+              if (profileData && !profileData.unique_id && session.user.user_metadata?.unique_id) {
+                // تحديث الملف الشخصي بالمعرف الفريد
+                const { data: updatedProfile } = await supabase
+                  .from('profiles')
+                  .update({ unique_id: session.user.user_metadata.unique_id })
+                  .eq('id', session.user.id)
+                  .select()
+                  .single();
+                
+                setProfile(updatedProfile || profileData);
+              } else {
+                setProfile(profileData);
+              }
             } catch (error) {
               console.error('Error fetching profile:', error);
             }
