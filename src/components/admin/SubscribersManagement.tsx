@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Users, UserCheck, UserX, Clock, Trash2, Search, Loader2, Crown } from 'lucide-react';
+import { Users, UserCheck, UserX, Clock, Trash2, Search, Loader2, Crown, Calendar } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -9,11 +8,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Badge } from '../ui/badge';
 import { useSubscribers } from '../../hooks/useSubscribers';
-import { SUBSCRIPTION_LEVELS } from '../../types/subscriber';
+import { SUBSCRIPTION_LEVELS, SUBSCRIPTION_DURATIONS } from '../../types/subscriber';
 import AddSubscriberForm from './AddSubscriberForm';
 
 const SubscribersManagement = () => {
-  const { subscribers, loading, addSubscriber, updateSubscriptionStatus, updateSubscriptionLevel, deleteSubscriber } = useSubscribers();
+  const { subscribers, loading, addSubscriber, updateSubscriptionStatus, updateSubscriptionLevel, updateSubscriptionDuration, deleteSubscriber } = useSubscribers();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [levelFilter, setLevelFilter] = useState<string>('all');
@@ -36,6 +35,17 @@ const SubscribersManagement = () => {
       await updateSubscriptionLevel(id, newLevel);
     } catch (error) {
       console.error('Error updating level:', error);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDurationChange = async (id: string, newDuration: number) => {
+    try {
+      setActionLoading(id);
+      await updateSubscriptionDuration(id, newDuration);
+    } catch (error) {
+      console.error('Error updating duration:', error);
     } finally {
       setActionLoading(null);
     }
@@ -78,6 +88,37 @@ const SubscribersManagement = () => {
     );
   };
 
+  const getDurationBadge = (duration?: number) => {
+    if (!duration && duration !== 0) return <Badge variant="outline">غير محدد</Badge>;
+    
+    const durationInfo = SUBSCRIPTION_DURATIONS.find(d => d.value === duration);
+    if (!durationInfo) return <Badge variant="outline">{duration} يوم</Badge>;
+    
+    if (duration === 0) {
+      return <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">بلا حدود</Badge>;
+    }
+    
+    return <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">{durationInfo.label}</Badge>;
+  };
+
+  const getExpiryStatus = (expiryDate?: string | null, status?: string) => {
+    if (!expiryDate || status !== 'active') return null;
+    
+    const today = new Date();
+    const expiry = new Date(expiryDate);
+    const daysLeft = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (daysLeft < 0) {
+      return <Badge className="bg-red-600/20 text-red-400 border-red-600/30">منتهي الصلاحية</Badge>;
+    } else if (daysLeft <= 7) {
+      return <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">ينتهي خلال {daysLeft} أيام</Badge>;
+    } else if (daysLeft <= 30) {
+      return <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">ينتهي خلال {daysLeft} يوم</Badge>;
+    }
+    
+    return <Badge className="bg-green-500/20 text-green-400 border-green-500/30">صالح ({daysLeft} يوم)</Badge>;
+  };
+
   const filteredSubscribers = subscribers.filter(subscriber => {
     const matchesSearch = 
       subscriber.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -107,14 +148,13 @@ const SubscribersManagement = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white">إدارة المشتركين</h2>
-          <p className="text-gray-300 mt-1">إدارة وعرض قائمة المشتركين والعضويات مع المستويات</p>
+          <p className="text-gray-300 mt-1">إدارة وعرض قائمة المشتركين والعضويات مع المستويات والمدد</p>
         </div>
       </div>
 
       {/* Add Subscriber Form */}
       <AddSubscriberForm onAdd={addSubscriber} />
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="gaming-card">
           <CardContent className="pt-6 bg-slate-950">
@@ -165,7 +205,6 @@ const SubscribersManagement = () => {
         </Card>
       </div>
 
-      {/* Level Stats */}
       <Card className="gaming-card">
         <CardHeader className="bg-slate-900">
           <CardTitle className="text-white flex items-center">
@@ -188,7 +227,6 @@ const SubscribersManagement = () => {
         </CardContent>
       </Card>
 
-      {/* Filters */}
       <Card className="gaming-card">
         <CardContent className="pt-6 bg-slate-950">
           <div className="flex flex-col sm:flex-row gap-4">
@@ -248,7 +286,7 @@ const SubscribersManagement = () => {
             قائمة المشتركين ({loading ? '...' : filteredSubscribers.length})
           </CardTitle>
           <CardDescription className="text-gray-300">
-            جميع المشتركين المسجلين في النظام مع مستوياتهم
+            جميع المشتركين المسجلين في النظام مع مستوياتهم ومدد اشتراكهم
           </CardDescription>
         </CardHeader>
         <CardContent className="bg-slate-950">
@@ -265,7 +303,9 @@ const SubscribersManagement = () => {
                     <TableHead className="text-gray-300">الإيميل</TableHead>
                     <TableHead className="text-gray-300">الاسم المستعار</TableHead>
                     <TableHead className="text-gray-300">مستوى الاشتراك</TableHead>
+                    <TableHead className="text-gray-300">مدة الاشتراك</TableHead>
                     <TableHead className="text-gray-300">حالة الاشتراك</TableHead>
+                    <TableHead className="text-gray-300">حالة الانتهاء</TableHead>
                     <TableHead className="text-gray-300">تاريخ الاشتراك</TableHead>
                     <TableHead className="text-gray-300">الإجراءات</TableHead>
                   </TableRow>
@@ -283,7 +323,13 @@ const SubscribersManagement = () => {
                         {getLevelBadge(subscriber.subscription_level)}
                       </TableCell>
                       <TableCell>
+                        {getDurationBadge(subscriber.subscription_duration)}
+                      </TableCell>
+                      <TableCell>
                         {getStatusBadge(subscriber.subscription_status)}
+                      </TableCell>
+                      <TableCell>
+                        {getExpiryStatus(subscriber.expiry_date, subscriber.subscription_status)}
                       </TableCell>
                       <TableCell className="text-gray-300">
                         {subscriber.subscription_date 
@@ -292,7 +338,7 @@ const SubscribersManagement = () => {
                         }
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <Select 
                             value={subscriber.subscription_level.toString()}
                             onValueChange={(value) => 
@@ -307,6 +353,25 @@ const SubscribersManagement = () => {
                               {SUBSCRIPTION_LEVELS.map((level) => (
                                 <SelectItem key={level.level} value={level.level.toString()}>
                                   المستوى {level.level}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+
+                          <Select 
+                            value={subscriber.subscription_duration?.toString() || '30'}
+                            onValueChange={(value) => 
+                              handleDurationChange(subscriber.id!, parseInt(value))
+                            }
+                            disabled={actionLoading === subscriber.id}
+                          >
+                            <SelectTrigger className="w-32 bg-gray-800/50 border-gray-600 text-white">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {SUBSCRIPTION_DURATIONS.map((duration) => (
+                                <SelectItem key={duration.value} value={duration.value.toString()}>
+                                  {duration.value === 0 ? 'بلا حدود' : `${duration.value} يوم`}
                                 </SelectItem>
                               ))}
                             </SelectContent>

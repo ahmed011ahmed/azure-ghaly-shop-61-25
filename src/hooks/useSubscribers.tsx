@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Subscriber, NewSubscriber } from '../types/subscriber';
@@ -14,6 +13,14 @@ interface ProfileData {
 export const useSubscribers = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // حساب تاريخ انتهاء الاشتراك
+  const calculateExpiryDate = (subscriptionDate: string, duration: number): string | null => {
+    if (duration === 0) return null; // بلا حدود زمنية
+    const startDate = new Date(subscriptionDate);
+    const expiryDate = new Date(startDate.getTime() + (duration * 24 * 60 * 60 * 1000));
+    return expiryDate.toISOString();
+  };
 
   const loadSubscribers = async () => {
     try {
@@ -67,6 +74,10 @@ export const useSubscribers = () => {
           // البحث عن مستوى الاشتراك من قاعدة البيانات
           const levelRecord = (levelsData || []).find(l => l.email === permission.email);
           const subscriptionLevel = (levelRecord?.subscription_level || 1) as 1 | 2 | 3 | 4 | 5;
+          const subscriptionDuration = levelRecord?.subscription_duration || 30;
+          
+          // حساب تاريخ انتهاء الاشتراك
+          const expiryDate = calculateExpiryDate(permission.granted_at, subscriptionDuration);
           
           formattedSubscribers.push({
             id: permission.email,
@@ -75,7 +86,9 @@ export const useSubscribers = () => {
             subscription_status: permission.is_active ? 'active' : 'inactive',
             subscription_level: subscriptionLevel,
             subscription_date: permission.granted_at,
-            last_login: profile?.updated_at || null
+            last_login: profile?.updated_at || null,
+            subscription_duration: subscriptionDuration,
+            expiry_date: expiryDate
           });
         });
       }
@@ -88,6 +101,10 @@ export const useSubscribers = () => {
             // البحث عن مستوى الاشتراك من قاعدة البيانات
             const levelRecord = (levelsData || []).find(l => l.email === profile.id);
             const subscriptionLevel = (levelRecord?.subscription_level || 1) as 1 | 2 | 3 | 4 | 5;
+            const subscriptionDuration = levelRecord?.subscription_duration || 30;
+            
+            // حساب تاريخ انتهاء الاشتراك
+            const expiryDate = calculateExpiryDate(profile.created_at, subscriptionDuration);
             
             formattedSubscribers.push({
               id: profile.id,
@@ -96,7 +113,9 @@ export const useSubscribers = () => {
               subscription_status: 'pending',
               subscription_level: subscriptionLevel,
               subscription_date: profile.created_at,
-              last_login: profile.updated_at
+              last_login: profile.updated_at,
+              subscription_duration: subscriptionDuration,
+              expiry_date: expiryDate
             });
           }
         });
@@ -192,12 +211,13 @@ export const useSubscribers = () => {
         throw checkError;
       }
 
-      // حفظ مستوى الاشتراك في قاعدة البيانات
+      // حفظ مستوى ومدة الاشتراك في قاعدة البيانات
       const { error: levelError } = await supabase
         .from('subscriber_levels')
         .upsert({
           email: subscriber.email,
           subscription_level: subscriber.subscription_level,
+          subscription_duration: subscriber.subscription_duration,
           updated_by: 'admin'
         });
 
@@ -332,7 +352,6 @@ export const useSubscribers = () => {
     try {
       console.log('Updating subscription level:', { id, level });
       
-      // حفظ المستوى في قاعدة البيانات باستخدام upsert
       const { error } = await supabase
         .from('subscriber_levels')
         .upsert({
@@ -350,10 +369,38 @@ export const useSubscribers = () => {
       
       console.log('تم تحديث مستوى الاشتراك بنجاح في قاعدة البيانات');
       
-      // إعادة تحميل البيانات فوراً
       await loadSubscribers();
     } catch (error) {
       console.error('خطأ في تحديث مستوى الاشتراك:', error);
+      throw error;
+    }
+  };
+
+  // تحديث مدة الاشتراك
+  const updateSubscriptionDuration = async (id: string, duration: number): Promise<void> => {
+    try {
+      console.log('Updating subscription duration:', { id, duration });
+      
+      const { error } = await supabase
+        .from('subscriber_levels')
+        .upsert({
+          email: id,
+          subscription_duration: duration,
+          updated_by: 'admin'
+        }, {
+          onConflict: 'email'
+        });
+
+      if (error) {
+        console.error('خطأ في تحديث مدة الاشتراك في قاعدة البيانات:', error);
+        throw error;
+      }
+      
+      console.log('تم تحديث مدة الاشتراك بنجاح في قاعدة البيانات');
+      
+      await loadSubscribers();
+    } catch (error) {
+      console.error('خطأ في تحديث مدة الاشتراك:', error);
       throw error;
     }
   };
@@ -405,6 +452,7 @@ export const useSubscribers = () => {
     addSubscriber,
     updateSubscriptionStatus,
     updateSubscriptionLevel,
+    updateSubscriptionDuration,
     deleteSubscriber
   };
 };
