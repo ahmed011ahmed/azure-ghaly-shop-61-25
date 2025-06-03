@@ -58,7 +58,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'تم إرسال رابط التحقق بنجاح',
+        message: 'تم ارسال رابط التحقق ب نجاح',
         emailSent: true,
         verificationLink: verificationLink // For development
       }),
