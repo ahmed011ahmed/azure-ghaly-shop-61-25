@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageSquare, Trash2, User, Loader2, Image, Link } from 'lucide-react';
+import { Send, MessageSquare, Trash2, User, Loader2, Image, Link, Hash } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
@@ -312,6 +312,15 @@ const AdminChat = () => {
                         <span className="text-xs bg-green-700 px-1 rounded text-white">
                           عام
                         </span>
+                      )}
+                      {/* عرض المعرف الفريد للعملاء */}
+                      {message.sender === 'user' && message.userUniqueId && (
+                        <div className="flex items-center space-x-1 bg-blue-700/30 px-1 rounded">
+                          <Hash className="w-3 h-3 text-blue-200" />
+                          <span className="text-xs text-blue-200 font-mono">
+                            {message.userUniqueId}
+                          </span>
+                        </div>
                       )}
                     </div>
                     <div className="text-white text-xs leading-relaxed">
