@@ -1,11 +1,12 @@
 
-import { ShoppingCart, Heart, Play } from 'lucide-react';
+import { ShoppingCart, Heart, Play, Hash } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useState } from 'react';
 
 interface ServiceCardProps {
   id: number;
+  uniqueId: string;
   name: string;
   price: string;
   image: string;
@@ -15,7 +16,7 @@ interface ServiceCardProps {
   category: string;
 }
 
-const ServiceCard = ({ id, name, price, image, video, description, rating, category }: ServiceCardProps) => {
+const ServiceCard = ({ id, uniqueId, name, price, image, video, description, rating, category }: ServiceCardProps) => {
   const { addItem } = useCart();
   const { t } = useLanguage();
   const [showVideo, setShowVideo] = useState(false);
@@ -47,11 +48,9 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
       console.log('Setting video to show - starting load');
       setVideoLoading(true);
       setVideoError(false);
-      // إضافة منع التمرير عند فتح الفيديو
       document.body.style.overflow = 'hidden';
     } else {
       console.log('Hiding video');
-      // إعادة التمرير عند إغلاق الفيديو
       document.body.style.overflow = 'auto';
     }
     
@@ -100,6 +99,10 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
   const closeVideoModal = () => {
     setShowVideo(false);
     document.body.style.overflow = 'auto';
+  };
+
+  const handleAddToFavorites = () => {
+    console.log(`Adding service ${name} to favorites`);
   };
 
   console.log('ServiceCard render - showVideo:', showVideo, 'hasVideo:', !!video, 'videoError:', videoError);
@@ -152,8 +155,14 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
         </div>
         
         <div className="p-6">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xl font-bold text-white">{name}</h3>
+          {/* معرف الحساب */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-2">
+              <Hash className="w-4 h-4 text-purple-400" />
+              <span className="font-mono text-purple-300 bg-purple-900/20 px-2 py-1 rounded text-sm">
+                {uniqueId}
+              </span>
+            </div>
             <div className="flex items-center space-x-1">
               {[...Array(5)].map((_, i) => (
                 <span 
@@ -165,6 +174,8 @@ const ServiceCard = ({ id, name, price, image, video, description, rating, categ
               ))}
             </div>
           </div>
+
+          <h3 className="text-xl font-bold text-white mb-2">{name}</h3>
           
           <p className="text-purple-200 mb-4 text-sm leading-relaxed">{description}</p>
           

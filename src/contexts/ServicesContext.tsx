@@ -1,11 +1,13 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Service } from '../types/service';
+import { generateUniqueId } from '../utils/generateId';
 
 interface ServicesContextType {
   services: Service[];
   loading: boolean;
-  addService: (service: Omit<Service, 'id'>) => Promise<void>;
-  updateService: (id: number, service: Omit<Service, 'id'>) => Promise<void>;
+  addService: (service: Omit<Service, 'id' | 'uniqueId'>) => Promise<void>;
+  updateService: (id: number, service: Omit<Service, 'id' | 'uniqueId'>) => Promise<void>;
   deleteService: (id: number) => Promise<void>;
 }
 
@@ -22,6 +24,7 @@ export const useServices = () => {
 const defaultServices: Service[] = [
   {
     id: 1,
+    uniqueId: "PBG01A",
     name: "🔒 حساب بوبجي متقدم",
     price: "$25",
     description: "حساب بوبجي محترف مع مستوى عالي وأسلحة نادرة وإكسسوارات حصرية",
@@ -32,6 +35,7 @@ const defaultServices: Service[] = [
   },
   {
     id: 2,
+    uniqueId: "FNT02B",
     name: "⚡ حساب فورتنايت مميز",
     price: "$30",
     description: "حساب فورتنايت مع سكنز حصرية ومستوى عالي ومجموعة كبيرة من الأدوات",
@@ -41,6 +45,7 @@ const defaultServices: Service[] = [
   },
   {
     id: 3,
+    uniqueId: "COD03C",
     name: "🎯 حساب كول أوف ديوتي",
     price: "$15",
     description: "حساب كول أوف ديوتي مع إنجازات متقدمة وأسلحة مفتوحة ومستوى احترافي",
@@ -59,7 +64,14 @@ export const ServicesProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const loadServices = () => {
       const savedServices = localStorage.getItem('services');
       if (savedServices) {
-        setServices(JSON.parse(savedServices));
+        const parsedServices = JSON.parse(savedServices);
+        // إضافة المعرف الفريد للحسابات المحفوظة التي لا تحتوي عليه
+        const servicesWithIds = parsedServices.map((service: Service) => ({
+          ...service,
+          uniqueId: service.uniqueId || generateUniqueId()
+        }));
+        setServices(servicesWithIds);
+        localStorage.setItem('services', JSON.stringify(servicesWithIds));
       } else {
         setServices(defaultServices);
         localStorage.setItem('services', JSON.stringify(defaultServices));
@@ -75,18 +87,19 @@ export const ServicesProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setServices(newServices);
   };
 
-  const addService = async (serviceData: Omit<Service, 'id'>) => {
+  const addService = async (serviceData: Omit<Service, 'id' | 'uniqueId'>) => {
     const newService: Service = {
       ...serviceData,
-      id: Date.now()
+      id: Date.now(),
+      uniqueId: generateUniqueId()
     };
     const updatedServices = [...services, newService];
     saveServices(updatedServices);
   };
 
-  const updateService = async (id: number, serviceData: Omit<Service, 'id'>) => {
+  const updateService = async (id: number, serviceData: Omit<Service, 'id' | 'uniqueId'>) => {
     const updatedServices = services.map(service => 
-      service.id === id ? { ...serviceData, id } : service
+      service.id === id ? { ...serviceData, id, uniqueId: service.uniqueId } : service
     );
     saveServices(updatedServices);
   };

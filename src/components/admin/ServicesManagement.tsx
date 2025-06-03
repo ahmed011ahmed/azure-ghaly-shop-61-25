@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Star, Package, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Star, Package, Loader2, Hash } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -41,7 +41,7 @@ const ServicesManagement = () => {
     }
   };
 
-  const handleSaveService = async (serviceData: Omit<Service, 'id'>) => {
+  const handleSaveService = async (serviceData: Omit<Service, 'id' | 'uniqueId'>) => {
     try {
       if (editingService) {
         await updateService(editingService.id, serviceData);
@@ -59,7 +59,8 @@ const ServicesManagement = () => {
   const filteredServices = services.filter(service => 
     service.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.category.toLowerCase().includes(searchTerm.toLowerCase())
+    service.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    service.uniqueId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (showForm) {
@@ -101,7 +102,7 @@ const ServicesManagement = () => {
               <Label htmlFor="search" className="text-gray-300">البحث في الحسابات</Label>
               <Input 
                 id="search"
-                placeholder="ابحث باسم الحساب أو الوصف أو الفئة..." 
+                placeholder="ابحث باسم الحساب أو الوصف أو الفئة أو المعرف..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="mt-1 bg-gray-800/50 border-gray-600 text-white" 
@@ -133,6 +134,7 @@ const ServicesManagement = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="text-gray-300">المعرف</TableHead>
                     <TableHead className="text-gray-300">الصورة</TableHead>
                     <TableHead className="text-gray-300">اسم الحساب</TableHead>
                     <TableHead className="text-gray-300">الفئة</TableHead>
@@ -145,6 +147,14 @@ const ServicesManagement = () => {
                 <TableBody>
                   {filteredServices.map((service) => (
                     <TableRow key={service.id}>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Hash className="w-4 h-4 text-purple-400" />
+                          <span className="font-mono text-purple-300 bg-purple-900/20 px-2 py-1 rounded text-sm">
+                            {service.uniqueId}
+                          </span>
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-700">
                           <img 
