@@ -332,13 +332,15 @@ export const useSubscribers = () => {
     try {
       console.log('Updating subscription level:', { id, level });
       
-      // حفظ المستوى في قاعدة البيانات
+      // حفظ المستوى في قاعدة البيانات باستخدام upsert
       const { error } = await supabase
         .from('subscriber_levels')
         .upsert({
           email: id,
           subscription_level: level,
           updated_by: 'admin'
+        }, {
+          onConflict: 'email'
         });
 
       if (error) {
@@ -347,6 +349,9 @@ export const useSubscribers = () => {
       }
       
       console.log('تم تحديث مستوى الاشتراك بنجاح في قاعدة البيانات');
+      
+      // إعادة تحميل البيانات فوراً
+      await loadSubscribers();
     } catch (error) {
       console.error('خطأ في تحديث مستوى الاشتراك:', error);
       throw error;
