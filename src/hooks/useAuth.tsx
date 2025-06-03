@@ -40,23 +40,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             try {
               const { data: profileData } = await supabase
                 .from('profiles')
-                .select('*')
+                .select('id, nickname, unique_id, created_at, updated_at')
                 .eq('id', session.user.id)
                 .single();
               
-              // إضافة المعرف الفريد من metadata المستخدم إذا لم يكن موجود في الملف الشخصي
-              if (profileData && !profileData.unique_id && session.user.user_metadata?.unique_id) {
-                // تحديث الملف الشخصي بالمعرف الفريد
-                const { data: updatedProfile } = await supabase
-                  .from('profiles')
-                  .update({ unique_id: session.user.user_metadata.unique_id } as any)
-                  .eq('id', session.user.id)
-                  .select()
-                  .single();
-                
-                setProfile(updatedProfile || profileData);
-              } else {
-                setProfile(profileData);
+              if (profileData) {
+                // إضافة المعرف الفريد من metadata المستخدم إذا لم يكن موجود في الملف الشخصي
+                if (!profileData.unique_id && session.user.user_metadata?.unique_id) {
+                  // تحديث الملف الشخصي بالمعرف الفريد
+                  const { data: updatedProfile } = await supabase
+                    .from('profiles')
+                    .update({ unique_id: session.user.user_metadata.unique_id })
+                    .eq('id', session.user.id)
+                    .select('id, nickname, unique_id, created_at, updated_at')
+                    .single();
+                  
+                  setProfile(updatedProfile || { ...profileData, unique_id: session.user.user_metadata.unique_id });
+                } else {
+                  setProfile(profileData);
+                }
               }
             } catch (error) {
               console.error('Error fetching profile:', error);
