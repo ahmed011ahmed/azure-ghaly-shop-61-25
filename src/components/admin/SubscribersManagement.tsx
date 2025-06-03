@@ -155,6 +155,20 @@ const SubscribersManagement = () => {
       {/* Add Subscriber Form */}
       <AddSubscriberForm onAdd={addSubscriber} />
 
+      {/* Database Schema Warning */}
+      <Card className="gaming-card border-orange-500/30">
+        <CardHeader className="bg-slate-900">
+          <CardTitle className="text-orange-400 flex items-center">
+            ⚠️ تحديث مطلوب لقاعدة البيانات
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="bg-slate-950 pt-4">
+          <p className="text-gray-300">
+            لتفعيل خاصية تحديث مدة الاشتراك، يجب إضافة عمود <code className="bg-gray-800 px-2 py-1 rounded text-orange-400">subscription_duration</code> إلى جدول <code className="bg-gray-800 px-2 py-1 rounded text-orange-400">subscriber_levels</code> في قاعدة البيانات.
+          </p>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="gaming-card">
           <CardContent className="pt-6 bg-slate-950">
@@ -358,24 +372,20 @@ const SubscribersManagement = () => {
                             </SelectContent>
                           </Select>
 
-                          <Select 
-                            value={subscriber.subscription_duration?.toString() || '30'}
-                            onValueChange={(value) => 
-                              handleDurationChange(subscriber.id!, parseInt(value))
-                            }
-                            disabled={actionLoading === subscriber.id}
-                          >
-                            <SelectTrigger className="w-32 bg-gray-800/50 border-gray-600 text-white">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {SUBSCRIPTION_DURATIONS.map((duration) => (
-                                <SelectItem key={duration.value} value={duration.value.toString()}>
-                                  {duration.value === 0 ? 'بلا حدود' : `${duration.value} يوم`}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          {/* Duration selector - disabled temporarily */}
+                          <div className="relative">
+                            <Select 
+                              value={subscriber.subscription_duration?.toString() || '30'}
+                              disabled={true}
+                            >
+                              <SelectTrigger className="w-32 bg-gray-800/30 border-gray-700 text-gray-500 cursor-not-allowed">
+                                <SelectValue />
+                              </SelectTrigger>
+                            </Select>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-xs text-orange-400 bg-gray-900 px-1 rounded">معطل</span>
+                            </div>
+                          </div>
 
                           <Select 
                             value={subscriber.subscription_status}
