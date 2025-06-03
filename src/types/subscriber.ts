@@ -7,12 +7,15 @@ export interface Subscriber {
   subscription_level: 1 | 2 | 3 | 4 | 5; // 1=برونزي, 2=فضي, 3=ذهبي, 4=بلاتيني, 5=ماسي
   subscription_date?: string;
   last_login?: string;
+  duration_days?: number; // المدة بالأيام
+  expires_at?: string; // تاريخ انتهاء الاشتراك
 }
 
 export interface NewSubscriber {
   email: string;
   nickname: string;
   subscription_level: 1 | 2 | 3 | 4 | 5;
+  duration_days: number; // المدة بالأيام
 }
 
 export interface SubscriberLevel {

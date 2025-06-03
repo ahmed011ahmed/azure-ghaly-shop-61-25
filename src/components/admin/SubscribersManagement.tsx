@@ -266,6 +266,8 @@ const SubscribersManagement = () => {
                     <TableHead className="text-gray-300">الاسم المستعار</TableHead>
                     <TableHead className="text-gray-300">مستوى الاشتراك</TableHead>
                     <TableHead className="text-gray-300">حالة الاشتراك</TableHead>
+                    <TableHead className="text-gray-300">المدة (يوم)</TableHead>
+                    <TableHead className="text-gray-300">تاريخ الانتهاء</TableHead>
                     <TableHead className="text-gray-300">تاريخ الاشتراك</TableHead>
                     <TableHead className="text-gray-300">الإجراءات</TableHead>
                   </TableRow>
@@ -284,6 +286,15 @@ const SubscribersManagement = () => {
                       </TableCell>
                       <TableCell>
                         {getStatusBadge(subscriber.subscription_status)}
+                      </TableCell>
+                      <TableCell className="text-gray-300">
+                        {subscriber.duration_days ? `${subscriber.duration_days} يوم` : 'غير محدد'}
+                      </TableCell>
+                      <TableCell className="text-gray-300">
+                        {subscriber.expires_at 
+                          ? new Date(subscriber.expires_at).toLocaleDateString('ar-EG')
+                          : 'غير محدد'
+                        }
                       </TableCell>
                       <TableCell className="text-gray-300">
                         {subscriber.subscription_date 
