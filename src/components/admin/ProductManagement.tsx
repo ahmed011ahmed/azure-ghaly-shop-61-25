@@ -78,7 +78,7 @@ const ProductManagement = () => {
       {/* Header with Add Button */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white">إدارة المنتجات</h2>
+          <h2 className="text-2xl font-bold text-white">إدارة الحسابات</h2>
           <p className="text-gray-300 mt-1">إضافة وتعديل وحذف المنتجات</p>
         </div>
         <Button 
