@@ -84,12 +84,6 @@ const AdminDashboard = () => {
       permission: 'services'
     },
     {
-      id: 'giveaways',
-      label: 'المسابقات والجوائز',
-      icon: Gift,
-      permission: 'giveaways'
-    },
-    {
       id: 'content-management',
       label: 'إدارة المحتوى',
       icon: FileText,
@@ -346,8 +340,6 @@ const AdminDashboard = () => {
         {activeTab === 'products' && (currentUser?.username === 'GHALY' || hasPermission('products')) && <ProductManagement />}
         
         {activeTab === 'services' && (currentUser?.username === 'GHALY' || hasPermission('services')) && <ServicesManagement />}
-        
-        {activeTab === 'giveaways' && (currentUser?.username === 'GHALY' || hasPermission('giveaways')) && <GiveawaysManagement />}
         
         {activeTab === 'subscribers' && (currentUser?.username === 'GHALY' || hasPermission('subscribers')) && <SubscribersManagement />}
         
