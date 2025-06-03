@@ -11,24 +11,6 @@ interface ProfileData {
   updated_at: string;
 }
 
-// تخزين محلي لمستويات الاشتراك
-const SUBSCRIPTION_LEVELS_KEY = 'subscriber_levels';
-
-const getStoredLevels = (): Record<string, number> => {
-  try {
-    const stored = localStorage.getItem(SUBSCRIPTION_LEVELS_KEY);
-    return stored ? JSON.parse(stored) : {};
-  } catch {
-    return {};
-  }
-};
-
-const setStoredLevel = (email: string, level: number) => {
-  const levels = getStoredLevels();
-  levels[email] = level;
-  localStorage.setItem(SUBSCRIPTION_LEVELS_KEY, JSON.stringify(levels));
-};
-
 export const useSubscribers = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,8 +44,16 @@ export const useSubscribers = () => {
 
       console.log('Profiles data:', profilesData);
 
-      // جلب المستويات المحفوظة محلياً
-      const storedLevels = getStoredLevels();
+      // جلب مستويات الاشتراك من قاعدة البيانات
+      const { data: levelsData, error: levelsError } = await supabase
+        .from('subscriber_levels')
+        .select('*');
+
+      if (levelsError) {
+        console.error('خطأ في تحميل مستويات الاشتراك:', levelsError);
+      }
+
+      console.log('Levels data:', levelsData);
 
       // دمج البيانات وإنشاء قائمة المشتركين
       const formattedSubscribers: Subscriber[] = [];
@@ -74,8 +64,9 @@ export const useSubscribers = () => {
           // البحث عن الملف الشخصي المطابق
           const profile = (profilesData || []).find(p => p.id === permission.email) as ProfileData;
           
-          // استخدام المستوى المحفوظ محلياً أو المستوى الافتراضي
-          const subscriptionLevel = (storedLevels[permission.email] || 1) as 1 | 2 | 3 | 4 | 5;
+          // البحث عن مستوى الاشتراك من قاعدة البيانات
+          const levelRecord = (levelsData || []).find(l => l.email === permission.email);
+          const subscriptionLevel = (levelRecord?.subscription_level || 1) as 1 | 2 | 3 | 4 | 5;
           
           formattedSubscribers.push({
             id: permission.email,
@@ -94,8 +85,9 @@ export const useSubscribers = () => {
         profilesData.forEach(profile => {
           const hasPermission = (permissionsData || []).some(p => p.email === profile.id);
           if (!hasPermission) {
-            // استخدام المستوى المحفوظ محلياً أو المستوى الافتراضي
-            const subscriptionLevel = (storedLevels[profile.id] || 1) as 1 | 2 | 3 | 4 | 5;
+            // البحث عن مستوى الاشتراك من قاعدة البيانات
+            const levelRecord = (levelsData || []).find(l => l.email === profile.id);
+            const subscriptionLevel = (levelRecord?.subscription_level || 1) as 1 | 2 | 3 | 4 | 5;
             
             formattedSubscribers.push({
               id: profile.id,
@@ -158,10 +150,29 @@ export const useSubscribers = () => {
       )
       .subscribe();
 
+    // إنشاء channel مع اسم فريد لمستويات الاشتراك
+    const levelsChannelId = `subscriber_levels_${Date.now()}_${Math.random()}`;
+    const levelsChannel = supabase
+      .channel(levelsChannelId)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'subscriber_levels'
+        },
+        () => {
+          console.log('تم تحديث بيانات مستويات الاشتراك');
+          loadSubscribers();
+        }
+      )
+      .subscribe();
+
     return () => {
       console.log('Cleaning up subscribers channels');
       supabase.removeChannel(profilesChannel);
       supabase.removeChannel(permissionsChannel);
+      supabase.removeChannel(levelsChannel);
     };
   }, []);
 
@@ -181,8 +192,19 @@ export const useSubscribers = () => {
         throw checkError;
       }
 
-      // حفظ مستوى الاشتراك محلياً أولاً
-      setStoredLevel(subscriber.email, subscriber.subscription_level);
+      // حفظ مستوى الاشتراك في قاعدة البيانات
+      const { error: levelError } = await supabase
+        .from('subscriber_levels')
+        .upsert({
+          email: subscriber.email,
+          subscription_level: subscriber.subscription_level,
+          updated_by: 'admin'
+        });
+
+      if (levelError) {
+        console.error('خطأ في حفظ مستوى الاشتراك:', levelError);
+        // لا نرمي الخطأ هنا لأن هذا لن يمنع إضافة المشترك
+      }
 
       // إذا كان المشترك موجود بالفعل، نقوم بتحديث البيانات فقط
       if (existingProfile) {
@@ -310,19 +332,21 @@ export const useSubscribers = () => {
     try {
       console.log('Updating subscription level:', { id, level });
       
-      // حفظ المستوى محلياً
-      setStoredLevel(id, level);
+      // حفظ المستوى في قاعدة البيانات
+      const { error } = await supabase
+        .from('subscriber_levels')
+        .upsert({
+          email: id,
+          subscription_level: level,
+          updated_by: 'admin'
+        });
+
+      if (error) {
+        console.error('خطأ في تحديث مستوى الاشتراك في قاعدة البيانات:', error);
+        throw error;
+      }
       
-      // تحديث حالة المشتركين محلياً مباشرة
-      setSubscribers(currentSubscribers => 
-        currentSubscribers.map(subscriber => 
-          subscriber.id === id || subscriber.email === id 
-            ? { ...subscriber, subscription_level: level }
-            : subscriber
-        )
-      );
-      
-      console.log('تم تحديث مستوى الاشتراك بنجاح');
+      console.log('تم تحديث مستوى الاشتراك بنجاح في قاعدة البيانات');
     } catch (error) {
       console.error('خطأ في تحديث مستوى الاشتراك:', error);
       throw error;
@@ -353,10 +377,15 @@ export const useSubscribers = () => {
         console.error('خطأ في حذف أذونات المشترك:', permissionError);
       }
 
-      // حذف المستوى المحفوظ محلياً
-      const levels = getStoredLevels();
-      delete levels[id];
-      localStorage.setItem(SUBSCRIPTION_LEVELS_KEY, JSON.stringify(levels));
+      // حذف من جدول مستويات الاشتراك
+      const { error: levelError } = await supabase
+        .from('subscriber_levels')
+        .delete()
+        .eq('email', id);
+
+      if (levelError) {
+        console.error('خطأ في حذف مستوى اشتراك المشترك:', levelError);
+      }
 
       console.log('تم حذف المشترك بنجاح');
     } catch (error) {

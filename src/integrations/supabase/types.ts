@@ -243,6 +243,33 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriber_levels: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          subscription_level: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          subscription_level?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          subscription_level?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       subscriber_permissions: {
         Row: {
           email: string
