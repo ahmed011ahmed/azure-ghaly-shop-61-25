@@ -165,12 +165,12 @@ const CustomerChat = () => {
             </div>
           </div>
           
-          {/* عرض المعرف الفريد للمستخدم من الملف الشخصي أو من metadata */}
-          {(profile?.unique_id || user?.user_metadata?.unique_id) && (
+          {/* عرض المعرف الفريد للمستخدم من metadata */}
+          {user?.user_metadata?.unique_id && (
             <div className="flex items-center space-x-2 bg-purple-600/20 px-3 py-1 rounded-full">
               <Hash className="w-4 h-4 text-purple-400" />
               <span className="font-mono text-purple-300 text-xs">
-                {profile?.unique_id || user?.user_metadata?.unique_id}
+                {user.user_metadata.unique_id}
               </span>
             </div>
           )}
@@ -187,10 +187,10 @@ const CustomerChat = () => {
               <div className="text-center">
                 <MessageSquare className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                 <p className="text-gray-300 text-xs">{t('chat.noMessages')}</p>
-                {(profile?.unique_id || user?.user_metadata?.unique_id) && (
+                {user?.user_metadata?.unique_id && (
                   <div className="mt-2 text-xs text-purple-300">
                     <Hash className="w-3 h-3 inline mr-1" />
-                    معرفك الفريد: {profile?.unique_id || user?.user_metadata?.unique_id}
+                    معرفك الفريد: {user.user_metadata.unique_id}
                   </div>
                 )}
               </div>
@@ -207,8 +207,8 @@ const CustomerChat = () => {
                       {message.sender === 'admin' && message.targetUser && <span className="text-xs bg-purple-700/30 px-1 rounded text-purple-200">
                           {t('chat.private')}
                         </span>}
-                      {message.sender === 'user' && (profile?.unique_id || user?.user_metadata?.unique_id) && <span className="text-xs bg-blue-700/30 px-1 rounded text-blue-200">
-                          {profile?.unique_id || user?.user_metadata?.unique_id}
+                      {message.sender === 'user' && user?.user_metadata?.unique_id && <span className="text-xs bg-blue-700/30 px-1 rounded text-blue-200">
+                          {user.user_metadata.unique_id}
                         </span>}
                     </div>
                     <div className="text-white text-xs leading-relaxed">
