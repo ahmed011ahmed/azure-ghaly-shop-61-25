@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -5,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface Profile {
   id: string;
   nickname: string;
-  unique_id?: string;
+  unique_id: string | null;
   created_at: string;
   updated_at: string;
 }
