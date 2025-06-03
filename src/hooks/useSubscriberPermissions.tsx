@@ -9,8 +9,6 @@ interface SubscriberPermission {
   granted_at: string;
   granted_by: string;
   is_active: boolean;
-  duration_days?: number; // المدة بالأيام
-  expires_at?: string; // تاريخ انتهاء الإذن
 }
 
 export const useSubscriberPermissions = () => {
@@ -57,26 +55,16 @@ export const useSubscriberPermissions = () => {
   };
 
   // إضافة إذن جديد
-  const addPermission = async (email: string, durationDays?: number) => {
+  const addPermission = async (email: string) => {
     try {
-      console.log('Adding permission for:', email, 'with duration:', durationDays);
-      
-      // حساب تاريخ الانتهاء إذا تم تحديد المدة
-      let expiresAt = null;
-      if (durationDays && durationDays > 0) {
-        const expireDate = new Date();
-        expireDate.setDate(expireDate.getDate() + durationDays);
-        expiresAt = expireDate.toISOString();
-      }
+      console.log('Adding permission for:', email);
       
       const { data, error } = await supabase
         .from('subscriber_permissions')
         .insert([{
           email: email.trim(),
           granted_by: 'admin',
-          is_active: true,
-          duration_days: durationDays || null,
-          expires_at: expiresAt
+          is_active: true
         }])
         .select()
         .single();
