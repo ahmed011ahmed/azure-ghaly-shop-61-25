@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Eye, Package, Users, DollarSign, TrendingUp, LogOut, MessageSquare, Calendar, Download, UserSearch, Shield, Settings, Wrench, Crown, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -79,7 +80,7 @@ const AdminDashboard = () => {
     },
     {
       id: 'services',
-      label: 'إدارة الخدمات',
+      label: 'إدارة الحسابات',
       icon: Wrench,
       permission: 'services'
     },
@@ -305,8 +306,8 @@ const AdminDashboard = () => {
                       className="bg-blue-600 hover:bg-blue-700 text-white p-6 h-auto flex-col space-y-2"
                     >
                       <Wrench className="w-8 h-8" />
-                      <span className="font-semibold">إدارة الخدمات</span>
-                      <span className="text-sm opacity-80">إضافة وتعديل الخدمات</span>
+                      <span className="font-semibold">إدارة الحسابات</span>
+                      <span className="text-sm opacity-80">إضافة وتعديل الحسابات</span>
                     </Button>
                   )}
                   
