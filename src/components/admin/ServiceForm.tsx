@@ -6,6 +6,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Service } from '../../types/service';
+import { generateUniqueId } from '../../utils/generateId';
 
 interface ServiceFormProps {
   service: Service | null;
@@ -21,7 +22,8 @@ const ServiceForm = ({ service, onSave, onCancel }: ServiceFormProps) => {
     image: '',
     video: '',
     rating: 5,
-    category: ''
+    category: '',
+    uniqueId: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -34,8 +36,15 @@ const ServiceForm = ({ service, onSave, onCancel }: ServiceFormProps) => {
         image: service.image,
         video: service.video || '',
         rating: service.rating,
-        category: service.category
+        category: service.category,
+        uniqueId: service.uniqueId
       });
+    } else {
+      // Generate a unique ID for new services
+      setFormData(prev => ({
+        ...prev,
+        uniqueId: generateUniqueId()
+      }));
     }
   }, [service]);
 
@@ -139,6 +148,18 @@ const ServiceForm = ({ service, onSave, onCancel }: ServiceFormProps) => {
         </CardHeader>
         <CardContent className="bg-gray-950">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* المعرف الفريد */}
+            <div>
+              <Label htmlFor="uniqueId" className="text-gray-300">المعرف الفريد</Label>
+              <Input 
+                id="uniqueId"
+                value={formData.uniqueId}
+                readOnly
+                className="mt-1 bg-gray-800/50 border-gray-600 text-purple-300 font-mono"
+              />
+              <p className="text-gray-500 text-sm mt-1">المعرف الفريد يتم إنشاؤه تلقائياً</p>
+            </div>
+
             {/* اسم الحساب */}
             <div>
               <Label htmlFor="name" className="text-gray-300">اسم الحساب</Label>

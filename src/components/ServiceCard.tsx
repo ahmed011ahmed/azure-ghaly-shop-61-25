@@ -101,10 +101,6 @@ const ServiceCard = ({ id, uniqueId, name, price, image, video, description, rat
     document.body.style.overflow = 'auto';
   };
 
-  const handleAddToFavorites = () => {
-    console.log(`Adding service ${name} to favorites`);
-  };
-
   console.log('ServiceCard render - showVideo:', showVideo, 'hasVideo:', !!video, 'videoError:', videoError);
 
   return (
