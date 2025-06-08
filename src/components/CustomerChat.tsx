@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageSquare, User, Loader2, Image, Link, Hash } from 'lucide-react';
+import { Send, MessageSquare, User, Loader2, Image, Link, Hash, Mail } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -176,12 +176,22 @@ const CustomerChat = () => {
             </div>
           </div>
           
-          {/* عرض المعرف الفريد للمستخدم */}
-          <div className="flex items-center space-x-2 bg-purple-600/20 px-3 py-1 rounded-full">
-            <Hash className="w-4 h-4 text-purple-400" />
-            <span className="font-mono text-purple-300 text-xs">
-              {userUniqueId}
-            </span>
+          {/* عرض المعرف الفريد والإيميل للمستخدم */}
+          <div className="flex flex-col items-end space-y-1">
+            <div className="flex items-center space-x-2 bg-purple-600/20 px-3 py-1 rounded-full">
+              <Hash className="w-4 h-4 text-purple-400" />
+              <span className="font-mono text-purple-300 text-xs">
+                {userUniqueId}
+              </span>
+            </div>
+            {user?.email && (
+              <div className="flex items-center space-x-2 bg-blue-600/20 px-3 py-1 rounded-full">
+                <Mail className="w-4 h-4 text-blue-400" />
+                <span className="text-blue-300 text-xs">
+                  {user.email}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -200,11 +210,17 @@ const CustomerChat = () => {
                   <Hash className="w-3 h-3 inline mr-1" />
                   معرفك الفريد: {userUniqueId}
                 </div>
+                {user?.email && (
+                  <div className="mt-1 text-xs text-blue-300">
+                    <Mail className="w-3 h-3 inline mr-1" />
+                    {user.email}
+                  </div>
+                )}
               </div>
             </div> : <div className="space-y-2">
               {customerMessages.map(message => <div key={message.id} className={`flex ${message.sender === 'admin' ? 'justify-start' : 'justify-end'}`}>
                   <div className={`max-w-[75%] rounded-lg p-2 ${message.sender === 'admin' ? 'bg-purple-600/20 border border-purple-500/30' : 'bg-blue-600/20 border border-blue-500/30'}`}>
-                    <div className="flex items-center space-x-1 mb-1">
+                    <div className="flex items-center space-x-1 mb-1 flex-wrap">
                       <span className={`text-xs font-medium ${message.sender === 'admin' ? 'text-purple-300' : 'text-blue-300'}`}>
                         {message.sender === 'admin' ? t('chat.supportTeam') : t('chat.you')}
                       </span>
@@ -214,9 +230,18 @@ const CustomerChat = () => {
                       {message.sender === 'admin' && message.targetUser && <span className="text-xs bg-purple-700/30 px-1 rounded text-purple-200">
                           {t('chat.private')}
                         </span>}
-                      {message.sender === 'user' && <span className="text-xs bg-blue-700/30 px-1 rounded text-blue-200">
-                          {userUniqueId}
-                        </span>}
+                      {message.sender === 'user' && (
+                        <div className="flex items-center space-x-1">
+                          <span className="text-xs bg-blue-700/30 px-1 rounded text-blue-200">
+                            {userUniqueId}
+                          </span>
+                          {user?.email && (
+                            <span className="text-xs bg-green-700/30 px-1 rounded text-green-200">
+                              {user.email}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="text-white text-xs leading-relaxed">
                       {renderMessageContent(message.text)}
