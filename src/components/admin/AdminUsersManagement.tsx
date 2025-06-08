@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { UserPlus, Users, Shield, Edit, Trash2, Eye, Settings } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -30,14 +31,13 @@ const AdminUsersManagement = () => {
   // قائمة الصلاحيات المتاحة
   const availablePermissions = [
     { id: 'products', label: 'إدارة المنتجات', icon: 'Package' },
-    { id: 'pubg-accounts', label: 'إدارة حسابات PUBG', icon: 'Gamepad2' },
-    { id: 'giveaways', label: 'إدارة المسابقات', icon: 'Gift' },
+    { id: 'services', label: 'إدارة الحسابات', icon: 'Wrench' },
+    { id: 'content', label: 'إدارة المحتوى', icon: 'FileText' },
     { id: 'subscribers', label: 'إدارة المشتركين', icon: 'Users' },
     { id: 'user-lookup', label: 'البحث عن المشتركين', icon: 'UserSearch' },
     { id: 'permissions', label: 'أذونات المشتركين', icon: 'Shield' },
     { id: 'downloads', label: 'روابط التحميل', icon: 'Download' },
     { id: 'updates', label: 'التحديثات', icon: 'Calendar' },
-    { id: 'content', label: 'عرض المحتوى', icon: 'Eye' },
     { id: 'chat', label: 'شات العملاء', icon: 'MessageSquare' },
     { id: 'admin-users', label: 'إدارة مستخدمي الإدارة', icon: 'Settings' }
   ];
