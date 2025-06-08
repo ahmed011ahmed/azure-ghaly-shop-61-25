@@ -1,5 +1,6 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageSquare, Trash2, User, Loader2, Image, Link } from 'lucide-react';
+import { Send, MessageSquare, Trash2, User, Loader2, Image, Link, Hash, Mail } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
@@ -169,6 +170,17 @@ const AdminChat = () => {
     return <span className="break-words">{text}</span>;
   };
 
+  // دالة لاستخراج الإيميل من نص الرسالة إذا كان موجوداً
+  const extractEmailFromMessage = (message: any) => {
+    // هنا يمكن إضافة منطق لاستخراج الإيميل من البيانات المرتبطة بالرسالة
+    // في الوقت الحالي، سنعرض إيميل وهمي كمثال
+    if (message.sender === 'user' && message.userName) {
+      // يمكن استبدال هذا بالبيانات الحقيقية من قاعدة البيانات
+      return `${message.userName.toLowerCase()}@example.com`;
+    }
+    return null;
+  };
+
   // الحصول على قائمة العملاء الفريدة
   const uniqueCustomers = Array.from(
     new Set(messages
@@ -312,6 +324,20 @@ const AdminChat = () => {
                         <span className="text-xs bg-green-700 px-1 rounded text-white">
                           عام
                         </span>
+                      )}
+                      {message.sender === 'user' && (
+                        <div className="flex items-center space-x-1">
+                          <span className="text-xs bg-blue-700/30 px-1 rounded text-blue-200 flex items-center">
+                            <Hash className="w-3 h-3 mr-1" />
+                            {message.userName}
+                          </span>
+                          {extractEmailFromMessage(message) && (
+                            <span className="text-xs bg-green-700/30 px-1 rounded text-green-200 flex items-center">
+                              <Mail className="w-3 h-3 mr-1" />
+                              {extractEmailFromMessage(message)}
+                            </span>
+                          )}
+                        </div>
                       )}
                     </div>
                     <div className="text-white text-xs leading-relaxed">
